@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Zen Scripts — 2K Services</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <img src="images/logo.png" alt="CTRLX Logo" class="logo-image logo-dark" />
+      <img src="images/whitelogo.png" alt="CTRLX Logo" class="logo-image logo-light" />
+      <div class="header-right">
+        <nav>
+          <a href="index.html">Home</a>
+          <a href="services.html">Services</a>
+          <a href="zen-scripts.html">Zen Scripts</a>
+        </nav>
+        <div class="header-actions">
+          <a href="contact.html" class="btn">Contact</a>
+          <button id="site-cart-toggle" class="cart-toggle" type="button" aria-label="Open cart">
+            <span class="cart-toggle-icon" aria-hidden="true">🛒</span>
+            <span id="site-cart-count" class="cart-toggle-count">0</span>
+          </button>
+          <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light mode">
+            <span class="theme-toggle-switch">
+              <span class="theme-icon theme-icon-dark">☾</span>
+              <span class="theme-icon theme-icon-light">☀</span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div id="site-cart-backdrop" class="site-cart-backdrop" aria-hidden="true"></div>
+  <aside id="site-cart" class="site-cart" aria-label="Shopping cart" aria-hidden="true">
+    <div class="site-cart-header">
+      <h2>Your Cart</h2>
+      <button id="site-cart-close" class="site-cart-close" type="button" aria-label="Close cart">×</button>
+    </div>
+    <div class="site-cart-body">
+      <p id="site-cart-summary" class="muted">No items in your cart yet.</p>
+      <ul id="site-cart-items" class="site-cart-items"></ul>
+    </div>
+    <div class="site-cart-footer">
+      <div id="site-cart-total" class="site-cart-total">Total: $0</div>
+      <div class="site-cart-actions">
+        <button id="site-cart-clear" class="btn ghost" type="button">Clear Cart</button>
+        <a href="contact.html" class="btn">Contact to Purchase</a>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <section class="services container" id="zen-scripts-page">
+      <h3>Zen Script Prices</h3>
+      <p class="muted">Pick exactly what you need or grab full access in one bundle.</p>
+
+      <div class="cards zen-grid">
+        <article class="card zen-product" data-animate="reveal">
+          <h4>COD Script</h4>
+          <p class="muted">Tailored Zen script tuned for Call of Duty.</p>
+          <div class="price">$15</div>
+          <button class="select-btn zen-add-btn card-action-btn" data-name="COD Zen Script" data-price="15">Add to
+            Cart</button>
+        </article>
+
+        <article class="card zen-product" data-animate="reveal">
+          <h4>2K Script</h4>
+          <p class="muted">Optimized Zen script for 2K.</p>
+          <div class="price">$20</div>
+          <button class="select-btn zen-add-btn" data-name="2K Zen Script" data-price="20">Add to Cart</button>
+        </article>
+
+        <article class="card zen-product" data-animate="reveal">
+          <h4>ARC Script</h4>
+          <p class="muted">ARC-specific Zen script for smooth control.</p>
+          <div class="price">$10</div>
+          <button class="select-btn zen-add-btn" data-name="ARC Zen Script" data-price="10">Add to Cart</button>
+        </article>
+
+        <article class="card zen-product" data-animate="reveal">
+          <h4>Fortnite Script</h4>
+          <p class="muted">Fortnite-focused Zen script for consistent aim.</p>
+          <div class="price">$10</div>
+          <button class="select-btn zen-add-btn" data-name="Fortnite Zen Script" data-price="10">Add to Cart</button>
+        </article>
+
+        <article class="card zen-product" data-animate="reveal">
+          <h4>Siege Script</h4>
+          <p class="muted">Rainbow Six Siege tuned Zen setup.</p>
+          <div class="price">$15</div>
+          <button class="select-btn zen-add-btn" data-name="Siege Zen Script" data-price="15">Add to Cart</button>
+        </article>
+
+        <article class="card zen-product" data-animate="reveal">
+          <h4>Apex Script</h4>
+          <p class="muted">Apex Legends Zen script with recoil control.</p>
+          <div class="price">$15</div>
+          <button class="select-btn zen-add-btn" data-name="Apex Zen Script" data-price="15">Add to Cart</button>
+        </article>
+
+        <article class="card zen-product" data-animate="reveal">
+          <h4>Rust Script</h4>
+          <p class="muted">Rust Zen script tuned for your favorite weapons.</p>
+          <div class="price">$10</div>
+          <button class="select-btn zen-add-btn" data-name="Rust Zen Script" data-price="10">Add to Cart</button>
+        </article>
+
+        <article class="card zen-product zen-product--highlight" data-animate="reveal">
+          <h4>Access to All Scripts</h4>
+          <p class="muted">Unlock COD, 2K, ARC, Fortnite, Siege, Apex, Rust and more in one bundle.</p>
+          <div class="price">$50</div>
+          <button class="select-btn zen-add-btn card-action-btn" data-name="All Zen Scripts Bundle" data-price="50">Add
+            All to Cart</button>
+        </article>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="muted">All of the scripts provided are ones that we own.</p>
+      <small>© <span id="year"></span> 2K Services — All lawful services.</small>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
