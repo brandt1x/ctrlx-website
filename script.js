@@ -371,36 +371,92 @@ document.addEventListener('DOMContentLoaded', function () {
 		});
 	})();
 
-	// Contact form handling (simulated)
-	const form = document.getElementById('contact-form');
-	const formMsg = document.getElementById('form-msg');
-	const clearBtn = document.getElementById('clear-btn');
+	// Contact form handling with EmailJS
+	(function setupContactForm() {
+		const form = document.getElementById('contact-form');
+		const formMsg = document.getElementById('form-msg');
+		const clearBtn = document.getElementById('clear-btn');
+		const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
 
-	if (form) {
-		form.addEventListener('submit', (e) => {
-			e.preventDefault();
-			if (formMsg) {
-				formMsg.textContent = 'Sending request...';
-			}
-			// Simulate async send
-			setTimeout(() => {
-				if (formMsg) formMsg.textContent = 'Request sent — we will contact you shortly.';
-				form.reset();
-				// reset cart selection
-				const cartContent = document.getElementById('cart-content');
-				if (cartContent) cartContent.textContent = 'No service selected.';
-				const checkoutBtn = document.getElementById('checkout-btn');
-				if (checkoutBtn) checkoutBtn.disabled = true;
-			}, 800);
-		});
-	}
+		if (!form || !formMsg) return;
 
-	if (clearBtn) {
-		clearBtn.addEventListener('click', () => {
-			const form = document.getElementById('contact-form');
-			if (form) form.reset();
-			if (formMsg) formMsg.textContent = '';
-		});
-	}
+		// Initialize EmailJS (replace with your Public Key)
+		if (typeof emailjs !== 'undefined') {
+			emailjs.init('5JZIOhB9nTFZZfiVc'); // Replace with your EmailJS Public Key
+		}
+
+		// Helper function to show messages
+		function showMessage(text, isError = false) {
+			if (!formMsg) return;
+			formMsg.textContent = text;
+			formMsg.className = 'form-msg' + (isError ? ' error' : '');
+		}
+
+		if (form) {
+			form.addEventListener('submit', async (e) => {
+				e.preventDefault();
+
+				// Basic validation
+				const name = form.querySelector('#name')?.value.trim();
+				const email = form.querySelector('#email')?.value.trim();
+				const details = form.querySelector('#details')?.value.trim();
+
+				if (!name || !email || !details) {
+					showMessage('Please fill in all fields.', true);
+					return;
+				}
+
+				// Check if EmailJS is loaded
+				if (typeof emailjs === 'undefined') {
+					showMessage('Email service is not available. Please try again later.', true);
+					return;
+				}
+
+				// Disable submit button during submission
+				if (submitBtn) submitBtn.disabled = true;
+				showMessage('Sending request...');
+
+				try {
+					// Send email using EmailJS
+					// Replace 'YOUR_SERVICE_ID' and 'YOUR_TEMPLATE_ID' with your actual values
+					await emailjs.send(
+						'service_4xnu2is',  // Replace with your EmailJS Service ID
+						'template_12vxe02', // Replace with your EmailJS Template ID
+						{
+							to_email: 'cntrlx4@gmail.com',
+							from_name: name,
+							from_email: email,
+							message: details,
+							reply_to: email
+						}
+					);
+
+					showMessage('Request sent successfully! We will contact you shortly.');
+					form.reset();
+
+					// Reset cart selection if present
+					const cartContent = document.getElementById('cart-content');
+					if (cartContent) cartContent.textContent = 'No service selected.';
+					const checkoutBtn = document.getElementById('checkout-btn');
+					if (checkoutBtn) checkoutBtn.disabled = true;
+				} catch (error) {
+					console.error('EmailJS error:', error);
+					showMessage('Failed to send request. Please try again or contact us directly.', true);
+				} finally {
+					if (submitBtn) submitBtn.disabled = false;
+				}
+			});
+		}
+
+		if (clearBtn) {
+			clearBtn.addEventListener('click', () => {
+				if (form) form.reset();
+				if (formMsg) {
+					formMsg.textContent = '';
+					formMsg.className = 'form-msg';
+				}
+			});
+		}
+	})();
 });
 
