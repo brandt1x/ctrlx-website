@@ -1175,6 +1175,7 @@ body.theme-light textarea {
 	text-decoration: none;
 }
 
+<<<<<<< HEAD
 body.theme-light .contact-link {
 	background: linear-gradient(180deg, #ffffff, #f3f4f6);
 	border: 1px solid rgba(185, 28, 28, 0.15);
@@ -1186,6 +1187,8 @@ body.theme-light .contact-link:hover {
 	border-color: rgba(185, 28, 28, 0.3);
 }
 
+=======
+>>>>>>> 8efc695c7db6aa1cb68e701e2947471994b2cbe8
 .contact-icon {
 	font-size: 1.1rem;
 	flex-shrink: 0;
