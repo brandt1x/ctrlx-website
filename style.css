@@ -1175,7 +1175,6 @@ body.theme-light textarea {
 	text-decoration: none;
 }
 
-<<<<<<< HEAD
 body.theme-light .contact-link {
 	background: linear-gradient(180deg, #ffffff, #f3f4f6);
 	border: 1px solid rgba(185, 28, 28, 0.15);
@@ -1187,8 +1186,6 @@ body.theme-light .contact-link:hover {
 	border-color: rgba(185, 28, 28, 0.3);
 }
 
-=======
->>>>>>> 8efc695c7db6aa1cb68e701e2947471994b2cbe8
 .contact-icon {
 	font-size: 1.1rem;
 	flex-shrink: 0;
@@ -1282,10 +1279,26 @@ body.is-loaded nav a {
 }
 
 @media (max-width:600px) {
+	.container {
+		padding: 16px;
+	}
+
 	.header-inner {
 		flex-direction: column;
 		align-items: flex-start;
 		gap: 10px;
+		padding-left: 20px;
+		padding-right: 20px;
+		min-height: auto;
+		padding-top: 12px;
+		padding-bottom: 12px;
+	}
+
+	.logo-image {
+		position: static;
+		transform: none;
+		height: 60px;
+		margin-bottom: 8px;
 	}
 
 	.header-right {
@@ -1293,15 +1306,104 @@ body.is-loaded nav a {
 		flex-direction: column;
 		align-items: flex-start;
 		gap: 12px;
+		margin-left: 0;
 	}
 
 	.header-actions {
 		margin-left: 0;
 		width: 100%;
 		justify-content: flex-start;
+		flex-wrap: wrap;
+	}
+
+	nav {
+		width: 100%;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	nav a {
+		font-size: 0.9rem;
+		padding: 8px 14px;
 	}
 
 	.hero h2 {
-		font-size: 1.25rem
+		font-size: 1.25rem;
+	}
+
+	.hero {
+		padding: 32px 0;
+	}
+
+	.contact-info {
+		padding: 16px;
+		margin-bottom: 20px;
+	}
+
+	.contact-methods {
+		gap: 10px;
+	}
+
+	.contact-link {
+		padding: 10px 12px;
+		font-size: 0.9rem;
+	}
+
+	.contact-link span:not(.contact-icon) {
+		word-break: break-word;
+	}
+
+	.cards {
+		grid-template-columns: 1fr;
+		gap: 14px;
+	}
+
+	.zen-grid {
+		grid-template-columns: 1fr;
+		gap: 16px;
+	}
+
+	.card {
+		padding: 16px;
+	}
+
+	.how-layout {
+		gap: 16px;
+	}
+
+	.how-step {
+		padding: 12px;
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	.how-step-badge {
+		align-self: flex-start;
+	}
+
+	.faq-vertical {
+		gap: 10px;
+	}
+
+	.faq details {
+		padding: 10px 12px;
+	}
+
+	.form-actions {
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.form-actions .btn {
+		width: 100%;
+	}
+
+	.site-cart {
+		width: 100%;
+	}
+
+	.btn {
+		padding: 10px 14px;
+		font-size: 0.9rem;
 	}
 }
