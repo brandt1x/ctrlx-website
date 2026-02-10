@@ -418,16 +418,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
 				try {
 					// Send email using EmailJS
-					// Replace 'YOUR_SERVICE_ID' and 'YOUR_TEMPLATE_ID' with your actual values
+					// Template expects: name, email, reply_to, message
 					await emailjs.send(
-						'service_4xnu2is',  // Replace with your EmailJS Service ID
-						'template_12vxe02', // Replace with your EmailJS Template ID
+						'service_4xnu2is',  // Your EmailJS Service ID
+						'template_12vxe02', // Your EmailJS Template ID
 						{
-							to_email: 'cntrlx4@gmail.com',
-							from_name: name,
-							from_email: email,
-							message: details,
-							reply_to: email
+							name: name,
+							email: email,
+							reply_to: email,
+							message: details
 						}
 					);
 
