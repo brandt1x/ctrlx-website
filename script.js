@@ -232,6 +232,12 @@ document.addEventListener('DOMContentLoaded', function () {
 		});
 
 		const checkoutBtn = document.getElementById('site-cart-checkout');
+		function resetCheckoutButton() {
+			if (checkoutBtn) {
+				checkoutBtn.disabled = false;
+				checkoutBtn.textContent = 'Checkout with Stripe';
+			}
+		}
 		if (checkoutBtn) {
 			checkoutBtn.addEventListener('click', async () => {
 				const items = Cart.getItems();
@@ -240,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function () {
 					return;
 				}
 				checkoutBtn.disabled = true;
-				checkoutBtn.textContent = 'Redirecting...';
+				checkoutBtn.textContent = 'Opening...';
 				try {
 					const apiBase = window.location.origin;
 					const res = await fetch(`${apiBase}/api/create-checkout-session`, {
@@ -250,17 +256,21 @@ document.addEventListener('DOMContentLoaded', function () {
 					});
 					const data = await res.json();
 					if (data.url) {
-						window.location.href = data.url;
+						const newWindow = window.open(data.url, '_blank', 'noopener,noreferrer');
+						if (!newWindow) {
+							window.location.href = data.url;
+						}
 					} else {
 						throw new Error(data.error || 'Checkout failed');
 					}
 				} catch (err) {
 					console.error(err);
 					alert('Checkout failed. Please try again.');
-					checkoutBtn.disabled = false;
-					checkoutBtn.textContent = 'Checkout with Stripe';
+				} finally {
+					resetCheckoutButton();
 				}
 			});
+			window.addEventListener('pageshow', resetCheckoutButton);
 		}
 
 		render();
