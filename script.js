@@ -231,6 +231,38 @@ document.addEventListener('DOMContentLoaded', function () {
 			}
 		});
 
+		const checkoutBtn = document.getElementById('site-cart-checkout');
+		if (checkoutBtn) {
+			checkoutBtn.addEventListener('click', async () => {
+				const items = Cart.getItems();
+				if (!items.length) {
+					alert('Your cart is empty.');
+					return;
+				}
+				checkoutBtn.disabled = true;
+				checkoutBtn.textContent = 'Redirecting...';
+				try {
+					const apiBase = window.location.origin;
+					const res = await fetch(`${apiBase}/api/create-checkout-session`, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ items }),
+					});
+					const data = await res.json();
+					if (data.url) {
+						window.location.href = data.url;
+					} else {
+						throw new Error(data.error || 'Checkout failed');
+					}
+				} catch (err) {
+					console.error(err);
+					alert('Checkout failed. Please try again.');
+					checkoutBtn.disabled = false;
+					checkoutBtn.textContent = 'Checkout with Stripe';
+				}
+			});
+		}
+
 		render();
 
 		// Expose helper used by other setup blocks

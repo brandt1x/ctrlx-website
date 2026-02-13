@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>Thank You — Control-X</title>
+	<link rel="stylesheet" href="style.css">
+	<link rel="icon" type="image/png" href="images/logo.png">
+</head>
+
+<body>
+	<header class="site-header">
+		<div class="container header-inner">
+			<a href="index.html"><img src="images/logo.png" alt="CTRLX Logo" class="logo-image logo-dark" /></a>
+			<a href="index.html"><img src="images/whitelogo.png" alt="CTRLX Logo" class="logo-image logo-light" /></a>
+			<div class="header-right">
+				<nav>
+					<a href="index.html">Home</a>
+					<a href="services.html">Services</a>
+					<a href="zen-scripts.html">Zen Scripts</a>
+				</nav>
+				<div class="header-actions">
+					<a href="contact.html" class="btn">Contact</a>
+					<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light mode">
+						<span class="theme-toggle-switch">
+							<span class="theme-icon theme-icon-dark">☾</span>
+							<span class="theme-icon theme-icon-light">☀</span>
+						</span>
+					</button>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<main class="container" style="padding: 4rem 1rem; text-align: center;">
+		<h2>Thank you for your purchase!</h2>
+		<p class="muted">Your payment was successful. We'll be in touch shortly.</p>
+		<a href="index.html" class="btn">Back to Home</a>
+	</main>
+
+	<footer class="site-footer">
+		<div class="container">
+			<small>© <span id="year"></span> Control — All lawful services.</small>
+		</div>
+	</footer>
+
+	<script>
+		document.body.classList.add('is-loaded');
+		const yearEl = document.getElementById('year');
+		if (yearEl) yearEl.textContent = new Date().getFullYear();
+		const stored = window.localStorage ? localStorage.getItem('theme') : null;
+		if (stored === 'light') document.body.classList.add('theme-light');
+		const toggle = document.getElementById('theme-toggle');
+		if (toggle) toggle.addEventListener('click', () => {
+			document.body.classList.toggle('theme-light');
+			if (window.localStorage) localStorage.setItem('theme', document.body.classList.contains('theme-light') ? 'light' : 'dark');
+		});
+	</script>
+</body>
+
+</html>
