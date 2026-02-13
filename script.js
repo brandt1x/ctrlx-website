@@ -247,6 +247,8 @@ document.addEventListener('DOMContentLoaded', function () {
 				}
 				checkoutBtn.disabled = true;
 				checkoutBtn.textContent = 'Opening...';
+				// Open window immediately (sync with click) to avoid popup blocker
+				const checkoutWindow = window.open('', '_blank', 'noopener,noreferrer');
 				try {
 					const apiBase = window.location.origin;
 					const res = await fetch(`${apiBase}/api/create-checkout-session`, {
@@ -256,14 +258,16 @@ document.addEventListener('DOMContentLoaded', function () {
 					});
 					const data = await res.json();
 					if (data.url) {
-						const newWindow = window.open(data.url, '_blank', 'noopener,noreferrer');
-						if (!newWindow) {
+						if (checkoutWindow) {
+							checkoutWindow.location.href = data.url;
+						} else {
 							window.location.href = data.url;
 						}
 					} else {
 						throw new Error(data.error || 'Checkout failed');
 					}
 				} catch (err) {
+					if (checkoutWindow) checkoutWindow.close();
 					console.error(err);
 					alert('Checkout failed. Please try again.');
 				} finally {
