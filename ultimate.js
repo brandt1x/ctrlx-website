@@ -306,7 +306,6 @@
 				if (cartToggle) {
 					cartToggle.classList.add('cart-toggle-pulse');
 					setTimeout(() => cartToggle.classList.remove('cart-toggle-pulse'), 320);
-					cartToggle.click();
 				} else {
 					showToast('Added to cart.');
 				}
