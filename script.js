@@ -734,13 +734,13 @@ document.addEventListener('DOMContentLoaded', function () {
 		});
 	})();
 
-	// Hero "Secret Setup" add-to-cart (index.html)
+	// Hero "CTRL-X Vision Setup" add-to-cart (index.html)
 	; (function setupHeroAdd() {
 		if (!window.__addToSiteCart) return;
 		const btn = document.querySelector('.hero-add-btn');
 		if (!btn) return;
 		btn.addEventListener('click', () => {
-			const name = btn.getAttribute('data-name') || 'Secret Setup';
+			const name = btn.getAttribute('data-name') || 'CTRL-X Vision Setup';
 			const price = btn.getAttribute('data-price') || '0';
 			window.__addToSiteCart(name, price);
 			const cartToggle = document.getElementById('site-cart-toggle');

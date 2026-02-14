@@ -1955,6 +1955,11 @@ body.theme-light .hero {
 	box-shadow: 0 18px 48px rgba(0, 0, 0, 0.8);
 }
 
+.zen-product p.muted {
+	flex-grow: 1;
+	min-height: 2.5em;
+}
+
 .price {
 	margin: 10px 0;
 	font-weight: 700;
