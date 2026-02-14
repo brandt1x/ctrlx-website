@@ -4,21 +4,28 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Contact — 2K Services</title>
+  <title>Contact — Control-X</title>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" type="image/png" href="images/logo.png">
 </head>
 
 <body>
+  <canvas id="site-canvas-bg" class="site-canvas-bg" aria-hidden="true"></canvas>
+  <div class="site-vignette" aria-hidden="true"></div>
+
   <header class="site-header">
     <div class="container header-inner">
-      <img src="images/logo.png" alt="CTRLX Logo" class="logo-image logo-dark" />
-      <img src="images/whitelogo.png" alt="CTRLX Logo" class="logo-image logo-light" />
+      <a href="index.html"><img src="images/logo.png" alt="CTRLX Logo" class="logo-image logo-dark" /></a>
+      <a href="index.html"><img src="images/whitelogo.png" alt="CTRLX Logo" class="logo-image logo-light" /></a>
       <div class="header-right">
-        <nav>
-          <a href="index.html">Home</a>
-          <a href="services.html">Services</a>
-          <a href="zen-scripts.html">Zen Scripts</a>
+        <nav class="nav-center">
+          <div class="nav-group nav-left">
+            <a href="index.html">Home</a>
+            <a href="services.html">Services</a>
+            <a href="zen-scripts.html">Zen Scripts</a>
+          </div>
+          <a href="ultimate.html" class="nav-ultimate nav-center-link">ULTIMATE</a>
+          <div class="nav-group nav-right"></div>
         </nav>
         <div class="header-actions">
           <a href="contact.html" class="btn">Contact</a>
@@ -68,7 +75,7 @@
             <span class="contact-icon">💬</span>
             <span>Discord: Join Server</span>
           </a>
-          <a href="mailto:brandtmar08@gmail.com" class="contact-link">
+          <a href="mailto:cntrlx4@gmail.com" class="contact-link">
             <span class="contact-icon">📧</span>
             <span>Email: cntrlx4@gmail.com</span>
           </a>
@@ -100,12 +107,13 @@
 
   <footer class="site-footer">
     <div class="container">
-      <small>© <span id="year"></span> 2K Services — All lawful services. Prices listed are placeholders.</small>
+      <small>© <span id="year"></span> Control-X — All lawful services.</small>
     </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script src="script.js"></script>
+  <script src="cinematic.js"></script>
 </body>
 
 </html>

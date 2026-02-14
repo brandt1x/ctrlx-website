@@ -10,14 +10,21 @@
 </head>
 
 <body>
+	<canvas id="site-canvas-bg" class="site-canvas-bg" aria-hidden="true"></canvas>
+	<div class="site-vignette" aria-hidden="true"></div>
+
 	<header class="site-header">
 		<div class="container header-inner">
-			<img src="images/logo.png" alt="CTRLX Logo" class="logo-image logo-dark" />
-			<img src="images/whitelogo.png" alt="CTRLX Logo" class="logo-image logo-light" />
+			<a href="index.html"><img src="images/logo.png" alt="CTRLX Logo" class="logo-image logo-dark" /></a>
+			<a href="index.html"><img src="images/whitelogo.png" alt="CTRLX Logo" class="logo-image logo-light" /></a>
 			<div class="header-right">
-				<nav>
-					<a href="services.html">Services</a>
-					<a href="zen-scripts.html">Zen Scripts</a>
+				<nav class="nav-center">
+					<div class="nav-group nav-left">
+						<a href="services.html">Services</a>
+						<a href="zen-scripts.html">Zen Scripts</a>
+					</div>
+					<a href="ultimate.html" class="nav-ultimate nav-center-link">ULTIMATE</a>
+					<div class="nav-group nav-right"></div>
 				</nav>
 				<div class="header-actions">
 					<a href="contact.html" class="btn">Contact</a>
@@ -76,14 +83,13 @@
 					<h4>Secret Setup</h4>
 					<p class="muted">Quick 30-minute session to setup Input Senses Secret.</p>
 					<div class="price">From: <strong>$25</strong></div>
-					<button class="btn hero-add-btn card-action-btn" type="button" data-name="Secret Setup" data-price="$25">Add
-						to Cart</button>
+					<button class="btn hero-add-btn card-action-btn" type="button" data-name="Secret Setup" data-price="$25">Add to Cart</button>
 				</article>
 
 				<article class="card" data-scroll-item>
 					<h4>Zen Scripts</h4>
 					<p class="muted">Zen Scripts from 2k, Cod, Arc, Fortnite, Siege, Apex, Rust and more.</p>
-					<div class="price">From: <strong>$10–25</strong></div>
+					<div class="price">From: <strong>$15–35</strong></div>
 					<a class="btn card-action-btn" href="zen-scripts.html">View Scripts</a>
 				</article>
 
@@ -100,13 +106,14 @@
 			<h3>How it Works</h3>
 			<div class="how-layout">
 				<div class="how-intro" data-scroll-item>
-					<p class="muted">Simple flow: pick what you want, tell us your details, and we handle the rest with lawful
-						coaching and support.</p>
-					<ul class="how-list">
-						<li>✔ Choose services that match what you need.</li>
-						<li>✔ Add them to your cart and send your request.</li>
-						<li>✔ We reply with timing, payment and next steps.</li>
-					</ul>
+					<p class="how-intro-label">The Process</p>
+					<h4>Pick. Send. Done.</h4>
+					<p class="muted">Choose what you need, send us the details, and we handle everything from there.</p>
+					<div class="how-chips">
+						<span class="how-chip">Choose services</span>
+						<span class="how-chip">Add to cart</span>
+						<span class="how-chip">We deliver</span>
+					</div>
 				</div>
 				<div class="how-steps">
 					<article class="how-step" data-scroll-item>
@@ -138,12 +145,8 @@
 		</section>
 
 		<section class="faq container" data-scroll-section>
-			<h3></h3>
+			<h3>FAQ</h3>
 			<div class="faq-vertical">
-				<details data-scroll-item data-scroll-direction="up">
-					<summary>Do you provide cheats or hacks?</summary>
-					<p>No. We provide guides, and account support.</p>
-				</details>
 				<details data-scroll-item data-scroll-direction="down">
 					<summary>How do I schedule a session?</summary>
 					<p>Use the contact form on the Contact page or email us; we'll confirm availability.</p>
@@ -162,11 +165,12 @@
 
 	<footer class="site-footer">
 		<div class="container">
-			<small>© <span id="year"></span> Control — All lawful services. </small>
+			<small>© <span id="year"></span> Control-X — All lawful services.</small>
 		</div>
 	</footer>
 
 	<script src="script.js"></script>
+	<script src="cinematic.js"></script>
 </body>
 
 </html>

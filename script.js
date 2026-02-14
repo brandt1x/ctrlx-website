@@ -27,6 +27,20 @@ document.addEventListener('DOMContentLoaded', function () {
 		targets.forEach(el => observer.observe(el));
 	})();
 
+	// Ensure add-to-cart helper exists even on pages without cart UI
+	if (!window.__addToSiteCart) {
+		window.__addToSiteCart = function (name, rawPrice) {
+			let priceNum = 0;
+			if (typeof rawPrice === 'number') {
+				priceNum = rawPrice;
+			} else if (typeof rawPrice === 'string') {
+				const match = rawPrice.replace(/[^0-9.]/g, '');
+				priceNum = parseFloat(match || '0') || 0;
+			}
+			Cart.addItem(name || 'Item', priceNum);
+		};
+	}
+
 	// Enhanced scroll reveal for index page sections with up/down animations
 	(function setupEnhancedScrollReveal() {
 		if (!('IntersectionObserver' in window)) return;
@@ -84,8 +98,368 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 	})();
 
+	// Site load animation – only on first load or refresh, not when navigating via links
+	(function setupSiteLoadAnimation() {
+		if (document.body.classList.contains('ultimate-page')) return;
+		const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		if (prefersReduced) return;
+
+		const nav = performance.getEntriesByType?.('navigation')?.[0];
+		const navType = nav?.type || (performance.navigation?.type === 1 ? 'reload' : 'navigate');
+		const referrer = document.referrer || '';
+		let sameOrigin = false;
+		if (referrer) {
+			try {
+				sameOrigin = new URL(referrer).origin === window.location.origin;
+			} catch {
+				sameOrigin = referrer.startsWith(window.location.origin || '');
+			}
+		}
+		if (navType === 'navigate' && sameOrigin) return; // Came from our site via link – skip
+
+		const isLight = document.body.classList.contains('theme-light');
+		const logoSrc = isLight ? 'images/whitelogo.png' : 'images/logo.png';
+		const streaks = Array.from({ length: 12 }, (_, i) =>
+			`<div class="site-load-streak" style="--delay:${(i * 0.08).toFixed(2)}s;--y:${(Math.random() * 100).toFixed(1)}%;--angle:${-15 + Math.random() * 30}deg;"></div>`
+		).join('');
+		const stars = Array.from({ length: 30 }, (_, i) =>
+			`<span class="site-load-star" style="--delay:${(i * 0.03).toFixed(2)}s;--x:${(50 + Math.random() * 50).toFixed(1)}%;--y:${(Math.random() * 100).toFixed(1)}%;--dur:${(1 + Math.random() * 0.6).toFixed(2)}s;"></span>`
+		).join('');
+
+		const overlay = document.createElement('div');
+		overlay.id = 'site-load-overlay';
+		overlay.className = 'site-load-overlay' + (isLight ? ' site-load-mode-light' : '');
+		overlay.setAttribute('aria-hidden', 'true');
+		overlay.innerHTML = `
+			<div class="site-load-layers">
+				<div class="site-load-warp"></div>
+				<div class="site-load-tunnel"></div>
+				<div class="site-load-streaks">${streaks}</div>
+				<div class="site-load-stars">${stars}</div>
+			</div>
+			<div class="site-load-center">
+				<div class="site-load-brand-wrap">
+					<img src="${logoSrc}" alt="Control-X" class="site-load-brand-img" />
+				</div>
+				<div class="site-load-pulse"></div>
+				<div class="site-load-title">Control-X</div>
+				<div class="site-load-subtitle">Precision Scripts</div>
+			</div>
+			<div class="site-load-hyperspace">
+				<div class="site-load-zoom-line"></div>
+				<div class="site-load-hyperspace-streaks"></div>
+			</div>
+		`;
+		document.body.insertBefore(overlay, document.body.firstChild);
+
+		// After initial animation: rapid line generation + zoom
+		setTimeout(() => {
+			overlay.classList.add('site-load-hyperspace-active');
+			overlay.querySelector('.site-load-center')?.classList.add('site-load-center-out');
+
+			const container = overlay.querySelector('.site-load-hyperspace-streaks');
+			const cx = 50, cy = 50;
+			const colors = ['red', 'coral', 'darkred', 'brightred'];
+			let count = 0;
+			const spawn = () => {
+				for (let i = 0; i < 18; i++) {
+					const r = 25 + Math.sqrt(Math.random()) * 50;
+					const theta = Math.random() * Math.PI * 2;
+					const x = cx + Math.cos(theta) * r;
+					const y = cy + Math.sin(theta) * r;
+					const dx = cx - x, dy = cy - y;
+					const dist = Math.hypot(dx, dy) || 1;
+					const angleTowardCenter = Math.atan2(dy, dx) * 180 / Math.PI - 90;
+					const spread = (Math.random() - 0.5) * 24;
+					const angle = angleTowardCenter + spread;
+					const len = 70 + dist * 0.5 + Math.random() * 90;
+					const color = colors[count % 4];
+					const el = document.createElement('div');
+					el.className = `site-load-hyperspace-streak site-load-hs-${color}`;
+					el.style.cssText = `--x:${x}%;--y:${y}%;--angle:${angle}deg;--len:${Math.max(60, Math.min(len, 280))}px;--delay:0s;`;
+					container.appendChild(el);
+					count++;
+				}
+			};
+			spawn();
+			const interval = setInterval(spawn, 18);
+			setTimeout(() => clearInterval(interval), 480);
+		}, 1200);
+		setTimeout(() => {
+			overlay.classList.add('site-load-done');
+			setTimeout(() => overlay.remove(), 650);
+		}, 1650);
+	})();
+
 	// Toggle loaded state to trigger CSS entrance animations
 	setTimeout(() => document.body.classList.add('is-loaded'), 60);
+
+	const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	const hasFinePointer = window.matchMedia && window.matchMedia('(pointer:fine)').matches;
+
+	if (!prefersReducedMotion) {
+		document.body.classList.add('cinematic-enabled');
+		document.body.classList.add('insane-mode');
+	}
+
+	// Cursor halo for premium desktop feel
+	(function setupCursorHalo() {
+		if (prefersReducedMotion || !hasFinePointer || document.body.classList.contains('ultimate-page')) return;
+		const halo = document.createElement('div');
+		halo.className = 'cursor-halo';
+		document.body.appendChild(halo);
+		let targetX = 0;
+		let targetY = 0;
+		let currentX = 0;
+		let currentY = 0;
+		let raf = 0;
+
+		function tick() {
+			currentX += (targetX - currentX) * 0.18;
+			currentY += (targetY - currentY) * 0.18;
+			halo.style.transform = `translate(${currentX}px, ${currentY}px) translate(-50%, -50%)`;
+			raf = requestAnimationFrame(tick);
+		}
+
+		window.addEventListener('mousemove', (e) => {
+			targetX = e.clientX;
+			targetY = e.clientY;
+			halo.classList.add('active');
+			if (!raf) raf = requestAnimationFrame(tick);
+		}, { passive: true });
+
+		window.addEventListener('mousedown', () => halo.classList.add('pressed'));
+		window.addEventListener('mouseup', () => halo.classList.remove('pressed'));
+		window.addEventListener('mouseleave', () => halo.classList.remove('active'));
+	})();
+
+	// Spotlight feedback on interactive elements
+	(function setupInteractiveSpotlight() {
+		if (prefersReducedMotion || !hasFinePointer) return;
+		const targets = document.querySelectorAll('nav a, .btn, .select-btn, .card, .how-step, .how-intro, .faq details, .contact-info, .contact-link');
+		if (!targets.length) return;
+		targets.forEach((el) => {
+			el.classList.add('interactive-spot');
+			el.addEventListener('mousemove', (e) => {
+				const rect = el.getBoundingClientRect();
+				const x = ((e.clientX - rect.left) / rect.width) * 100;
+				const y = ((e.clientY - rect.top) / rect.height) * 100;
+				el.style.setProperty('--mx', `${x.toFixed(2)}%`);
+				el.style.setProperty('--my', `${y.toFixed(2)}%`);
+				el.classList.add('is-hot');
+			}, { passive: true });
+			el.addEventListener('mouseleave', () => {
+				el.classList.remove('is-hot');
+			});
+		});
+	})();
+
+	// Subtle desktop tilt on core cards/blocks
+	(function setupGlobalTilt() {
+		if (prefersReducedMotion || !hasFinePointer || document.body.classList.contains('ultimate-page')) return;
+		const targets = document.querySelectorAll('.card, .how-step, .how-intro, .faq details, .contact-info');
+		if (!targets.length) return;
+		targets.forEach((el) => {
+			el.addEventListener('mousemove', (e) => {
+				const rect = el.getBoundingClientRect();
+				const px = (e.clientX - rect.left) / rect.width;
+				const py = (e.clientY - rect.top) / rect.height;
+				const rx = (0.5 - py) * 5.5;
+				const ry = (px - 0.5) * 6.5;
+				el.style.transform = `perspective(900px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+			}, { passive: true });
+			el.addEventListener('mouseleave', () => {
+				el.style.transform = '';
+			});
+		});
+	})();
+
+	// Premium magnetic feel on key controls
+	(function setupMagneticControls() {
+		if (prefersReducedMotion || !hasFinePointer) return;
+		const targets = document.querySelectorAll('nav a, .btn, .select-btn, .cart-toggle, .theme-toggle, .site-cart-close, .site-cart-item-remove, .contact-link');
+		if (!targets.length) return;
+		targets.forEach((el) => {
+			el.classList.add('magnetic');
+			el.addEventListener('mousemove', (e) => {
+				const rect = el.getBoundingClientRect();
+				const px = (e.clientX - rect.left) / rect.width - 0.5;
+				const py = (e.clientY - rect.top) / rect.height - 0.5;
+				const max = el.classList.contains('btn') ? 5 : 4;
+				el.style.setProperty('--mag-x', `${(px * max).toFixed(2)}px`);
+				el.style.setProperty('--mag-y', `${(py * max).toFixed(2)}px`);
+			}, { passive: true });
+			el.addEventListener('mouseleave', () => {
+				el.style.setProperty('--mag-x', '0px');
+				el.style.setProperty('--mag-y', '0px');
+			});
+		});
+	})();
+
+	// Click shockwaves on nav/buttons/switches for insane feel
+	(function setupClickBursts() {
+		if (prefersReducedMotion || !hasFinePointer) return;
+		const targets = document.querySelectorAll('nav a, .btn, .select-btn, .theme-toggle, .cart-toggle');
+		if (!targets.length) return;
+
+		targets.forEach((el) => {
+			el.addEventListener('click', (e) => {
+				const rect = el.getBoundingClientRect();
+				const burst = document.createElement('span');
+				burst.className = 'click-burst';
+				if (document.body.classList.contains('theme-light')) {
+					burst.classList.add('click-burst-light');
+				}
+				const x = e.clientX - rect.left;
+				const y = e.clientY - rect.top;
+				burst.style.left = `${x}px`;
+				burst.style.top = `${y}px`;
+				el.appendChild(burst);
+				setTimeout(() => burst.remove(), 520);
+			});
+		});
+	})();
+
+	// Per-letter cursor glow on key text (like ULTIMATE mode)
+	(function setupGlobalLetterGlow() {
+		if (prefersReducedMotion || !hasFinePointer) return;
+		if (document.body.classList.contains('ultimate-page')) return;
+
+		const selectors = 'main h2, main h3, .card h4, .how-step h4, .hero h2, .price strong, nav a, .btn:not(.card-action-btn), .contact-info h4, .how-intro h4, .how-intro-label, .how-chip, .site-footer small';
+		const targets = document.querySelectorAll(selectors);
+		if (!targets.length) return;
+
+		function splitLetters(node) {
+			if (node.dataset.glowReady === '1') return;
+			const text = node.textContent || '';
+			if (!text.trim()) return;
+			const frag = document.createDocumentFragment();
+			for (let i = 0; i < text.length; i++) {
+				const ch = text[i];
+				const span = document.createElement('span');
+				span.className = ch === ' ' ? 'glow-letter glow-letter-space' : 'glow-letter';
+				span.textContent = ch === ' ' ? '\u00A0' : ch;
+				frag.appendChild(span);
+			}
+			node.textContent = '';
+			node.appendChild(frag);
+			node.dataset.glowReady = '1';
+		}
+
+		targets.forEach((node) => {
+			splitLetters(node);
+			const letters = Array.from(node.querySelectorAll('.glow-letter'));
+			if (!letters.length) return;
+
+			let raf = 0;
+			let mx = 0;
+			let my = 0;
+			const radius = 88;
+
+			function paint() {
+				raf = 0;
+				for (let i = 0; i < letters.length; i++) {
+					const letter = letters[i];
+					if (letter.classList.contains('glow-letter-space')) continue;
+					const rect = letter.getBoundingClientRect();
+					const cx = rect.left + rect.width * 0.5;
+					const cy = rect.top + rect.height * 0.5;
+					const dist = Math.hypot(mx - cx, my - cy);
+					const glow = Math.max(0, 1 - dist / radius);
+					letter.style.setProperty('--g', glow.toFixed(3));
+				}
+			}
+
+			node.addEventListener('mouseenter', () => node.classList.add('glow-active'));
+			node.addEventListener('mouseleave', () => {
+				node.classList.remove('glow-active');
+				for (let i = 0; i < letters.length; i++) {
+					letters[i].style.setProperty('--g', '0');
+				}
+			});
+			node.addEventListener('mousemove', (e) => {
+				mx = e.clientX;
+				my = e.clientY;
+				if (!raf) raf = requestAnimationFrame(paint);
+			}, { passive: true });
+		});
+	})();
+
+	// Whole-element hover color fade for body text (no letter split to preserve word wrap)
+	(function setupTextHoverFade() {
+		if (prefersReducedMotion || !hasFinePointer) return;
+		if (document.body.classList.contains('ultimate-page')) return;
+
+		const selectors = '.hero p, .card p, .card li, .how-step p, .how-intro p, .faq details summary, .faq details p, .contact-info p, .contact-link span, .zen-product p, .zen-product .price, .price, .services > .muted';
+		const targets = document.querySelectorAll(selectors);
+		if (!targets.length) return;
+
+		targets.forEach((el) => {
+			el.classList.add('text-hover-fade');
+		});
+	})();
+
+	// Headline reveal to make sections feel cinematic
+	(function setupHeadlineReveal() {
+		const heads = document.querySelectorAll('main h2, main h3, .card h4, .how-step h4, .site-cart-header h2');
+		if (!heads.length) return;
+		heads.forEach(h => h.classList.add('headline-reveal'));
+		if (!('IntersectionObserver' in window)) {
+			heads.forEach(h => h.classList.add('headline-live'));
+			return;
+		}
+		const obs = new IntersectionObserver((entries) => {
+			entries.forEach((entry) => {
+				if (entry.isIntersecting) {
+					entry.target.classList.add('headline-live');
+					obs.unobserve(entry.target);
+				}
+			});
+		}, { threshold: 0.25, rootMargin: '0px 0px -25px 0px' });
+		heads.forEach(h => obs.observe(h));
+	})();
+
+	// Cinematic internal page hop (non-ultimate links)
+	(function setupPageHopTransition() {
+		if (prefersReducedMotion) return;
+		const links = document.querySelectorAll('a[href]');
+		if (!links.length) return;
+		let active = false;
+		function isInternalHtml(href) {
+			if (!href) return false;
+			if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return false;
+			try {
+				const url = new URL(href, window.location.href);
+				return url.origin === window.location.origin && /\.html($|#|\?)/i.test(url.pathname + url.search + url.hash);
+			} catch {
+				return false;
+			}
+		}
+		links.forEach((link) => {
+			link.addEventListener('click', (e) => {
+				const href = link.getAttribute('href') || '';
+				if (!isInternalHtml(href)) return;
+				if (/ultimate\.html/i.test(href)) return;
+				if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+				if (active) return;
+				active = true;
+				e.preventDefault();
+				const targetUrl = new URL(href, window.location.href).href;
+				const title = (link.textContent || 'Entering').trim() || 'Entering';
+				const overlay = document.createElement('div');
+				overlay.className = 'page-hop-overlay';
+				if (document.body.classList.contains('theme-light')) {
+					overlay.classList.add('theme-light-hop');
+				}
+				overlay.innerHTML = `<div class="page-hop-core"><div class="page-hop-title">${title}</div></div>`;
+				document.body.appendChild(overlay);
+				requestAnimationFrame(() => overlay.classList.add('active'));
+				setTimeout(() => {
+					window.location.href = targetUrl;
+				}, 460);
+			});
+		});
+	})();
 
 	// GLOBAL CART (all pages)
 	const Cart = (function () {
@@ -290,9 +664,19 @@ document.addEventListener('DOMContentLoaded', function () {
 	(function setupNavHide() {
 		const header = document.querySelector('.site-header');
 		if (!header) return;
+		header.classList.remove('hide');
 		let lastY = window.scrollY;
 		let ticking = false;
 		const delta = 8; // threshold
+		const navLinks = document.querySelectorAll('.header-right nav a');
+		navLinks.forEach(link => {
+			link.addEventListener('click', () => {
+				header.classList.remove('hide');
+			});
+		});
+		window.addEventListener('pageshow', () => {
+			header.classList.remove('hide');
+		});
 		function onScroll() {
 			const y = window.scrollY;
 			if (!ticking) {
@@ -407,6 +791,129 @@ document.addEventListener('DOMContentLoaded', function () {
 			if (path === href || (path === '' && href === 'index.html')) {
 				link.classList.add('nav-active');
 			}
+		});
+	})();
+
+	// Letter-by-letter cursor glow on ULTIMATE nav links
+	; (function setupUltimateNavLetters() {
+		const links = document.querySelectorAll('.nav-ultimate');
+		if (!links.length) return;
+
+		links.forEach((link) => {
+			if (link.dataset.lettersReady === '1') return;
+			const text = link.textContent || '';
+			link.textContent = '';
+			const frag = document.createDocumentFragment();
+			for (let i = 0; i < text.length; i++) {
+				const ch = text[i];
+				const span = document.createElement('span');
+				span.className = ch === ' ' ? 'nav-ultimate-letter nav-ultimate-letter-space' : 'nav-ultimate-letter';
+				span.textContent = ch === ' ' ? '\u00A0' : ch;
+				frag.appendChild(span);
+			}
+			link.appendChild(frag);
+			link.dataset.lettersReady = '1';
+			const letters = Array.from(link.querySelectorAll('.nav-ultimate-letter'));
+			let raf = 0;
+			let mx = 0;
+			let my = 0;
+			const radius = 90;
+
+			function paint() {
+				raf = 0;
+				for (let i = 0; i < letters.length; i++) {
+					const letter = letters[i];
+					if (letter.classList.contains('nav-ultimate-letter-space')) continue;
+					const rect = letter.getBoundingClientRect();
+					const cx = rect.left + rect.width * 0.5;
+					const cy = rect.top + rect.height * 0.5;
+					const dist = Math.hypot(mx - cx, my - cy);
+					const glow = Math.max(0, 1 - dist / radius);
+					letter.style.setProperty('--glow', glow.toFixed(3));
+				}
+			}
+
+			link.addEventListener('mousemove', (e) => {
+				mx = e.clientX;
+				my = e.clientY;
+				if (!raf) raf = requestAnimationFrame(paint);
+			});
+			link.addEventListener('mouseleave', () => {
+				for (let i = 0; i < letters.length; i++) {
+					letters[i].style.setProperty('--glow', '0');
+				}
+			});
+		});
+	})();
+
+	// Cinematic transition when opening ULTIMATE page
+	; (function setupUltimateTransition() {
+		const links = document.querySelectorAll('a[href="ultimate.html"]');
+		if (!links.length) return;
+		const currentPath = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+		let navigating = false;
+		const MODE_KEY = 'ultimateTransitionMode';
+
+		function nextMode() {
+			const prev = sessionStorage.getItem(MODE_KEY) || 'dark';
+			const next = prev === 'dark' ? 'cosmic' : 'dark';
+			sessionStorage.setItem(MODE_KEY, next);
+			return next;
+		}
+
+		function startTransition(href) {
+			if (navigating) return;
+			navigating = true;
+			const isLight = document.body.classList.contains('theme-light');
+			const mode = isLight ? 'light' : nextMode();
+			const logoSrc = mode === 'light' ? 'images/whitelogo.png' : 'images/logo.png';
+			const overlay = document.createElement('div');
+			overlay.className = 'ultimate-loading-overlay';
+			overlay.classList.add(`ultimate-mode-${mode}`);
+			const sparks = Array.from({ length: 24 }, (_, i) =>
+				`<span class="ultimate-loading-spark" style="--spark-delay:${(i * 0.06).toFixed(2)}s;--spark-x:${(Math.random() * 100).toFixed(1)}%;--spark-size:${(2 + Math.random() * 5).toFixed(1)}px;"></span>`
+			).join('');
+			overlay.innerHTML = `
+				<div class="ultimate-loading-layers">
+					<div class="ultimate-loading-beam"></div>
+					<div class="ultimate-loading-grid"></div>
+					<div class="ultimate-loading-nebula"></div>
+					<div class="ultimate-loading-sparks">${sparks}</div>
+				</div>
+				<div class="ultimate-loading-center">
+					<div class="ultimate-loading-brand-wrap">
+						<img src="${logoSrc}" alt="Control-X" class="ultimate-loading-brand-img" />
+					</div>
+					<div class="ultimate-loading-logo">
+						<span class="ultimate-logo-layer base">CTRLX</span>
+						<span class="ultimate-logo-layer glitch g1">CTRLX</span>
+						<span class="ultimate-logo-layer glitch g2">CTRLX</span>
+						<span class="ultimate-logo-morph">ULTIMATE</span>
+					</div>
+					<div class="ultimate-loading-rings">
+						<div class="ultimate-loading-ring"></div>
+						<div class="ultimate-loading-ring"></div>
+						<div class="ultimate-loading-ring"></div>
+					</div>
+					<div class="ultimate-loading-title">ULTIMATE</div>
+					<div class="ultimate-loading-subtitle">${mode === 'light' ? 'Luminous Sequence • CONTROL+X' : mode === 'cosmic' ? 'Cosmic Surge • CONTROL+X' : 'Neural Sequence • VISION-X'}</div>
+				</div>
+			`;
+			document.body.appendChild(overlay);
+			requestAnimationFrame(() => overlay.classList.add('active'));
+			const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+			setTimeout(() => {
+				window.location.href = href;
+			}, prefersReduced ? 260 : 1280);
+		}
+
+		links.forEach((link) => {
+			link.addEventListener('click', (e) => {
+				if (currentPath === 'ultimate.html') return;
+				if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+				e.preventDefault();
+				startTransition(link.href);
+			});
 		});
 	})();
 

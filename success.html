@@ -10,15 +10,22 @@
 </head>
 
 <body>
+	<canvas id="site-canvas-bg" class="site-canvas-bg" aria-hidden="true"></canvas>
+	<div class="site-vignette" aria-hidden="true"></div>
+
 	<header class="site-header">
 		<div class="container header-inner">
 			<a href="index.html"><img src="images/logo.png" alt="CTRLX Logo" class="logo-image logo-dark" /></a>
 			<a href="index.html"><img src="images/whitelogo.png" alt="CTRLX Logo" class="logo-image logo-light" /></a>
 			<div class="header-right">
-				<nav>
-					<a href="index.html">Home</a>
-					<a href="services.html">Services</a>
-					<a href="zen-scripts.html">Zen Scripts</a>
+				<nav class="nav-center">
+					<div class="nav-group nav-left">
+						<a href="index.html">Home</a>
+						<a href="services.html">Services</a>
+						<a href="zen-scripts.html">Zen Scripts</a>
+					</div>
+					<a href="ultimate.html" class="nav-ultimate nav-center-link">ULTIMATE</a>
+					<div class="nav-group nav-right"></div>
 				</nav>
 				<div class="header-actions">
 					<a href="contact.html" class="btn">Contact</a>
@@ -41,22 +48,12 @@
 
 	<footer class="site-footer">
 		<div class="container">
-			<small>© <span id="year"></span> Control — All lawful services.</small>
+			<small>© <span id="year"></span> Control-X — All lawful services.</small>
 		</div>
 	</footer>
 
-	<script>
-		document.body.classList.add('is-loaded');
-		const yearEl = document.getElementById('year');
-		if (yearEl) yearEl.textContent = new Date().getFullYear();
-		const stored = window.localStorage ? localStorage.getItem('theme') : null;
-		if (stored === 'light') document.body.classList.add('theme-light');
-		const toggle = document.getElementById('theme-toggle');
-		if (toggle) toggle.addEventListener('click', () => {
-			document.body.classList.toggle('theme-light');
-			if (window.localStorage) localStorage.setItem('theme', document.body.classList.contains('theme-light') ? 'light' : 'dark');
-		});
-	</script>
+	<script src="script.js"></script>
+	<script src="cinematic.js"></script>
 </body>
 
 </html>
