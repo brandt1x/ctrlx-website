@@ -2107,7 +2107,7 @@ body.theme-light .hero {
 	z-index: 150;
 	display: flex;
 	flex-direction: column;
-	padding: 18px 18px 20px;
+	padding: 18px 18px 24px;
 	border-left: 1px solid rgba(248, 250, 252, 0.06);
 }
 
@@ -2132,13 +2132,18 @@ body.theme-light .hero {
 
 .site-cart-body {
 	flex: 1;
+	min-height: 0;
 	overflow: auto;
 	padding-right: 4px;
 }
 
+#site-cart-summary {
+	margin: 20px 0 16px;
+}
+
 .site-cart-items {
 	list-style: none;
-	margin: 10px 0 0;
+	margin: 0;
 	padding: 0;
 	display: flex;
 	flex-direction: column;
@@ -2442,14 +2447,16 @@ body.theme-light .how-chip:hover {
 }
 
 .site-cart-total {
-	margin-top: 8px;
+	margin-top: 12px;
 	font-weight: 700;
 }
 
 .site-cart-footer {
-	margin-top: 8px;
+	margin-top: 12px;
+	padding-top: 14px;
+	padding-bottom: 8px;
 	border-top: 1px solid rgba(15, 23, 42, 0.9);
-	padding-top: 10px;
+	flex-shrink: 0;
 }
 
 .site-cart-actions {
