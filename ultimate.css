@@ -219,6 +219,9 @@
 
 .ultimate-product {
 	position: relative;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
 	background: linear-gradient(180deg, rgba(20, 17, 24, 0.78), rgba(10, 8, 12, 0.92));
 	border: 1px solid rgba(239, 68, 68, 0.32);
 	border-radius: 22px;
@@ -266,6 +269,7 @@
 .ultimate-product-content {
 	position: relative;
 	z-index: 2;
+	flex: 1;
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
@@ -300,6 +304,7 @@
 .ultimate-product-features {
 	list-style: none;
 	margin-bottom: 24px;
+	flex-grow: 1;
 }
 
 .ultimate-product-features li {
