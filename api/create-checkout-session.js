@@ -28,6 +28,7 @@ module.exports = async (req, res) => {
 			mode: 'payment',
 			success_url: `${baseUrl}/success.html?session_id={CHECKOUT_SESSION_ID}`,
 			cancel_url: `${baseUrl}/`,
+			metadata: { items: JSON.stringify(items.map(i => ({ name: i.name, price: i.price }))) },
 		});
 		res.json({ url: session.url });
 	} catch (err) {

@@ -43,6 +43,7 @@
 	<main class="container" style="padding: 4rem 1rem; text-align: center;">
 		<h2>Thank you for your purchase!</h2>
 		<p class="muted">Your payment was successful. We'll be in touch shortly.</p>
+		<div id="success-downloads" style="margin: 1.5rem 0;"></div>
 		<a href="index.html" class="btn">Back to Home</a>
 	</main>
 
@@ -54,6 +55,27 @@
 
 	<script src="script.js"></script>
 	<script src="cinematic.js"></script>
+	<script>
+		(function setupSuccessDownloads() {
+			const params = new URLSearchParams(window.location.search);
+			const sessionId = params.get('session_id');
+			const container = document.getElementById('success-downloads');
+			if (!sessionId || !container) return;
+
+			fetch(`${window.location.origin}/api/verify-session?session_id=${encodeURIComponent(sessionId)}`)
+				.then((r) => r.json())
+				.then((data) => {
+					if (!data.paid || !data.hasControlX) return;
+					container.innerHTML = `
+						<a href="downloads/CONTROL%2BX.gpc" download="CONTROL+X.gpc" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">
+							⬇ Download CONTROL+X Script (.gpc)
+						</a>
+						<p class="muted" style="font-size: 0.875rem; margin-top: 0.5rem;">Load this file into Zen Studio and flash to your CronusZen.</p>
+					`;
+				})
+				.catch(() => {});
+		})();
+	</script>
 </body>
 
 </html>
