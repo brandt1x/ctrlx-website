@@ -109,7 +109,8 @@
 				if (!cfg.url || !cfg.anonKey) throw new Error('Supabase not configured');
 				const origin = window.location.origin;
 				const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
-				oauthRedirectUrl = (cfg.siteUrl || (isLocalhost ? 'https://www.cntrl-x.com' : origin)) + '/account.html';
+				const baseUrl = cfg.siteUrl || (isLocalhost ? 'https://www.cntrl-x.com' : origin);
+				oauthRedirectUrl = baseUrl.replace(/\/$/, '') + '/account.html';
 				const lib = window.supabase || window.supabaseJs;
 				const createClient = lib?.createClient || lib?.default?.createClient;
 				if (!createClient) throw new Error('Supabase script not loaded');
@@ -129,17 +130,23 @@
 			const purchasesView = document.getElementById('account-purchases-view');
 			const overviewView = document.getElementById('account-overview');
 			const signoutBtn = document.getElementById('account-signout');
-			const tabs = document.querySelectorAll('.account-tab');
+			const authPasswordInput = document.getElementById('auth-password-input');
+			const tabs = authForm.querySelectorAll('.account-tab');
 			const dashboardTabs = document.querySelectorAll('.account-tab-btn');
 			let mode = 'signin';
 			let purchasesLoaded = false;
+
+			function updateAuthMode(newMode) {
+				mode = newMode;
+				authSubmit.textContent = mode === 'signin' ? 'Sign in' : 'Sign up';
+				authPasswordInput.setAttribute('autocomplete', mode === 'signin' ? 'current-password' : 'new-password');
+			}
 
 			tabs.forEach(t => {
 				t.addEventListener('click', () => {
 					tabs.forEach(x => x.classList.remove('active'));
 					t.classList.add('active');
-					mode = t.dataset.tab;
-					authSubmit.textContent = mode === 'signin' ? 'Sign in' : 'Sign up';
+					updateAuthMode(t.dataset.tab);
 					authError.hidden = true;
 				});
 			});
@@ -148,18 +155,24 @@
 				e.preventDefault();
 				authError.hidden = true;
 				const email = document.getElementById('auth-email-input').value.trim();
-				const password = document.getElementById('auth-password-input').value;
+				const password = authPasswordInput.value;
 				if (!email || !password) return;
 				authSubmit.disabled = true;
 				try {
 					if (mode === 'signin') {
 						const { error } = await supabase.auth.signInWithPassword({ email, password });
 						if (error) throw error;
+						location.reload();
 					} else {
-						const { error } = await supabase.auth.signUp({ email, password });
+						const { data, error } = await supabase.auth.signUp({ email, password });
 						if (error) throw error;
+						if (data?.user && (!data.user.identities || data.user.identities.length === 0)) {
+							authError.textContent = 'Check your email to confirm your account.';
+							authError.hidden = false;
+						} else {
+							location.reload();
+						}
 					}
-					location.reload();
 				} catch (err) {
 					authError.textContent = err.message || 'Something went wrong';
 					authError.hidden = false;

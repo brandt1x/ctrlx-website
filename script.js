@@ -900,6 +900,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
 		const trigger = wrapper.querySelector('.profile-trigger');
 		const dropdown = wrapper.querySelector('.profile-dropdown');
+		let dropdownBackdrop = null;
+
+		function closeDropdown() {
+			dropdown.hidden = true;
+			trigger.setAttribute('aria-expanded', 'false');
+			if (dropdownBackdrop && dropdownBackdrop.parentNode) {
+				dropdownBackdrop.remove();
+				dropdownBackdrop = null;
+			}
+		}
+		function openDropdown() {
+			dropdown.hidden = false;
+			trigger.setAttribute('aria-expanded', 'true');
+			if (!dropdownBackdrop) {
+				dropdownBackdrop = document.createElement('div');
+				dropdownBackdrop.className = 'profile-dropdown-backdrop';
+				dropdownBackdrop.setAttribute('data-profile-dropdown-backdrop', '1');
+				dropdownBackdrop.addEventListener('click', closeDropdown);
+				document.body.appendChild(dropdownBackdrop);
+			}
+		}
+
 		const tabs = hub.querySelectorAll('.account-hub-tab');
 		const views = hub.querySelectorAll('.account-hub-view');
 		const purchasesEl = hub.querySelector('.account-hub-purchases');
@@ -921,21 +943,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
 		trigger.addEventListener('click', (e) => {
 			e.stopPropagation();
-			const open = dropdown.hidden;
-			dropdown.hidden = !open;
-			trigger.setAttribute('aria-expanded', String(open));
+			if (dropdown.hidden) {
+				openDropdown();
+			} else {
+				closeDropdown();
+			}
 		});
-		document.addEventListener('click', () => {
-			dropdown.hidden = true;
-			trigger.setAttribute('aria-expanded', 'false');
-		});
-		wrapper.addEventListener('click', (e) => e.stopPropagation());
 		hub.addEventListener('click', (e) => {
 			const target = e.target;
 			if (!(target instanceof HTMLElement)) return;
 			if (target.dataset.close === '1' || target.classList.contains('account-hub-close')) closeHub();
 		});
-		window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeHub(); });
+		window.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape') {
+				if (!dropdown.hidden) closeDropdown();
+				else closeHub();
+			}
+		});
 
 		async function loadPurchasesIntoHub(client) {
 			purchasesEl.innerHTML = '<p class="muted">Loading purchases...</p>';
@@ -994,8 +1018,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		wrapper.querySelectorAll('.profile-dropdown-item').forEach((btn) => {
 			btn.addEventListener('click', async () => {
 				const action = btn.dataset.action;
-				dropdown.hidden = true;
-				trigger.setAttribute('aria-expanded', 'false');
+				closeDropdown();
 				const client = await ensureClient();
 				if (!client) return;
 				if (action === 'signout') {

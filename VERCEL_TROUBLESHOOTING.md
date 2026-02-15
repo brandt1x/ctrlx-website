@@ -53,7 +53,7 @@ If pushes to `main` don't create new deployments:
    git push origin main
    ```
 
----git git git
+---
 
 ## Step 5: Inspect Build Logs (if build fails)
 
@@ -76,8 +76,21 @@ If pushes to `main` don't create new deployments:
    - `SUPABASE_URL`
    - `SUPABASE_ANON_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY`
+   - `SITE_URL` — Set to `https://www.cntrl-x.com` (or your production URL). Required for Google sign-in redirect.
 
 Missing vars can cause runtime errors; some can also affect the build.
+
+---
+
+## Step 7: Google Sign-In (Supabase OAuth)
+
+If "Sign in with Google" fails:
+
+1. **Vercel:** Ensure `SITE_URL` = `https://www.cntrl-x.com` (or your production domain).
+2. **Supabase Dashboard** → **Authentication** → **URL Configuration**:
+   - **Site URL:** `https://www.cntrl-x.com`
+   - **Redirect URLs:** Add `https://www.cntrl-x.com/account.html`
+3. **Supabase Dashboard** → **Authentication** → **Providers:** Enable **Google** and configure Client ID and Client Secret from [Google Cloud Console](https://console.cloud.google.com/apis/credentials).
 
 ---
 
@@ -87,5 +100,5 @@ Missing vars can cause runtime errors; some can also affect the build.
 - [ ] Production branch = `main`
 - [ ] Latest deployment status checked
 - [ ] Build logs reviewed if failed
-- [ ] Env vars set for Production
+- [ ] Env vars set for Production (including `SITE_URL` for Google sign-in)
 - [ ] New commit pushed if redeploy blocked
