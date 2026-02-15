@@ -2725,6 +2725,129 @@ body.theme-light .depth-shine::after {
 	background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(185, 28, 28, 0.06) 0%, transparent 50%);
 }
 
+/* ─── Success / Thank You page ─── */
+body.success-page main {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: calc(100vh - var(--header-height) - 120px);
+	padding: 3rem 1.5rem;
+}
+
+.success-main {
+	width: 100%;
+	max-width: 520px;
+	margin: 0 auto;
+}
+
+.success-card {
+	background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.98));
+	border: 1px solid rgba(248, 250, 252, 0.06);
+	border-radius: 20px;
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(239, 68, 68, 0.08);
+	padding: 2.5rem 2rem;
+	text-align: center;
+}
+
+body.theme-light .success-card {
+	background: linear-gradient(180deg, #ffffff, #f9fafb);
+	border-color: rgba(185, 28, 28, 0.15);
+	box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12), 0 0 30px rgba(185, 28, 28, 0.06);
+}
+
+.success-title {
+	font-size: 1.75rem;
+	font-weight: 800;
+	color: var(--text);
+	margin-bottom: 0.5rem;
+}
+
+.success-subtitle {
+	color: var(--muted);
+	font-size: 0.9375rem;
+	margin-bottom: 1.75rem;
+}
+
+.success-downloads {
+	margin-bottom: 1.75rem;
+}
+
+.success-download-list {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.success-dl-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	width: 100%;
+	max-width: 340px;
+	padding: 12px 20px;
+}
+
+.success-instruction {
+	font-size: 0.8125rem;
+	color: var(--muted);
+	margin-top: 1rem;
+	line-height: 1.5;
+}
+
+.success-instruction code {
+	background: rgba(239, 68, 68, 0.15);
+	padding: 2px 6px;
+	border-radius: 4px;
+	font-size: 0.8em;
+}
+
+.success-support {
+	background: rgba(248, 113, 113, 0.1);
+	border: 1px solid rgba(248, 113, 113, 0.25);
+	border-radius: 12px;
+	padding: 1.25rem 1.5rem;
+	margin-bottom: 1.5rem;
+}
+
+body.theme-light .success-support {
+	background: rgba(185, 28, 28, 0.06);
+	border-color: rgba(185, 28, 28, 0.2);
+}
+
+.success-support-text {
+	margin: 0 0 1rem;
+	font-size: 0.9375rem;
+	color: var(--text);
+}
+
+.success-support-text a {
+	color: var(--accent);
+	text-decoration: none;
+}
+
+.success-support-text a:hover {
+	text-decoration: underline;
+}
+
+.success-support-btns {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.75rem;
+}
+
+.success-support-btns .btn {
+	padding: 10px 18px;
+	font-size: 0.9rem;
+}
+
+.success-home-btn {
+	display: inline-block;
+	padding: 12px 24px;
+}
+
 .how,
 .faq,
 .contact {
@@ -3432,6 +3555,33 @@ body[data-motion-tier="low"] .cursor-halo {
 	.price {
 		font-size: 1.125rem;
 		margin: 12px 0;
+	}
+
+	/* Success page mobile */
+	body.success-page main {
+		padding: 2rem 1rem;
+		min-height: calc(100vh - var(--header-height) - 80px);
+	}
+
+	.success-card {
+		padding: 1.75rem 1.25rem;
+		border-radius: 16px;
+	}
+
+	.success-title {
+		font-size: 1.5rem;
+	}
+
+	.success-support-btns {
+		flex-direction: column;
+	}
+
+	.success-support-btns .btn {
+		width: 100%;
+	}
+
+	.success-dl-btn {
+		max-width: none;
 	}
 
 	/* Smooth scroll reveal adjustments */

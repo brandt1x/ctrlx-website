@@ -9,7 +9,7 @@
 	<link rel="icon" type="image/png" href="images/logo.png">
 </head>
 
-<body>
+<body class="success-page">
 	<canvas id="site-canvas-bg" class="site-canvas-bg" aria-hidden="true"></canvas>
 	<div class="site-vignette" aria-hidden="true"></div>
 
@@ -40,18 +40,20 @@
 		</div>
 	</header>
 
-	<main class="container" style="padding: 4rem 1rem; text-align: center;">
-		<h2>Thank you for your purchase!</h2>
-		<p class="muted">Your payment was successful. We'll be in touch shortly.</p>
-		<div id="success-downloads" style="margin: 1.5rem 0;"></div>
-		<div class="success-support" style="margin: 1.5rem auto 2rem; max-width: 480px; padding: 1.25rem 1.5rem; background: rgba(248, 113, 113, 0.12); border-radius: 12px; border: 1px solid rgba(248, 113, 113, 0.35);">
-			<p style="margin: 0 0 1rem; font-size: 0.9375rem; color: var(--text);">Questions or need help? <a href="contact.html" style="color: var(--accent);">Contact us</a> or <a href="https://discord.gg/q9KWFd9xxH" target="_blank" rel="noopener" style="color: var(--accent);">join our Discord</a>.</p>
-			<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;">
-				<a href="contact.html" class="btn" style="padding: 10px 20px;">Contact Page</a>
-				<a href="https://discord.gg/q9KWFd9xxH" target="_blank" rel="noopener" class="btn ghost" style="padding: 10px 20px;">Join Discord</a>
+	<main class="success-main">
+		<div class="success-card">
+			<h2 class="success-title">Thank you for your purchase!</h2>
+			<p class="success-subtitle">Your payment was successful. We'll be in touch shortly.</p>
+			<div id="success-downloads" class="success-downloads"></div>
+			<div class="success-support">
+				<p class="success-support-text">Questions or need help? <a href="contact.html">Contact us</a> or <a href="https://discord.gg/q9KWFd9xxH" target="_blank" rel="noopener">join our Discord</a>.</p>
+				<div class="success-support-btns">
+					<a href="contact.html" class="btn">Contact Page</a>
+					<a href="https://discord.gg/q9KWFd9xxH" target="_blank" rel="noopener" class="btn ghost">Join Discord</a>
+				</div>
 			</div>
+			<a href="index.html" class="btn success-home-btn">Back to Home</a>
 		</div>
-		<a href="index.html" class="btn">Back to Home</a>
 	</main>
 
 	<footer class="site-footer">
@@ -75,38 +77,45 @@
 					if (!data.paid) return;
 					const links = [];
 					if (data.hasControlX) {
-						links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=control-x" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download CONTROL+X Ultimate Script (.gpc)</a>`);
+						links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=control-x" class="btn success-dl-btn">⬇ Download CONTROL+X Ultimate Script (.gpc)</a>`);
 					}
 					if (data.hasVisionX) {
-						links.push(`<a href="/api/download-vision-x?session_id=${encodeURIComponent(sessionId)}" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download Vision-X Tempo (ZIP)</a>`);
+						links.push(`<a href="/api/download-vision-x?session_id=${encodeURIComponent(sessionId)}" class="btn success-dl-btn">⬇ Download Vision-X Tempo (ZIP)</a>`);
 					}
 					if (data.hasAllBundle) {
-						links.push(`<a href="/api/download-all-scripts?session_id=${encodeURIComponent(sessionId)}" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download All Scripts (ZIP)</a>`);
+						links.push(`<a href="/api/download-all-scripts?session_id=${encodeURIComponent(sessionId)}" class="btn success-dl-btn">⬇ Download All Scripts (ZIP)</a>`);
 					} else {
 						if (data.has2K) {
-							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=2k" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download 2K Script (.gpc)</a>`);
+							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=2k" class="btn success-dl-btn">⬇ Download 2K Script (.gpc)</a>`);
 						}
 						if (data.hasCOD) {
-							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=cod" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download COD Script (.gpc)</a>`);
+							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=cod" class="btn success-dl-btn">⬇ Download COD Script (.gpc)</a>`);
 						}
 						if (data.hasApex) {
-							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=apex" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download Apex Script (.gpc)</a>`);
+							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=apex" class="btn success-dl-btn">⬇ Download Apex Script (.gpc)</a>`);
 						}
 						if (data.hasArc) {
-							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=arc" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download ARC Script (.gpc)</a>`);
+							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=arc" class="btn success-dl-btn">⬇ Download ARC Script (.gpc)</a>`);
 						}
 						if (data.hasFortnite) {
-							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=fortnite" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download Fortnite Script (.gpc)</a>`);
+							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=fortnite" class="btn success-dl-btn">⬇ Download Fortnite Script (.gpc)</a>`);
 						}
 						if (data.hasSiege) {
-							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=siege" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download Siege Script (.gpc)</a>`);
+							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=siege" class="btn success-dl-btn">⬇ Download Siege Script (.gpc)</a>`);
 						}
 						if (data.hasRust) {
-							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=rust" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download Rust Script (.gpc)</a>`);
+							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=rust" class="btn success-dl-btn">⬇ Download Rust Script (.gpc)</a>`);
 						}
 					}
 					if (links.length) {
-						container.innerHTML = links.join('<br>') + '<p class="muted" style="font-size: 0.875rem; margin-top: 0.5rem;">Load the file(s) into Zen Studio and flash to your CronusZen.</p>';
+						let instructions = '';
+						if (data.hasVisionX && !data.hasControlX && !data.has2K && !data.hasCOD && !data.hasApex && !data.hasArc && !data.hasFortnite && !data.hasSiege && !data.hasRust && !data.hasAllBundle) {
+							instructions = '<p class="success-instruction">Extract the ZIP, run <code>npm install</code>, then double-click Launch Vision-X Tempo.bat.</p>';
+						} else if (data.hasVisionX || data.hasControlX || data.has2K || data.hasCOD || data.hasApex || data.hasArc || data.hasFortnite || data.hasSiege || data.hasRust || data.hasAllBundle) {
+							instructions = '<p class="success-instruction">Load the .gpc file(s) into Zen Studio and flash to your CronusZen.</p>';
+							if (data.hasVisionX) instructions += '<p class="success-instruction">For Vision-X: extract the ZIP, run <code>npm install</code>, then Launch Vision-X Tempo.bat.</p>';
+						}
+						container.innerHTML = '<div class="success-download-list">' + links.join('') + '</div>' + instructions;
 					}
 				})
 				.catch(() => {});
