@@ -2,9 +2,6 @@
   "functions": {
     "api/**": {
       "excludeFiles": "api/vision-x-tempo/node_modules/**"
-    },
-    "api/stripe-webhook.js": {
-      "bodyParser": false
     }
   }
 }
