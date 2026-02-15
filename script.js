@@ -949,6 +949,10 @@ document.addEventListener('DOMContentLoaded', function () {
 				closeDropdown();
 			}
 		});
+		document.addEventListener('click', () => {
+			if (!dropdown.hidden) closeDropdown();
+		});
+		wrapper.addEventListener('click', (e) => e.stopPropagation());
 		hub.addEventListener('click', (e) => {
 			const target = e.target;
 			if (!(target instanceof HTMLElement)) return;
