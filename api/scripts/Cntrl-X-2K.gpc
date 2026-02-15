@@ -1,4 +1,18 @@
-// ty from script finder
+																																																									/*
+_________   ____________________________.____              ____  ___
+\_   ___ \  \      \__    ___/\______   \    |             \   \/  /
+/    \  \/  /   |   \|    |    |       _/    |      ______  \     / 
+\     \____/    |    \    |    |    |   \    |___  /_____/  /     \ 
+ \______  /\____|__  /____|    |____|_  /_______ \         /___/\  \
+        \/         \/                 \/        \/               \_/																																	/*
+
+Welcome to Cntrl-X! This is the Base model NBA 2K26 Cronus Zen script.
+
+To protect the quality of our scripts and community, all guides and settings are private.
+To unlock full access, open a ticket in our Discord and verify your order. Once verified, you'll unlock private guides, fast support and personalized help.
+
+Support:
+Cntrl-x.com																																													*/
 int sqRhythm = 0;
 int tempo_display_value = 25; 
 int wait_time = 0; 
@@ -120,7 +134,7 @@ int option_width;
 int title_height = 12;
 int option_height = 12;
 int was_menu_enabled = FALSE;
-const string splash_line1[] = { "CONTROL+X" };
+const string splash_line1[] = { "Cntrl-X" };
 const string splash_line2[] = { "By" };
 const string splash_line3[] = { "CNTRL-X.COM" };
 const string saver_line1[] = { "CNTRL-X.COM" };

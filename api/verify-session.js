@@ -40,10 +40,17 @@ module.exports = async (req, res) => {
 				((i.name || '').toLowerCase().includes('control') && Number(i.price) === 75)
 		);
 
+		const has2K = items.some(
+			(i) =>
+				(i.name || '').toLowerCase().includes('2k') ||
+				Number(i.price) === 35
+		);
+
 		res.json({
 			paid: true,
 			items,
 			hasControlX,
+			has2K,
 		});
 	} catch (err) {
 		console.error(err);

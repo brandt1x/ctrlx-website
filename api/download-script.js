@@ -1,0 +1,76 @@
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const path = require('path');
+const fs = require('fs');
+
+const SCRIPT_MAP = {
+	'control-x': { file: 'CONTROL+X.gpc', filename: 'CONTROL+X.gpc', price: 75, nameMatch: 'control+x' },
+	'2k': { file: 'Cntrl-X-2K.gpc', filename: 'Cntrl-X-2K.gpc', price: 35, nameMatch: '2k' },
+};
+
+function hasPurchased(items, script) {
+	const cfg = SCRIPT_MAP[script];
+	if (!cfg) return false;
+	return items.some(
+		(i) =>
+			(i.name || '').toLowerCase().includes(cfg.nameMatch) ||
+			Number(i.price) === cfg.price
+	);
+}
+
+module.exports = async (req, res) => {
+	if (req.method !== 'GET') {
+		return res.status(405).json({ error: 'Method not allowed' });
+	}
+
+	const sessionId = req.query.session_id;
+	const script = req.query.script;
+
+	if (!sessionId || !script) {
+		return res.status(400).json({ error: 'Missing session_id or script' });
+	}
+
+	const cfg = SCRIPT_MAP[script];
+	if (!cfg) {
+		return res.status(400).json({ error: 'Invalid script' });
+	}
+
+	try {
+		const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+		if (session.payment_status !== 'paid') {
+			return res.status(403).json({ error: 'Payment not completed' });
+		}
+
+		let items = [];
+		if (session.metadata?.items) {
+			try {
+				items = JSON.parse(session.metadata.items);
+			} catch (_) {}
+		}
+		if (items.length === 0 && session.line_items?.data) {
+			for (const li of session.line_items.data) {
+				items.push({
+					name: li.description || li.price?.product?.name || '',
+					price: (li.amount_total || 0) / 100,
+				});
+			}
+		}
+
+		if (!hasPurchased(items, script)) {
+			return res.status(403).json({ error: 'Script not purchased' });
+		}
+
+		const scriptPath = path.join(__dirname, 'scripts', cfg.file);
+		if (!fs.existsSync(scriptPath)) {
+			return res.status(500).json({ error: 'Script file not found' });
+		}
+
+		const content = fs.readFileSync(scriptPath);
+		res.setHeader('Content-Type', 'application/octet-stream');
+		res.setHeader('Content-Disposition', `attachment; filename="${cfg.filename}"`);
+		res.send(content);
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({ error: err.message || 'Download failed' });
+	}
+};

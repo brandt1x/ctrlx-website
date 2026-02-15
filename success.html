@@ -72,13 +72,17 @@
 			fetch(`${window.location.origin}/api/verify-session?session_id=${encodeURIComponent(sessionId)}`)
 				.then((r) => r.json())
 				.then((data) => {
-					if (!data.paid || !data.hasControlX) return;
-					container.innerHTML = `
-						<a href="downloads/CONTROL%2BX.gpc" download="CONTROL+X.gpc" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">
-							⬇ Download CONTROL+X Script (.gpc)
-						</a>
-						<p class="muted" style="font-size: 0.875rem; margin-top: 0.5rem;">Load this file into Zen Studio and flash to your CronusZen.</p>
-					`;
+					if (!data.paid) return;
+					const links = [];
+					if (data.hasControlX) {
+						links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=control-x" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download CONTROL+X Ultimate Script (.gpc)</a>`);
+					}
+					if (data.has2K) {
+						links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=2k" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download 2K Script (.gpc)</a>`);
+					}
+					if (links.length) {
+						container.innerHTML = links.join('<br>') + '<p class="muted" style="font-size: 0.875rem; margin-top: 0.5rem;">Load the file into Zen Studio and flash to your CronusZen.</p>';
+					}
 				})
 				.catch(() => {});
 		})();
