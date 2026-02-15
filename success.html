@@ -77,11 +77,33 @@
 					if (data.hasControlX) {
 						links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=control-x" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download CONTROL+X Ultimate Script (.gpc)</a>`);
 					}
-					if (data.has2K) {
-						links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=2k" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download 2K Script (.gpc)</a>`);
+					if (data.hasAllBundle) {
+						links.push(`<a href="/api/download-all-scripts?session_id=${encodeURIComponent(sessionId)}" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download All Scripts (ZIP)</a>`);
+					} else {
+						if (data.has2K) {
+							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=2k" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download 2K Script (.gpc)</a>`);
+						}
+						if (data.hasCOD) {
+							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=cod" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download COD Script (.gpc)</a>`);
+						}
+						if (data.hasApex) {
+							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=apex" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download Apex Script (.gpc)</a>`);
+						}
+						if (data.hasArc) {
+							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=arc" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download ARC Script (.gpc)</a>`);
+						}
+						if (data.hasFortnite) {
+							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=fortnite" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download Fortnite Script (.gpc)</a>`);
+						}
+						if (data.hasSiege) {
+							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=siege" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download Siege Script (.gpc)</a>`);
+						}
+						if (data.hasRust) {
+							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=rust" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download Rust Script (.gpc)</a>`);
+						}
 					}
 					if (links.length) {
-						container.innerHTML = links.join('<br>') + '<p class="muted" style="font-size: 0.875rem; margin-top: 0.5rem;">Load the file into Zen Studio and flash to your CronusZen.</p>';
+						container.innerHTML = links.join('<br>') + '<p class="muted" style="font-size: 0.875rem; margin-top: 0.5rem;">Load the file(s) into Zen Studio and flash to your CronusZen.</p>';
 					}
 				})
 				.catch(() => {});

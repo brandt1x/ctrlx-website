@@ -5,6 +5,12 @@ const fs = require('fs');
 const SCRIPT_MAP = {
 	'control-x': { file: 'CONTROL+X.gpc', filename: 'CONTROL+X.gpc', price: 75, nameMatch: 'control+x' },
 	'2k': { file: 'Cntrl-X-2K.gpc', filename: 'Cntrl-X-2K.gpc', price: 35, nameMatch: '2k' },
+	'cod': { file: 'Cntrl-X-COD.gpc', filename: 'Cntrl-X-COD.gpc', price: 20, nameMatch: 'cod' },
+	'apex': { file: 'Cntrl-X-Apex.gpc', filename: 'Cntrl-X-Apex.gpc', price: 15, nameMatch: 'apex' },
+	'arc': { file: 'Cntrl-X-Arc.gpc', filename: 'Cntrl-X-Arc.gpc', price: 15, nameMatch: 'arc' },
+	'fortnite': { file: 'Cntrl-X-Fortnite.gpc', filename: 'Cntrl-X-Fortnite.gpc', price: 20, nameMatch: 'fortnite' },
+	'siege': { file: 'Cntrl-X-Siege.gpc', filename: 'Cntrl-X-Siege.gpc', price: 20, nameMatch: 'siege' },
+	'rust': { file: 'Cntrl-X-Rust.gpc', filename: 'Cntrl-X-Rust.gpc', price: 20, nameMatch: 'rust' },
 };
 
 function hasPurchased(items, script) {

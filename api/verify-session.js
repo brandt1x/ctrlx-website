@@ -46,11 +46,55 @@ module.exports = async (req, res) => {
 				Number(i.price) === 35
 		);
 
+		const hasCOD = items.some(
+			(i) =>
+				(i.name || '').toLowerCase().includes('cod zen') ||
+				((i.name || '').toLowerCase().includes('cod') && Number(i.price) === 20)
+		);
+		const hasApex = items.some(
+			(i) =>
+				(i.name || '').toLowerCase().includes('apex') ||
+				Number(i.price) === 15
+		);
+		const hasArc = items.some(
+			(i) =>
+				(i.name || '').toLowerCase().includes('arc zen') ||
+				((i.name || '').toLowerCase().includes('arc') && Number(i.price) === 15)
+		);
+		const hasFortnite = items.some(
+			(i) =>
+				(i.name || '').toLowerCase().includes('fortnite') ||
+				Number(i.price) === 20
+		);
+		const hasSiege = items.some(
+			(i) =>
+				(i.name || '').toLowerCase().includes('siege') ||
+				Number(i.price) === 20
+		);
+		const hasRust = items.some(
+			(i) =>
+				(i.name || '').toLowerCase().includes('rust') ||
+				Number(i.price) === 20
+		);
+		const hasAllBundle = items.some(
+			(i) =>
+				(i.name || '').toLowerCase().includes('all zen scripts') ||
+				(i.name || '').toLowerCase().includes('all scripts') ||
+				Number(i.price) === 100
+		);
+
 		res.json({
 			paid: true,
 			items,
 			hasControlX,
 			has2K,
+			hasCOD,
+			hasApex,
+			hasArc,
+			hasFortnite,
+			hasSiege,
+			hasRust,
+			hasAllBundle,
 		});
 	} catch (err) {
 		console.error(err);

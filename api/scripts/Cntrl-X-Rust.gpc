@@ -1,0 +1,4365 @@
+
+																									/*
+_________   ____________________________.____              ____  ___
+\_   ___ \  \      \__    ___/\______   \    |             \   \/  /
+/    \  \/  /   |   \|    |    |       _/    |      ______  \     / 
+\     \____/    |    \    |    |    |   \    |___  /_____/  /     \ 
+ \______  /\____|__  /____|    |____|_  /_______ \         /___/\  \
+        \/         \/                 \/        \/               \_/																																	/*
+
+Welcome to Cntrl-x Rust! This is the Premium model Rust Cronus Zen script.
+
+To protect the quality of our scripts and community, all guides and settings are private.
+To unlock full access, open a ticket in our Discord and verify your order. Once verified, you'll unlock private guides, fast support and personalized help.
+
+Support:
+Cntrl-x.com																																													*/
+
+/* =========================
+   Cntrl-x OLED (CX_) module
+   ========================= */
+define CX_JETS_COUNT = 8;
+define CX_LASERS_COUNT = 6;
+define CX_LOADING_TIMER = 3500;
+
+const string CX_splash_line1[] = { "Cntrl-x Rust" };
+const string CX_splash_line2[] = { "By" };
+const string CX_splash_line3[] = { "CNTRL-X.COM" };
+const string CX_saver_line1[]  = { "CNTRL-X.COM" };
+const string CX_saver_line2[]  = { "L2+Options" };
+
+int CX_jet_x[CX_JETS_COUNT];
+int CX_jet_y[CX_JETS_COUNT];
+int CX_jet_speed[CX_JETS_COUNT];
+int CX_jet_i;
+
+int CX_laser_x[CX_LASERS_COUNT];
+int CX_laser_y[CX_LASERS_COUNT];
+int CX_laser_speed[CX_LASERS_COUNT];
+int CX_laser_i;
+
+int CX_sx = 2, CX_sy = 16;
+int CX_svx = 2, CX_svy = 2;
+int CX_msg_w, CX_line1_w, CX_line2_w;
+
+int CX_saver_timer = 0;
+int CX_initialized = 0;
+int CX_isLoadingScreen = 1;
+int CX_LoadingTimeToRun = 0;
+int CX_splash_progress = 0;
+int CX_splash_cx;
+
+int CX_stringLength;
+function CX_get_string_length(offset) {
+    CX_stringLength = 0;
+    while (duint8(offset++)) {
+        CX_stringLength++;
+    }
+    return CX_stringLength + 1;
+}
+
+function CX_center_x(f_chars, f_font) {
+    return (OLED_WIDTH / 2) - ((f_chars * f_font) / 2);
+}
+
+function CX_update_jets() {
+    for (CX_jet_i = 0; CX_jet_i < CX_JETS_COUNT; CX_jet_i++) {
+        CX_jet_y[CX_jet_i] -= CX_jet_speed[CX_jet_i];
+        if (CX_jet_y[CX_jet_i] < -10) {
+            CX_jet_x[CX_jet_i] = random(5, 122);
+            CX_jet_y[CX_jet_i] = random(64, 90);
+            CX_jet_speed[CX_jet_i] = random(1, 3);
+        }
+    }
+}
+
+function CX_draw_jets() {
+    for (CX_jet_i = 0; CX_jet_i < CX_JETS_COUNT; CX_jet_i++) {
+        if (CX_jet_y[CX_jet_i] >= 0 && CX_jet_y[CX_jet_i] < 63) {
+            if (CX_jet_x[CX_jet_i] >= 0 && CX_jet_x[CX_jet_i] < 127) {
+                pixel_oled(CX_jet_x[CX_jet_i], CX_jet_y[CX_jet_i], 1);
+            }
+            if (CX_jet_y[CX_jet_i] + 1 >= 0 && CX_jet_y[CX_jet_i] + 1 < 63) {
+                pixel_oled(CX_jet_x[CX_jet_i], CX_jet_y[CX_jet_i] + 1, 1);
+            }
+            if (CX_jet_y[CX_jet_i] + 2 >= 0 && CX_jet_y[CX_jet_i] + 2 < 63) {
+                pixel_oled(CX_jet_x[CX_jet_i], CX_jet_y[CX_jet_i] + 2, 1);
+            }
+            if (CX_jet_x[CX_jet_i] - 1 >= 0 && CX_jet_y[CX_jet_i] + 2 < 63) {
+                pixel_oled(CX_jet_x[CX_jet_i] - 1, CX_jet_y[CX_jet_i] + 2, 1);
+            }
+            if (CX_jet_x[CX_jet_i] + 1 < 127 && CX_jet_y[CX_jet_i] + 2 < 63) {
+                pixel_oled(CX_jet_x[CX_jet_i] + 1, CX_jet_y[CX_jet_i] + 2, 1);
+            }
+        }
+    }
+}
+
+function CX_update_lasers() {
+    for (CX_laser_i = 0; CX_laser_i < CX_LASERS_COUNT; CX_laser_i++) {
+        CX_laser_y[CX_laser_i] -= CX_laser_speed[CX_laser_i];
+        if (CX_laser_y[CX_laser_i] < -5) {
+            CX_laser_x[CX_laser_i] = random(5, 122);
+            CX_laser_y[CX_laser_i] = random(64, 100);
+            CX_laser_speed[CX_laser_i] = random(2, 4);
+        }
+    }
+}
+
+function CX_draw_lasers() {
+    for (CX_laser_i = 0; CX_laser_i < CX_LASERS_COUNT; CX_laser_i++) {
+        if (CX_laser_y[CX_laser_i] >= 0 && CX_laser_y[CX_laser_i] < 63) {
+            if (CX_laser_x[CX_laser_i] >= 0 && CX_laser_x[CX_laser_i] < 127) {
+                pixel_oled(CX_laser_x[CX_laser_i], CX_laser_y[CX_laser_i], 1);
+            }
+            if (CX_laser_y[CX_laser_i] + 1 >= 0 && CX_laser_y[CX_laser_i] + 1 < 63) {
+                pixel_oled(CX_laser_x[CX_laser_i], CX_laser_y[CX_laser_i] + 1, 1);
+            }
+            if (CX_laser_y[CX_laser_i] + 2 >= 0 && CX_laser_y[CX_laser_i] + 2 < 63) {
+                pixel_oled(CX_laser_x[CX_laser_i], CX_laser_y[CX_laser_i] + 2, 1);
+            }
+        }
+    }
+}
+
+function CX_draw_splash(load_pct) {
+    cls_oled(OLED_BLACK);
+    CX_draw_jets();
+    CX_draw_lasers();
+    line_oled(2, 2, 2, 10, 1, OLED_WHITE);
+    line_oled(2, 2, 10, 2, 1, OLED_WHITE);
+    line_oled(OLED_WIDTH - 3, 2, OLED_WIDTH - 3, 10, 1, OLED_WHITE);
+    line_oled(OLED_WIDTH - 11, 2, OLED_WIDTH - 3, 2, 1, OLED_WHITE);
+    line_oled(2, OLED_HEIGHT - 3, 2, OLED_HEIGHT - 11, 1, OLED_WHITE);
+    line_oled(2, OLED_HEIGHT - 3, 10, OLED_HEIGHT - 3, 1, OLED_WHITE);
+    line_oled(OLED_WIDTH - 3, OLED_HEIGHT - 3, OLED_WIDTH - 3, OLED_HEIGHT - 11, 1, OLED_WHITE);
+    line_oled(OLED_WIDTH - 11, OLED_HEIGHT - 3, OLED_WIDTH - 3, OLED_HEIGHT - 3, 1, OLED_WHITE);
+    line_oled(34, 16, 94, 16, 1, OLED_WHITE);
+    line_oled(34, 38, 94, 38, 1, OLED_WHITE);
+    line_oled(58, 27, 70, 27, 1, OLED_WHITE);
+    line_oled(64, 21, 64, 33, 1, OLED_WHITE);
+    CX_splash_cx = CX_center_x(CX_get_string_length(CX_splash_line1[0]), OLED_FONT_SMALL_WIDTH);
+    print(CX_splash_cx, 5, OLED_FONT_SMALL, OLED_WHITE, CX_splash_line1[0]);
+    CX_splash_cx = CX_center_x(CX_get_string_length(CX_splash_line2[0]), OLED_FONT_SMALL_WIDTH);
+    print(CX_splash_cx, 18, OLED_FONT_SMALL, OLED_WHITE, CX_splash_line2[0]);
+    CX_splash_cx = CX_center_x(CX_get_string_length(CX_splash_line3[0]), OLED_FONT_SMALL_WIDTH);
+    print(CX_splash_cx, 40, OLED_FONT_SMALL, OLED_WHITE, CX_splash_line3[0]);
+    line_oled(14, 55, OLED_WIDTH - 15, 55, 1, OLED_WHITE);
+    line_oled(14, 58, OLED_WIDTH - 15, 58, 1, OLED_WHITE);
+    if (load_pct > 0) {
+        rect_oled(16, 56, (96 * load_pct) / 100, 1, 1, OLED_WHITE);
+    }
+}
+
+function CX_saver_step() {
+    cls_oled(OLED_BLACK);
+    CX_draw_jets();
+    CX_draw_lasers();
+    CX_line1_w = (CX_get_string_length(CX_saver_line1[0]) - 1) * OLED_FONT_SMALL_WIDTH;
+    CX_line2_w = (CX_get_string_length(CX_saver_line2[0]) - 1) * OLED_FONT_SMALL_WIDTH;
+    if (CX_line1_w > CX_line2_w) { CX_msg_w = CX_line1_w; } else { CX_msg_w = CX_line2_w; }
+    print(CX_sx, CX_sy, OLED_FONT_SMALL, OLED_WHITE, CX_saver_line1[0]);
+    print(CX_sx + ((CX_msg_w - CX_line2_w) / 2), CX_sy + 14, OLED_FONT_SMALL, OLED_WHITE, CX_saver_line2[0]);
+    CX_saver_timer += get_rtime();
+    if (CX_saver_timer >= 80) {
+        CX_sx += CX_svx;
+        CX_sy += CX_svy;
+        if (CX_sx <= 1 || CX_sx >= (OLED_WIDTH - CX_msg_w - 1)) { CX_svx = -CX_svx; }
+        if (CX_sy <= 1 || CX_sy >= (OLED_HEIGHT - 38 - 1)) { CX_svy = -CX_svy; }
+        CX_saver_timer = 0;
+    }
+}
+
+function CX_Init() {
+    for (CX_jet_i = 0; CX_jet_i < CX_JETS_COUNT; CX_jet_i++) {
+        CX_jet_x[CX_jet_i] = random(5, 122);
+        CX_jet_y[CX_jet_i] = random(64, 128);
+        CX_jet_speed[CX_jet_i] = random(1, 3);
+    }
+    for (CX_laser_i = 0; CX_laser_i < CX_LASERS_COUNT; CX_laser_i++) {
+        CX_laser_x[CX_laser_i] = random(5, 122);
+        CX_laser_y[CX_laser_i] = random(64, 128);
+        CX_laser_speed[CX_laser_i] = random(2, 4);
+    }
+    CX_sx = 2; CX_sy = 16;
+    CX_svx = 2; CX_svy = 2;
+    CX_saver_timer = 0;
+    CX_isLoadingScreen = 1;
+    CX_LoadingTimeToRun = 0;
+    CX_splash_progress = 0;
+    CX_initialized = 1;
+    CX_draw_splash(0);
+}
+
+function CX_Tick(allow_idle) {
+    if (!CX_initialized) CX_Init();
+
+    if (CX_isLoadingScreen) {
+        CX_LoadingTimeToRun += get_rtime();
+        CX_update_jets();
+        CX_update_lasers();
+        CX_splash_progress = (CX_LoadingTimeToRun * 100) / CX_LOADING_TIMER;
+        if (CX_splash_progress > 100) CX_splash_progress = 100;
+        CX_draw_splash(CX_splash_progress);
+        if (CX_LoadingTimeToRun >= CX_LOADING_TIMER) {
+            cls_oled(OLED_BLACK);
+            CX_isLoadingScreen = 0;
+            CX_saver_timer = 80;
+        }
+    } else if (allow_idle) {
+        CX_update_jets();
+        CX_update_lasers();
+        CX_saver_step();
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// afk
+int spinning = FALSE;
+
+main {
+    // spin buttons
+    if (event_press(XB1_RS) && event_press(XB1_LS)) {
+        spinning = !spinning;
+    }
+
+    // Apply spin
+     if (spinning) {
+        set_val(XB1_RX, 100);   // Spin right
+        set_val(XB1_RY, 100);     // Neutral vertical stick
+        set_val(XB1_LY, 100);   // Move forward
+        set_val(XB1_LX, 100);     // No horizontal movement
+        set_val(XB1_A, 100);    // Jump
+    }
+    // Otherwise, leave sticks/buttons free for normal use
+}
+
+
+
+const string NumberSet[] = {
+    "0  ", "1  ", "2  ", "3  ", "4  ", "5  ", "6  ", "7  ", "8  ", "9  ", 
+    "10 ", "11 ", "12 ", "13 ", "14 ", "15 ", "16 ", "17 ", "18 ", "19 ", 
+    "20 ", "21 ", "22 ", "23 ", "24 ", "25 ", "26 ", "27 ", "28 ", "29 ", 
+    "30 ", "31 ", "32 ", "33 ", "34 ", "35 ", "36 ", "37 ", "38 ", "39 ", 
+    "40 ", "41 ", "42 ", "43 ", "44 ", "45 ", "46 ", "47 ", "48 ", "49 ",
+    "50 "
+};
+
+
+const string Menu[] = {"Cntrl-x Rust"}
+init 
+{
+	CX_Init();
+	CurrentDeadzoneX= get_pvar(SPVAR_1, 0, 50, 5);
+	CurrentDeadzoneY= get_pvar(SPVAR_2, 0, 50, 5);
+	CurrentWeapon = get_pvar(SPVAR_3, 0, 6, 0);
+	set_led(0, 0);
+	set_led(1, 0);
+	set_led(2, 0);
+	set_led(3, 0);
+}
+int timer, NewScreenTimer;
+
+const string AIMSS[] = {"FAST", "MID"}
+int CurrentSSX = 0;
+const string Status[] = {"STANDING", "CROUCHING"}
+int CurrentStatus = 0; 
+int CurrentPage = 0
+int IsUpdating = FALSE
+int quickUPD = TRUE
+int ReadyToDelete = FALSE
+int searchinginAnInventory = FALSE;
+int atStart = TRUE
+int DoneWithStart = FALSE
+int ClearScreen = TRUE
+int STSCR = FALSE
+int Ready_For_Second_Timer = FALSE
+int SecondTime = 0;
+int A = XB1_A | PS5_CROSS;
+int X = XB1_X | PS5_SQUARE;
+int Y = XB1_Y | PS5_TRIANGLE;
+int B = XB1_B | PS5_CIRCLE;
+int MENU = XB1_MENU
+int RB = XB1_RB | PS5_R1;
+int RT = XB1_RT | PS5_R2;
+int LB = XB1_LB | PS5_L1;
+int LT = XB1_LT | PS5_L2;
+int RX = XB1_RX | PS5_RX
+int RY = XB1_RY | PS5_RY
+int LX = XB1_LX | PS5_LX
+int LY = XB1_LY | PS5_LY
+int RS = XB1_RS | PS5_R3
+int LS = XB1_LS | PS5_L3
+int View = XB1_VIEW | PS5_OPTIONS
+int UP = XB1_UP | PS5_UP
+int DOWN = XB1_DOWN | PS5_DOWN
+int LEFT = XB1_LEFT | PS5_LEFT
+int RIGHT = XB1_RIGHT | PS5_RIGHT
+int CurrentDeadzoneX;
+int CurrentDeadzoneY;
+int CurrentSubject = 0;
+int isScriptOn = TRUE
+main {
+	
+
+
+
+	if (CX_isLoadingScreen) {
+		CX_Tick(FALSE);
+	} else if (!isScriptOn) {
+		CX_Tick(TRUE);
+	}
+
+	if (onOffCombo() == TRUE) // turn on the script
+	{
+		if (isScriptOn)
+		{
+			isScriptOn = FALSE
+			cls_oled(0)
+			OffScreen();
+		}
+		else
+		{
+			isScriptOn = TRUE
+			cls_oled(0)
+			MainScreen();
+		}
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	if (isScriptOn && get_val(LT) && event_press(RB))
+	{
+		CurrentSSX = (CurrentSSX + 1) % 2;
+		cls_oled(0)
+
+		MainScreen();
+	
+	}
+	if (isScriptOn && get_val(LB)&&event_press(RB))
+	{
+		combo_stop_all();
+		CurrentStatus = (CurrentStatus + 1) % 2;
+		MainScreen();
+	}
+	if (atStart == TRUE)
+	{
+		if (timer > 2000)
+		{
+			atStart = FALSE
+			Ready_For_Second_Timer = TRUE
+			timer = 0
+		}
+	}
+	if (SecondTime > 1000 && STSCR == FALSE)
+	{
+		STSCR = TRUE
+		MainScreen();
+	}
+	if (ClearScreen && !atStart && DoneWithStart == FALSE)
+	{
+		DetermineScreenUpdate();
+	}
+
+	
+	if (isScriptOn)
+	{
+		if (event_press(XB1_DOWN) || event_press(XB1_X) || event_press(XB1_UP) || event_press(XB1_RS)      || event_press(PS5_DOWN) || event_press(PS5_SQUARE) || event_press(PS5_UP) || event_press(PS5_R3)   )
+		{
+			searchinginAnInventory = TRUE
+		}
+	}
+	if (isScriptOn)
+	{
+		if (event_press(XB1_B) || event_press(PS5_CIRCLE) && !IsUpdating )
+		{
+			if (!searchinginAnInventory)
+			{
+				combo_stop_all();
+				CurrentStatus = (CurrentStatus + 1) % 2;
+		
+				MainScreen();
+			}
+			searchinginAnInventory = FALSE;	
+		}
+	}
+	
+	if (CurrentPage == 0)
+	{
+		if (get_val(XB1_LT)>50 && event_press(XB1_VIEW)           ||          get_val(PS5_L2)>50 && event_press(PS5_OPTIONS))
+		{
+			set_led(1, 1);
+			IsUpdating = TRUE
+			quickUPD = TRUE
+			CurrentPage = 1
+		}
+	}
+	
+	
+	
+	
+	if (CurrentPage == 1 && IsUpdating)
+	{
+		if(quickUPD) {quickUPD = FALSE; Weapons();}
+		
+		
+		if (event_press(XB1_RIGHT) || event_press(PS5_RIGHT))
+		{
+			CurrentWeapon = clamp(CurrentWeapon + 1, 0, ListLen)
+			Weapons();
+		}
+		if (event_press(XB1_LEFT) || event_press(PS5_LEFT))
+		{
+			CurrentWeapon = clamp(CurrentWeapon - 1, 0, ListLen)
+			Weapons();
+		}
+		if (event_press(XB1_DOWN) || event_press(PS5_DOWN))
+		{
+			CurrentWeapon = clamp(CurrentWeapon + 3, 0, ListLen)
+			Weapons();
+		}
+		if (event_press(XB1_UP) || event_press(PS5_UP))
+		{
+			
+
+			CurrentWeapon = clamp(CurrentWeapon - 3, 0, ListLen)
+			
+			Weapons();
+		}
+		if (event_press(XB1_RB) || event_press(PS5_R1))
+		{
+			CurrentPage = 2
+			
+			cls_oled(OLED_BLACK)
+			SETTINGS();
+			
+			
+		}
+		
+		if (event_press(XB1_XBOX) || event_press(PS5_PS))
+		{
+			ReadyToDelete = TRUE
+			quickUPD = TRUE
+			IsUpdating = FALSE
+			timer = 0
+			cls_oled(OLED_BLACK)
+			MainScreen();
+		}
+	}
+	
+	if (CurrentPage == 2 && IsUpdating)
+	{
+		if(quickUPD) {quickUPD = FALSE; SETTINGS();}
+		
+		
+		if (event_press(XB1_RIGHT) || event_press(PS5_RIGHT))
+		{
+			CurrentDeadzoneX = clamp(CurrentDeadzoneX + 1, 0, 50)
+			SETTINGS();
+		}
+		if (event_press(XB1_LEFT) || event_press(PS5_LEFT))
+		{
+			CurrentDeadzoneX = clamp(CurrentDeadzoneX - 1, 0, 50)
+			SETTINGS();
+		}
+		if (event_press(XB1_DOWN) || event_press(PS5_DOWN))
+		{
+			CurrentDeadzoneY = clamp(CurrentDeadzoneY - 1, 0, 50)
+			SETTINGS();
+		}
+		if (event_press(XB1_UP) || event_press(PS5_UP))
+		{
+			
+
+			CurrentDeadzoneY = clamp(CurrentDeadzoneY + 1, 0, 50)
+			
+			SETTINGS();
+		}
+		if (event_press(XB1_LB) || event_press(PS5_L1))
+		{
+			CurrentPage = 1
+			quickUPD = TRUE
+			
+			cls_oled(OLED_BLACK)
+			Weapons();
+			
+		}
+		
+		if (event_press(XB1_XBOX) || event_press(PS5_PS))
+		{
+			ReadyToDelete = TRUE
+			quickUPD = TRUE
+			IsUpdating = FALSE
+			timer = 0
+		
+			cls_oled(OLED_BLACK)
+			MainScreen();
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+
+
+	if(isScriptOn &&IsUpdating == TRUE)
+	{
+		block_all_inputs()
+	}
+	if (ReadyToDelete )
+	{
+		block_all_inputs();
+		if (timer > 300)
+		{
+			IsUpdating = FALSE
+			quickUPD = FALSE
+			CurrentPage = 0;
+			ReadyToDelete = FALSE
+			set_led(1, 0);
+		}
+	}
+	// TIMERS 
+	timer+= get_rtime();
+	if (Ready_For_Second_Timer == TRUE)
+	{
+		SecondTime += get_rtime();
+	}
+	
+	//Input Checks
+	
+	
+	
+	if(isScriptOn)
+	{
+		if (get_val(XB1_LT) > 10 && (get_val(XB1_RT) > 10)  ||     (get_val(PS5_L2) > 10 && (get_val(PS5_R2) > 10))) { // ADS fire scenerio
+		
+			if (CurrentWeapon == 0 && CurrentStatus == 0 && !combo_running(AK_Stand)){combo_restart(AK_Stand)}
+			if (CurrentWeapon == 0 && CurrentStatus == 1 && !combo_running(AK_Crouched)){combo_restart(AK_Crouched)}
+			
+			if (CurrentWeapon == 1 && CurrentStatus == 0 && !combo_running(Tommy_Stand)){combo_restart(Tommy_Stand)}
+			if (CurrentWeapon == 1 && CurrentStatus == 1 && !combo_running(Tommy_Crouched)){combo_restart(Tommy_Crouched)}
+			
+			if (CurrentWeapon == 2 && CurrentStatus == 0 && !combo_running(MP_Stand)){combo_restart(MP_Stand)}
+			if (CurrentWeapon == 2 && CurrentStatus == 1 && !combo_running(MP_Crouched)){combo_restart(MP_Crouched)}
+			
+			if (CurrentWeapon == 3 && CurrentStatus == 0 && !combo_running(SKS_Stand)){combo_restart(SKS_Stand)}
+			if (CurrentWeapon == 3 && CurrentStatus == 1 && !combo_running(SKS_Crouched)){combo_restart(SKS_Crouched)}
+			
+			if (CurrentWeapon == 4 && CurrentStatus == 0 && !combo_running(Sar_Stand)){combo_restart(Sar_Stand)}
+			if (CurrentWeapon == 4 && CurrentStatus == 1 && !combo_running(Sar_Crouched)){combo_restart(Sar_Crouched)}
+			
+			if (CurrentWeapon == 5 && CurrentStatus == 0 && !combo_running(M2_Stand)) { combo_restart(M2_Stand); }
+        	if (CurrentWeapon == 5 && CurrentStatus == 1 && !combo_running(M2_Crouched)) { combo_restart(M2_Crouched); }
+        
+        	if (CurrentWeapon == 6 && CurrentStatus == 0 && !combo_running(LR_Stand)) { combo_restart(LR_Stand); }
+        	if (CurrentWeapon == 6 && CurrentStatus == 1 && !combo_running(LR_Crouched)) { combo_restart(LR_Crouched); }
+        
+        	if (CurrentWeapon == 7 && CurrentStatus == 0 && !combo_running(HMLMG_Stand)) { combo_restart(HMLMG_Stand); }
+        	if (CurrentWeapon == 7 && CurrentStatus == 1 && !combo_running(HMLMG_Crouched)) { combo_restart(HMLMG_Crouched); }
+        
+        	if (CurrentWeapon == 8 && CurrentStatus == 0 && !combo_running(HMSMG_Stand)) { combo_restart(HMSMG_Stand); }
+        	if (CurrentWeapon == 8 && CurrentStatus == 1 && !combo_running(HMSMG_Crouched)) { combo_restart(HMSMG_Crouched); }
+        
+        	if (CurrentWeapon == 9 && CurrentStatus == 0 && !combo_running(M39_Stand)) { combo_restart(M39_Stand); }
+   	    	if (CurrentWeapon == 9 && CurrentStatus == 1 && !combo_running(M39_Crouched)) { combo_restart(M39_Crouched); }
+   	    
+   	    	if (CurrentWeapon == 10 && CurrentStatus == 0 && !combo_running(CUSTOM_Stand)) { combo_restart(CUSTOM_Stand); }
+   	    	if (CurrentWeapon == 10 && CurrentStatus == 1 && !combo_running(CUSTOM_Crouched)) { combo_restart(CUSTOM_Crouched); }	
+   	    
+   	    	if (CurrentWeapon == 11 && CurrentStatus == 0 && !combo_running(P2_Stand)) { combo_restart(P2_Stand); }
+   	    	if (CurrentWeapon == 11 && CurrentStatus == 1 && !combo_running(P2_Crouched)) { combo_restart(P2_Crouched); }
+   	    
+   	  		if (CurrentWeapon == 12 && CurrentStatus == 0 && !combo_running(HIGHCAL_Stand)) { combo_restart(HIGHCAL_Stand); }
+   	    	if (CurrentWeapon == 12 && CurrentStatus == 1 && !combo_running(HIGHCAL_Crouched)) { combo_restart(HIGHCAL_Crouched); }
+   	    
+   	    	if (CurrentWeapon == 13 && CurrentStatus == 0 && !combo_running(M92_Stand)) { combo_restart(M92_Stand); }
+   	    	if (CurrentWeapon == 13 && CurrentStatus == 1 && !combo_running(M92_Crouched)) { combo_restart(M92_Crouched); }
+   	    
+   	    	if (CurrentWeapon == 14 && CurrentStatus == 0 && !combo_running(GLOCK_Stand)) { combo_restart(GLOCK_Stand); }
+   	    	if (CurrentWeapon == 14 && CurrentStatus == 1 && !combo_running(GLOCK_Crouched)) { combo_restart(GLOCK_Crouched); }
+   	     
+   	    	if (CurrentWeapon == 15 && CurrentStatus == 0 && !combo_running(PYTHON_Stand)) { combo_restart(PYTHON_Stand); }
+   	    	if (CurrentWeapon == 15 && CurrentStatus == 1 && !combo_running(PYTHON_Crouched)) { combo_restart(PYTHON_Crouched); }
+   	     
+   	    	if (CurrentWeapon == 16 && CurrentStatus == 0 && !combo_running(REVO_Stand)) { combo_restart(REVO_Stand); }
+   	    	if (CurrentWeapon == 16 && CurrentStatus == 1 && !combo_running(REVO_Crouched)) { combo_restart(REVO_Crouched); }
+   	    
+   	    	if (CurrentWeapon == 17 && CurrentStatus == 0 && !combo_running(NAILGUN_Stand)) { combo_restart(NAILGUN_Stand); }
+   	    	if (CurrentWeapon == 17 && CurrentStatus == 1 && !combo_running(NAILGUN_Crouched)) { combo_restart(NAILGUN_Crouched); }
+   	    
+   	    	if (CurrentWeapon == 18 && CurrentStatus == 0 && !combo_running(MINIGUN_Stand)) { combo_restart(MINIGUN_Stand); }
+        	if (CurrentWeapon == 18 && CurrentStatus == 1 && !combo_running(MINIGUN_Crouched)) { combo_restart(MINIGUN_Crouched); }
+		
+			if (CurrentWeapon == 19 && CurrentStatus == 0 && !combo_running(AkMzb_Stand)) { combo_restart(AkMzb_Stand); }
+			if (CurrentWeapon == 19 && CurrentStatus == 1 && !combo_running(AkMzb_Crouched)) { combo_restart(AkMzb_Crouched); }
+
+		} else {
+			if (get_val(XB1_RT) > 10) { // Hip fire scenerio
+				
+				// (AK)
+				if (CurrentWeapon == 0 && CurrentStatus == 0) { if (!combo_running(AK_Stand_HIP)){combo_restart(AK_Stand_HIP)} }
+				if (CurrentWeapon == 0 && CurrentStatus == 1) { if (!combo_running(AK_Crouched_HIP)){combo_restart(AK_Crouched_HIP)} }
+				
+				// (M2)
+				if (CurrentWeapon == 1 && CurrentStatus == 0) { if (!combo_running(M2_Stand)){combo_restart(M2_Stand)} }
+				if (CurrentWeapon == 1 && CurrentStatus == 1) { if (!combo_running(M2_Crouched)){combo_restart(M2_Crouched)} }
+				
+				// LR
+				if (CurrentWeapon == 2 && CurrentStatus == 0) { if (!combo_running(LR_Stand_HIP)){combo_restart(LR_Stand_HIP)} }
+				if (CurrentWeapon == 2 && CurrentStatus == 1) { if (!combo_running(LR_Crouch_HIP)){combo_restart(LR_Crouch_HIP)} }
+				
+				// (Tommy) 
+				if (CurrentWeapon == 3 && CurrentStatus == 0) { if (!combo_running(Tommy_Stand)){combo_restart(Tommy_Stand)} }
+				if (CurrentWeapon == 3 && CurrentStatus == 1) { if (!combo_running(Tommy_Crouched)){combo_restart(Tommy_Crouched)} }
+				
+				// (MP)
+				if (CurrentWeapon == 4 && CurrentStatus == 0) { if (!combo_running(MP_Stand)){combo_restart(MP_Stand)} }
+				if (CurrentWeapon == 4 && CurrentStatus == 1) { if (!combo_running(MP_Crouched)){combo_restart(MP_Crouched)} }
+				
+				// (SKS) 
+				if (CurrentWeapon == 5 && CurrentStatus == 0) { if (!combo_running(SKS_Stand)){combo_restart(SKS_Stand)} }
+				if (CurrentWeapon == 5 && CurrentStatus == 1) { if (!combo_running(SKS_Crouched)){combo_restart(SKS_Crouched)} }
+				
+				// (SAR)
+				if (CurrentWeapon == 6 && CurrentStatus == 0) { if (!combo_running(Sar_Stand)){combo_restart(Sar_Stand)} }
+				if (CurrentWeapon == 6 && CurrentStatus == 1) { if (!combo_running(Sar_Crouched)){combo_restart(Sar_Crouched)} }
+			}
+		}
+	}
+	if (get_val(XB1_RT)<5 || get_val(PS5_R2)<5)
+	{
+		combo_stop_all();
+	}
+		
+		
+		
+		
+		
+		
+		
+	
+	
+
+}
+function onOffCombo()
+{
+	if (get_val(LB)> 90 && event_press(UP))
+	{
+		return TRUE
+	}
+	return FALSE
+}
+const string Off[] = {"SCRIPT OFF"}
+function OffScreen()
+{
+    // Off text - medium font, left-aligned
+    print(2, 24, OLED_WHITE, OLED_FONT_MEDIUM, Off[0]);
+
+    // Menu text - medium font, left-aligned
+    print(2, 44, OLED_BLACK, OLED_FONT_MEDIUM, Menu[0]);
+}
+
+
+
+
+
+
+
+
+
+function MainScreen()
+{
+
+
+    // Menu - small font at top, left-aligned
+    print(2, 0, OLED_BLACK, OLED_FONT_SMALL, Menu[0]);
+
+    // Weapon - medium font below Menu, left-aligned
+    print(2, 14, OLED_BLACK, OLED_FONT_MEDIUM, WeaponChoices[CurrentWeapon]);
+
+    // AIMSS - small font under Weapon, left-aligned
+    print(2, 26, OLED_BLACK, OLED_FONT_SMALL, AIMSS[CurrentSSX]);
+
+    // Deadzone X and Y - same row, left-aligned
+    print(2, 36, OLED_BLACK, OLED_FONT_MEDIUM, Deadzones[2]);                // Label X
+    print(30, 36, OLED_BLACK, OLED_FONT_MEDIUM, NumberSet[CurrentDeadzoneX]); // Value X
+    print(70, 36, OLED_BLACK, OLED_FONT_MEDIUM, Deadzones[3]);                // Label Y
+    print(98, 36, OLED_BLACK, OLED_FONT_MEDIUM, NumberSet[CurrentDeadzoneY]); // Value Y
+
+    // Status - medium font at bottom, left-aligned
+    print(2, 50, OLED_BLACK, OLED_FONT_MEDIUM, Status[CurrentStatus]);
+
+    // Set variables
+    set_pvar(PVAR_1, CurrentDeadzoneX);
+    set_pvar(PVAR_2, CurrentDeadzoneY);
+    set_pvar(PVAR_3, CurrentWeapon);
+}
+
+
+
+
+
+
+
+// Globals
+const string WeaponChoices[] = {"AK","TOMMY","MP5","SKS","SAR","M249","LR","LMG","HSMG","M39","SMG","P2","HCAL","M92","GLK","PYT","REVO","NG","MG","AKMZB"};
+int XLen = 3;           // number of columns
+int ListLen = 19;       // last index
+int line_offset = 10;   // starting y position
+int row_height = 20;    // vertical spacing per row
+int CurrentWeapon = 0;  // selected weapon
+
+// loop counters and positions
+int i;
+int x_pos;
+int y_pos;
+int scroll_row;
+int weapon_row;
+int weapon_col;
+
+function Weapons()
+{
+    cls_oled(OLED_BLACK);
+
+    i = 0; // initialize counter
+    scroll_row = CurrentWeapon / XLen;
+
+    while(i <= ListLen)
+    {
+        weapon_row = i / XLen;
+        weapon_col = i % XLen;
+
+        // left-aligned x positions
+        x_pos = 2 + weapon_col * 40;
+
+        // y position relative to scroll
+        y_pos = line_offset + (weapon_row - scroll_row) * row_height;
+
+        // only draw if visible
+        if(y_pos >= 0 && y_pos <= 64 - row_height)
+        {
+            if(i == CurrentWeapon)
+                print(x_pos, y_pos, OLED_BLACK, OLED_FONT_SMALL, WeaponChoices[i]);
+            else
+                print(x_pos, y_pos, OLED_BLACK, OLED_FONT_MEDIUM, WeaponChoices[i]);
+        }
+
+        i = i + 1; // increment
+    }
+}
+
+const string Deadzones[]= {"ADS X: ", "ADS Y: ", "X:", "Y:"} 
+const string Automation[] = {""};
+function SETTINGS()
+{
+	print(50- (3 * 5), 0, OLED_BLACK, OLED_FONT_MEDIUM, Deadzones[0]);
+	print(90- (3 * 3), 0, OLED_BLACK, OLED_FONT_MEDIUM, NumberSet[CurrentDeadzoneX]);
+	
+	print(50- (3 * 5), 12, OLED_BLACK, OLED_FONT_MEDIUM, Deadzones[1]);
+	print(90- (3 * 3), 12, OLED_BLACK, OLED_FONT_MEDIUM, NumberSet[CurrentDeadzoneY]);
+	
+	print(64- (3 * 12), 30, OLED_BLACK, OLED_FONT_MEDIUM, Automation[0]);
+	if (get_controller() == PIO_XB1)
+	{
+		print(64- (3 * 7), 50, OLED_BLACK, OLED_FONT_MEDIUM, Automation[1]);
+	}
+	if (get_controller() == PIO_PS5)
+	{
+		print(64- (3 * 10), 50, OLED_BLACK, OLED_FONT_MEDIUM, Automation[2]);
+	}
+	
+	
+	
+	
+}
+
+
+
+int isDoneCovering = FALSE
+int TempY, TempX
+function CoverScreen()
+
+{
+
+if (timer > 1 && TempY < 64)
+
+{
+
+line_oled(0, TempY, 124, TempY, 2, 1)
+
+TempY += 2;
+
+timer = 0;
+
+}
+
+if (TempY >= 64)
+
+{
+
+isDoneCovering = TRUE
+
+}
+
+}
+
+
+
+int IsFinishedWithScreenChange = FALSE
+
+function ReleaseScreen()
+
+{
+
+
+
+if (timer > 1 && TempY > -1)
+
+{
+
+line_oled(0, TempY, 124, TempY, 2, OLED_BLACK)
+
+TempY -= 2;
+
+timer = 0;
+
+}
+
+if (TempY < 0)
+
+{
+
+
+isDoneCovering = FALSE;
+
+timer = 0
+
+
+IsFinishedWithScreenChange = TRUE;
+
+
+
+}
+
+}
+
+int Is_Completly_Finished = FALSE;
+
+function DetermineScreenUpdate()
+
+{
+
+
+
+if (!isDoneCovering && !IsFinishedWithScreenChange)
+
+{
+
+CoverScreen();
+
+}
+
+if (isDoneCovering && !IsFinishedWithScreenChange)
+
+{
+
+ReleaseScreen();
+
+}
+
+if (IsFinishedWithScreenChange && !ClearScreen)
+
+{
+
+ClearScreen = FALSE
+
+}
+
+
+}
+
+
+int y, x, index;
+
+function DrawBitmap(x_start, y_start, width, height, WHICH) {
+
+for (y = 0; y < height; y = y + 1)
+
+{
+	
+	for (x = 0; x < width; x = x + 1)
+	
+	{
+	
+		// Calculate the 1D index from the 2D coordinates
+		
+		index = (y * width) + x;
+		
+		
+		// Draw a pixel only if the value in the array is 1 (White)
+		
+		
+		if (Intro[index] == 1 )
+		
+		{
+		
+		// pixel_oled(x, y, color)
+		
+			pixel_oled(x_start + x, y_start + y, OLED_WHITE);
+		}
+	}
+}
+}
+
+
+
+const int Intro[] = {
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+
+
+
+
+
+
+int CurrentScope = 0
+
+int CurrentAdded, InvdeadzoneY, RY_, LX_;
+function AddToCombosRY()
+{
+	CurrentAdded = 0;
+	InvdeadzoneY = CurrentDeadzoneY * -1
+	RY_ = get_val(RY);
+	LX_ = get_val(LX); //LEFT = -    right = +
+	
+	//Movement Control recoil through Variable
+	if (LX_< -6 || LX_ > 6)
+	{
+		if (CurrentWeapon == 0 && CurrentStatus % 2 == 0)
+		{
+			CurrentAdded = CurrentAdded + 5;
+		}
+		else if (CurrentWeapon == 1 && CurrentStatus % 2 == 0)
+		{
+			CurrentAdded = CurrentAdded + 3 ;
+		}else if (CurrentWeapon == 3 && CurrentStatus % 2 == 0)
+		{
+			CurrentAdded = CurrentAdded + 10 ;
+		}
+		
+		else if (CurrentWeapon == 4 && CurrentStatus % 2 == 0 && CurrentScope == 0)//sar standing
+		{
+			CurrentAdded = CurrentAdded + 8 ;
+		}
+		else if (CurrentWeapon == 4 && CurrentStatus % 2 == 1&& CurrentScope == 0)//sar crouche
+		{
+			CurrentAdded = CurrentAdded + 3 ;
+		}
+		else if (CurrentWeapon == 4 && CurrentStatus % 2 == 1 && CurrentScope == 1)//sar crouche 4X
+		{
+			CurrentAdded = CurrentAdded + 9 ;
+		}
+		
+		
+		else if (CurrentWeapon == 5 && CurrentStatus % 2 == 1&& CurrentScope == 0)//M2 crouche
+		{
+			CurrentAdded = CurrentAdded + 8 ;
+		}
+		else if (CurrentWeapon == 5 && CurrentStatus % 2 == 0 && CurrentScope == 0)//M2 Standed
+		{
+			CurrentAdded = CurrentAdded + 22 ;
+		}
+		else
+		{	
+		CurrentAdded = CurrentAdded + 1;
+		}
+	}
+
+	//All before this is logic LEAVE ALONE	
+
+	if (CurrentSSX == 0)
+	{
+		if ( RY_ > CurrentDeadzoneY && CurrentSSX == 0 && CurrentStatus == 0) // Held Down
+		{
+			return (RY_ - CurrentDeadzoneY) / 1.5
+		}
+		if (abs(RY_) > CurrentDeadzoneY && CurrentSSX == 0 && CurrentStatus == 0)
+		{
+			return (RY_ * 1.5 + CurrentDeadzoneY)   
+		}
+		if ( RY_ > CurrentDeadzoneY && CurrentSSX == 0 && CurrentStatus == 1) // Held Down
+		{
+			return (RY_ - CurrentDeadzoneY) 
+		}
+		if (abs(RY_) > CurrentDeadzoneY && CurrentSSX == 0 && CurrentStatus == 1)
+		{
+			return (RY_ * 1.5 + CurrentDeadzoneY)
+		}
+	}
+	else
+	{
+		if ( RY_ > CurrentDeadzoneY) // Held Down
+	
+		{
+			return (RY_ - CurrentDeadzoneY) / 2
+		}
+		if (abs(RY_) > CurrentDeadzoneY)
+		{
+			return (RY_ + CurrentDeadzoneY)
+		}
+	}
+	
+	
+	
+	
+	//All before this is logic LEAVE ALONE
+	if (CurrentStatus % 2 == 1)
+	{
+		CurrentAdded = CurrentAdded + 1
+	}
+	
+	
+	
+
+	return CurrentAdded
+}
+int currentDivider;
+function AddToCombosRX()
+{
+	if (CurrentSSX == 0)
+	{
+		currentDivider = 1
+	}
+	else if (CurrentSSX == 1)
+	{
+		currentDivider = 1
+	}
+	if (CurrentSSX == 0)
+	{
+		if(get_val(RX) > CurrentDeadzoneX && CurrentStatus == 0 && CurrentSSX == 0) //Hold right
+		{		
+			return (get_val(RX)* 10/9 - CurrentDeadzoneX) / currentDivider //100 - 11
+		}
+		if(get_val(RX) < (CurrentDeadzoneX*-1) && CurrentStatus == 0 && CurrentSSX == 0) // Hold Left
+		{
+			return (get_val(RX) + (CurrentDeadzoneX)) / currentDivider //-100 + 11 
+		}
+		
+		//crouch
+		if(get_val(RX) > CurrentDeadzoneX && CurrentStatus == 1 && CurrentSSX == 0) //Hold right
+		{		
+			return (get_val(RX)* 10/9 - CurrentDeadzoneX)/ currentDivider //100 - 11
+		}
+		if(get_val(RX) < (CurrentDeadzoneX*-1) && CurrentStatus == 1 && CurrentSSX == 0) // Hold Left
+		{
+			return (get_val(RX) + (CurrentDeadzoneX))/ currentDivider //-100 + 11 
+		}
+
+	}else
+	{
+	
+		if(get_val(RX) > CurrentDeadzoneX && CurrentStatus == 0 && CurrentSSX == 1) //Hold right
+		{		
+			return (get_val(RX)* 10/9 - CurrentDeadzoneX) / 2 
+		}
+		if(get_val(RX) < (CurrentDeadzoneX*-1) && CurrentStatus == 0 && CurrentSSX == 1) // Hold Left
+		{
+			return (get_val(RX) + (CurrentDeadzoneX)) / 2 //-100 + 11 
+		}
+		
+		//crouch
+		if(get_val(RX) > CurrentDeadzoneX && CurrentStatus == 1 && CurrentSSX == 1) //Hold right
+		{		
+			return (get_val(RX) - CurrentDeadzoneX)/ 2 //100 - 11
+		}
+		if(get_val(RX) < (CurrentDeadzoneX*-1) && CurrentStatus == 1 && CurrentSSX == 1) // Hold Left
+		{
+			return (get_val(RX) + (CurrentDeadzoneX))/ 2 //-100 + 11 
+		}
+	}
+	
+	
+	
+	
+	
+	return 0;
+
+}
+
+
+
+combo AK_Stand {
+
+	set_val(XB1_RX, -5 + AddToCombosRX());
+	set_val(XB1_RY, 59 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RX, -5 + AddToCombosRX());
+	set_val(XB1_RY, 60 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RX, -5 + AddToCombosRX());
+	set_val(XB1_RY, 59 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RX, -5 + AddToCombosRX());
+	set_val(XB1_RY, 59 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RX, -5 + AddToCombosRX());
+	set_val(XB1_RY, 59 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RX, -5 + AddToCombosRX());
+	set_val(XB1_RY, 59 + AddToCombosRY());
+	wait(20);
+	set_val(XB1_RX, -5 + AddToCombosRX());
+	set_val(XB1_RY, 59 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RX, -5 + AddToCombosRX());
+	set_val(XB1_RY, 60 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RX, -5 + AddToCombosRX());
+	set_val(XB1_RY, 61 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RX, -4 + AddToCombosRX());
+	set_val(XB1_RY, 60 + AddToCombosRY());
+	wait(110);
+	set_val(XB1_RX, -4 + AddToCombosRX());
+	set_val(XB1_RY, 60 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RX, -5 + AddToCombosRX());
+	set_val(XB1_RY, 60 + AddToCombosRY());
+	wait(20);
+set_val(XB1_RX, -5 + AddToCombosRX());
+set_val(XB1_RY, 60 + AddToCombosRY());
+wait(50);
+
+set_val(XB1_RX, -11 + AddToCombosRX());
+set_val(XB1_RY, 60 + AddToCombosRY());
+wait(400);
+
+set_val(XB1_RX, -11.5 + AddToCombosRX());
+set_val(XB1_RY, 60 + AddToCombosRY());
+wait(300);
+
+set_val(XB1_RX, -14.5 + AddToCombosRX());
+set_val(XB1_RY, 60 + AddToCombosRY());
+wait(600);
+
+set_val(XB1_RX, -14.5 + AddToCombosRX());
+set_val(XB1_RY, 60 + AddToCombosRY());                // L43712 -   https://discord.gg/w5GJMuXzyy
+wait(350);
+
+set_val(XB1_RX, -14.5 + AddToCombosRX());
+set_val(XB1_RY, 59.5 + AddToCombosRY());
+wait(1900);
+
+}
+combo AK_Crouched {
+
+	set_val(RX, -4 + AddToCombosRX());
+	set_val(RY, 41 + AddToCombosRY());
+	wait(10);
+	set_val(RX, -3.85 + AddToCombosRX());
+	set_val(RY, 40 + AddToCombosRY());
+	wait(10);
+	set_val(RX, -6.2 + AddToCombosRX());
+	set_val(RY, 42 + AddToCombosRY())
+	wait(70);
+	set_val(RX, -6 + AddToCombosRX());
+	set_val(RY, 42 + AddToCombosRY());
+	wait(200);
+	set_val(RX, -10+ AddToCombosRX());
+	set_val(RY, 42 + AddToCombosRY());
+	wait(120);
+	set_val(RX, -9 + AddToCombosRX());
+	set_val(RY, 43 + AddToCombosRY());
+	wait(440);
+	set_val(RX, -11 + AddToCombosRX());
+	set_val(RY, 42 + AddToCombosRY());
+	wait(1310);
+	set_val(RX, -12 + AddToCombosRX());
+	set_val(RY, 42 + AddToCombosRY());
+	wait(690);
+	set_val(RX, -12 + AddToCombosRX());
+	set_val(RY, 42 + AddToCombosRY());
+	wait(310);
+	set_val(RX, -12 + AddToCombosRX());
+	set_val(RY, 42 + AddToCombosRY());
+	wait(310);
+	set_val(RX, -11 + AddToCombosRX());
+	set_val(RY, 42 + AddToCombosRY());
+	wait(130);
+	set_val(RX, -12 + AddToCombosRX());
+	set_val(RY, 42 + AddToCombosRY());
+	wait(130);
+	set_val(RX, -11 + AddToCombosRX());
+	set_val(RY, 42 + AddToCombosRY());
+	wait(150);
+}
+//Tommy
+combo Tommy_Stand{
+	set_val(RX, 4 + AddToCombosRX());
+	set_val(RY, 36 + AddToCombosRY());
+	wait(370);
+	set_val(RX, 6 + AddToCombosRX());
+	set_val(RY, 36 + AddToCombosRY());
+	wait(200);
+	set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 39 + AddToCombosRY());
+	wait(80);
+	set_val(RY, 36 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 39 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 36 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 39 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 36 + AddToCombosRY());
+	wait(40);
+	set_val(RY, 36 + AddToCombosRY());
+	wait(20);
+	set_val(RY, 39 + AddToCombosRY());
+	wait(160);
+	set_val(RY, 36 + AddToCombosRY());
+	wait(10);
+	set_val(RX, -3 + AddToCombosRX());
+	set_val(RY, 36 + AddToCombosRY());
+	wait(60);
+	set_val(RX, -3 + AddToCombosRX());
+	set_val(RY, 39 + AddToCombosRY());
+	wait(10);
+	set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 40 + AddToCombosRY());
+	wait(210);
+	set_val(RX, -3 + AddToCombosRX());
+	set_val(RY, 40 + AddToCombosRY());
+	wait(120);
+	set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 39 + AddToCombosRY());
+	wait(60);
+	set_val(RX, -3 + AddToCombosRX());
+	set_val(RY, 39 + AddToCombosRY());
+	wait(520);
+	set_val(RX, -8 + AddToCombosRX());
+	set_val(RY, 39 + AddToCombosRY());
+	wait(190);
+	set_val(RX, -7 + AddToCombosRX());
+	set_val(RY, 41 + AddToCombosRY());
+	wait(20);
+	set_val(RX, -4 + AddToCombosRX());
+	set_val(RY, 40 + AddToCombosRY());
+	wait(20);
+	set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 39 + AddToCombosRY());
+	wait(30);
+	set_val(RX, 3 + AddToCombosRX());
+	set_val(RY, 38 + AddToCombosRY());
+	wait(140);
+	set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 39 + AddToCombosRY());
+	wait(90);
+	set_val(RX, -4 + AddToCombosRX());
+	set_val(RY, 35 + AddToCombosRY());
+	wait(100);
+	set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 37 + AddToCombosRY());
+	wait(40);
+	set_val(RX, 5 + AddToCombosRX());
+	set_val(RY, 37 + AddToCombosRY());
+	wait(380);
+	set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 39 + AddToCombosRY());
+	wait(40);
+	set_val(RX, -3 + AddToCombosRX());
+	set_val(RY, 41 + AddToCombosRY());
+	wait(10);
+	set_val(RX, -5 + AddToCombosRX());
+	set_val(RY, 41 + AddToCombosRY());
+	wait(170);
+	set_val(RX, -5 + AddToCombosRX());
+	set_val(RY, 40 + AddToCombosRY());
+	wait(10);
+	set_val(RX, -5 + AddToCombosRX());
+	set_val(RY, 40 + AddToCombosRY());
+	wait(150);
+	set_val(RX, -3 + AddToCombosRX());
+	set_val(RY, 38 + AddToCombosRY());
+	wait(40);
+	set_val(RX, -5 + AddToCombosRX());
+	set_val(RY, 40 + AddToCombosRY());
+	wait(160);
+	set_val(RX, -6 + AddToCombosRX());
+	set_val(RY, 35 + AddToCombosRY());
+	wait(10);
+	set_val(RX, -4 + AddToCombosRX());
+	set_val(RY, 32 + AddToCombosRY());
+	wait(10);
+	set_val(RX, -3 + AddToCombosRX());
+	set_val(RY, 25 + AddToCombosRY());
+	wait(10);
+	set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 19 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 9 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 5 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 0 + AddToCombosRY());
+	wait(10);
+	wait(20);
+	set_val(RX, -3 + AddToCombosRX());
+	wait(30);
+	set_val(RX, -6 + AddToCombosRX());
+	wait(30);
+	set_val(RX, -7 + AddToCombosRX());
+	set_val(RY, -3 + AddToCombosRY());
+	wait(10);
+	set_val(RX, -7 + AddToCombosRX());
+	set_val(RY, -5 + AddToCombosRY());
+	wait(10);
+}
+combo Tommy_Crouched {
+
+	set_val(RX, -5 + AddToCombosRX());
+	set_val(RY, 23 + AddToCombosRY());
+	wait(10);
+	set_val(RX, -5 + AddToCombosRX());
+	set_val(RY, 27 + AddToCombosRY());
+
+	wait(10);
+	set_val(RX, -6 + AddToCombosRX());
+	set_val(RY, 29 + AddToCombosRY());
+	wait(10);
+	set_val(RX, -6 + AddToCombosRX());
+	set_val(RY, 31 + AddToCombosRY());
+	wait(20);
+	set_val(RX, -6 + AddToCombosRX());
+	set_val(RY, 29 + AddToCombosRY());
+	wait(280);
+	set_val(RX, -6 + AddToCombosRX());
+	set_val(RY, 29 + AddToCombosRY());
+
+	wait(150);
+	set_val(RX, -6 + AddToCombosRX());
+	set_val(RY, 29 + AddToCombosRY());
+
+	wait(70);
+	set_val(RX, -3 + AddToCombosRX());
+	set_val(RY, 31 + AddToCombosRY());
+	wait(80);
+	set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 29 + AddToCombosRY());
+	wait(180);
+	set_val(RX, -2 + AddToCombosRX());
+	set_val(RY, 29 + AddToCombosRY());
+	wait(760);
+	set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 30 + AddToCombosRY());
+	wait(170);
+	set_val(RX, -2 + AddToCombosRX());
+	set_val(RY, 30 + AddToCombosRY());
+	wait(270);
+	set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 30 + AddToCombosRY());
+	wait(440);
+	set_val(RX, -2 + AddToCombosRX());
+	set_val(RY, 27 + AddToCombosRY());
+	wait(140);
+	set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 27 + AddToCombosRY());
+	wait(180);
+	set_val(RX, -4 + AddToCombosRX());
+	set_val(RY, 19 + AddToCombosRY());
+	wait(10);
+	set_val(RX, -5 + AddToCombosRX());
+	set_val(RY, 13 + AddToCombosRY());
+	wait(10);
+	set_val(RX, -4 + AddToCombosRX());
+	set_val(RY, 5 + AddToCombosRY());
+	wait(10);
+	set_val(RX, -4 + AddToCombosRX());
+	set_val(RY, 0 + AddToCombosRY());
+	wait(10);
+	set_val(RX, -4 + AddToCombosRX());
+	wait(530);
+}
+//MP
+combo MP_Stand {
+	set_val(RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 33 + AddToCombosRY());
+	wait(20);
+	set_val(RY, 37 + AddToCombosRY());
+	wait(30);
+	set_val(RY, 41 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 43 + AddToCombosRY());
+	wait(40);
+	set_val(RY, 48 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 48 + AddToCombosRY());
+	wait(30);
+	set_val(RX, -3 + AddToCombosRX());
+	set_val(RY, 50 + AddToCombosRY());
+	wait(20);
+	set_val(RX, -5 + AddToCombosRX());
+	set_val(RY, 50 + AddToCombosRY());
+	wait(340);
+	set_val(RX, -3 + AddToCombosRX());
+	set_val(RY, 48 + AddToCombosRY());
+	wait(130);
+	set_val(RX, -5 + AddToCombosRX());
+	set_val(RY, 49 + AddToCombosRY());
+	wait(320);
+	set_val(RX, -3 + AddToCombosRX());
+	set_val(RY, 49 + AddToCombosRY());
+	wait(20);
+	set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 50 + AddToCombosRY());
+	wait(350);
+	set_val(RY, 37 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 35 + AddToCombosRY());
+	wait(40);
+	set_val(RY, 40 + AddToCombosRY());
+	wait(150);
+	set_val(RX, 3 + AddToCombosRX());
+	set_val(RY, 40 + AddToCombosRY());
+	wait(30);
+	set_val(RX, 4 + AddToCombosRX());
+	set_val(RY, 40 + AddToCombosRY());
+	wait(10);
+	set_val(RX, 4 + AddToCombosRX());
+	set_val(RY, 40 + AddToCombosRY());
+	wait(70);
+	set_val(RX, 4 + AddToCombosRX());
+	set_val(RY, 40 + AddToCombosRY());
+	wait(10);
+	set_val(RX, 3 + AddToCombosRX());
+	set_val(RY, 32 + AddToCombosRY());
+	wait(10);
+	set_val(RX, 3 + AddToCombosRX());
+	set_val(RY, 40 + AddToCombosRY());
+	wait(10);
+	set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 40 + AddToCombosRY());
+	wait(10);
+	set_val(RX, 3 + AddToCombosRX());
+	set_val(RY, 40 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 43 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 45 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 48 + AddToCombosRY());
+	wait(320);
+	set_val(RX, -3 + AddToCombosRX());
+	set_val(RY, 50 + AddToCombosRY());
+	wait(220);
+	set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 46 + AddToCombosRY());
+	wait(300);
+	set_val(RY, 40 + AddToCombosRY());
+	wait(280);
+	set_val(RY, 42 + AddToCombosRY());
+	wait(280);
+	set_val(RY, 42 + AddToCombosRY());
+	wait(20);
+	set_val(RY, 38 + AddToCombosRY());
+	wait(20);
+	set_val(RY, 40 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 40 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 40 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 40 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 35 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 35 + AddToCombosRY());
+	wait(10);
+}
+combo MP_Crouched {
+	set_val(RY, 20 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 20 + AddToCombosRY());
+	wait(10);
+	set_val(RY, 20 + AddToCombosRY());
+	wait(40);
+	set_val(RY, 20 + AddToCombosRY());
+	wait(20);
+	set_val(RY, 20 + AddToCombosRY());
+	wait(210);
+	set_val(RY, 27 + AddToCombosRY());
+	wait(30);
+	set_val(RY, 32 + AddToCombosRY());
+	wait(340);
+	set_val(RX, 3 + AddToCombosRX());
+	set_val(RY, 30 + AddToCombosRY());
+	wait(270);
+	set_val(RX, 3 + AddToCombosRX());
+	set_val(RY, 35 + AddToCombosRY());
+	wait(10);
+	set_val(RX, 3 + AddToCombosRX());
+	set_val(RY, 37 + AddToCombosRY());
+	wait(1210);
+	set_val(RX, 3 + AddToCombosRX());
+	set_val(RY, 33 + AddToCombosRY());
+	wait(100);
+	set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 33 + AddToCombosRY());
+	wait(380);
+	set_val(RX, 3 + AddToCombosRX());
+	set_val(RY, 33 + AddToCombosRY());
+	wait(80);
+	set_val(RX, 6 + AddToCombosRX());
+	set_val(RY, 25 + AddToCombosRY());
+	wait(460);
+	set_val(RX, 4 + AddToCombosRX());
+	set_val(RY, 25 + AddToCombosRY());
+	wait(10);
+	set_val(RX, 4 + AddToCombosRX());
+	set_val(RY, 20 + AddToCombosRY());
+	wait(10);
+	set_val(RX, 4 + AddToCombosRX());
+	set_val(RY, 15 + AddToCombosRY());
+	wait(10);
+	set_val(RX, 3 + AddToCombosRX());
+	set_val(RY, 10 + AddToCombosRY());
+	wait(10);
+	set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 0 + AddToCombosRY());
+	wait(10);
+	wait(10);
+	set_val(RY, -3 + AddToCombosRY());
+	wait(1110);
+}
+//SKS
+combo SKS_Stand{
+// --- Shot 1 / 15 ---
+set_val(XB1_RT, 100); // Fire
+set_val(XB1_RY, 52 + AddToCombosRY()); // Dynamic Recoil
+set_val(XB1_RX, 0 + AddToCombosRX());  // Dynamic Recoil
+wait(80);
+set_val(XB1_RT, 0);? ?// Release
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 0 + AddToCombosRX());
+wait(80);
+
+// --- Shot 2 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 0 + AddToCombosRX());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 0 + AddToCombosRX());
+wait(80);
+
+// --- Shot 3 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 0 + AddToCombosRX());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 0 + AddToCombosRX());
+wait(80);
+
+// --- Shot 4 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 0 + AddToCombosRX());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 0 + AddToCombosRX());
+wait(80);
+
+// --- Shot 5 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 0 + AddToCombosRX());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 0 + AddToCombosRX());
+wait(80);
+
+// --- Shot 6 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 0 + AddToCombosRX());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 0 + AddToCombosRX());
+wait(80);
+
+// --- Shot 7 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 0 + AddToCombosRX());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 0 + AddToCombosRX());
+wait(80);
+
+// --- Shot 8 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 0 + AddToCombosRX());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 0 + AddToCombosRX());
+wait(80);
+
+// --- Shot 9 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 0 + AddToCombosRX());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 0 + AddToCombosRX());
+wait(80);
+
+// --- Shot 10 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 0 + AddToCombosRX());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 0 + AddToCombosRX());
+wait(80);
+
+// --- Shot 11 / 15 (Start of Horizontal Adjustment) ---
+set_val(XB1_RT, 100);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 8 + AddToCombosRX());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, -5 + AddToCombosRX()); // Note the change in RX here
+wait(80);
+
+// --- Shot 12 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, -5 + AddToCombosRX());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, -5 + AddToCombosRX());
+wait(80);
+
+// --- Shot 13 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, -5 + AddToCombosRX());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, -5 + AddToCombosRX());
+wait(80);
+
+// --- Shot 14 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, 8 + AddToCombosRX());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, -5 + AddToCombosRX());
+wait(80);
+
+// --- Shot 15 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, -5 + AddToCombosRX());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_RY, 52 + AddToCombosRY());
+set_val(XB1_RX, -5 + AddToCombosRX());
+wait(80);
+
+// --- Cleanup: Release all buttons/sticks used in the combo ---
+set_val(XB1_LT, 0);
+set_val(XB1_RY, 0);
+set_val(XB1_RX, 0); // Added clean up for RX
+}
+combo SKS_Crouched{
+set_val(XB1_RT, 100); // Fire
+set_val(XB1_LT, 100); // Hold ADS explicitly
+set_val(XB1_RY, 38 + AddToCombosRY());  // Apply Recoil explicitly
+wait(80);
+set_val(XB1_RT, 0);   // Release
+set_val(XB1_LT, 100); // Hold ADS explicitly
+set_val(XB1_RY, 38 + AddToCombosRY());  // Apply Recoil explicitly
+wait(80);
+
+// --- Shot 2 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+wait(80);
+
+// --- Shot 3 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+wait(80);
+
+// --- Shot 4 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+wait(80);
+
+// --- Shot 5 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+wait(80);
+
+// --- Shot 6 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+wait(80);
+
+// --- Shot 7 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+wait(80);
+
+// --- Shot 8 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+wait(80);
+
+// --- Shot 9 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+wait(80);
+
+// --- Shot 38 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+wait(80);
+
+// --- Shot 11 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+set_val(XB1_RX, -12 + AddToCombosRX());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+
+set_val(XB1_RX, -5 + AddToCombosRX());
+wait(80);
+
+// --- Shot 12 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+set_val(XB1_RX, -5 + AddToCombosRX());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+set_val(XB1_RX, -5 + AddToCombosRX());
+
+wait(80);
+
+// --- Shot 13 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+set_val(XB1_RX, -5 + AddToCombosRX());
+
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+set_val(XB1_RX, -5 + AddToCombosRX());
+
+wait(80);
+
+// --- Shot 14 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+set_val(XB1_RX, 8 + AddToCombosRX());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+set_val(XB1_RX, -5 + AddToCombosRX());
+wait(80);
+
+// --- Shot 15 / 15 ---
+set_val(XB1_RT, 100);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+set_val(XB1_RX, -5 + AddToCombosRX());
+wait(80);
+set_val(XB1_RT, 0);
+set_val(XB1_LT, 100);
+set_val(XB1_RY, 38 + AddToCombosRY());
+set_val(XB1_RX, -5 + AddToCombosRX());
+wait(80);
+
+// --- Cleanup: Release all buttons/sticks used in the combo ---
+set_val(XB1_LT, 0);
+set_val(XB1_RY, 0);
+}
+//SAR
+int SAR1xY = 43;
+int SAR1xX = 4;
+combo Sar_Crouched {
+	
+	// Added AddToCombosRY() and fixed the trailing semicolon (;;)
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 16 + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 98);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 19 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+    // Added AddToCombosRX() and fixed the double plus sign (+ +) and trailing semicolon (;;)
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 20 + AddToCombosRY());
+	wait(100);
+	set_val(XB1_RT, 52);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 24 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 26 + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 28 + AddToCombosRY());
+	wait(100);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(20);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 26);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 38 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 40 + AddToCombosRY());
+	wait(60);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 40 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 91);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 38 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 84);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 41);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 84);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 30);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 51);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 73);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 90);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 28);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 21);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 94);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(100);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(50);
+	set_val(XB1_RT, 78);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 49);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 87);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 30);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 59);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 60);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 31);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 37 + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 36);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 28 + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 28);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 26 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 26 + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 22);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 25 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 23 + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 22);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 23 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 23 + AddToCombosRY());
+	wait(20);
+	set_val(XB1_RT, 18);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 23 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 67);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 23 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 23 + AddToCombosRY());
+	wait(120);
+	set_val(XB1_RT, 87);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 24);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(70);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 31 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 26 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 22 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_LT, 0);
+	set_val(XB1_RY, 0 + AddToCombosRY());
+}
+combo Sar_Stand {
+	
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 98);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 52);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(100);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(20);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 26);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + 1 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(60);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + 1 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 91);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 84);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 41);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 84);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 30);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 51);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 73);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 90);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 28);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 21);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 94);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(50);
+	set_val(XB1_RT, 78);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 49);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 87);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 30);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + 1 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 59);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX - 2 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 60);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX - 2 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 31);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 36);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 28);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 22);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 22);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY - 2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY - 2 + AddToCombosRY());
+	wait(20);
+	set_val(XB1_RT, 18);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 67);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY - 2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR1xY - 2 + AddToCombosRY());
+	set_val(XB1_RX, SAR1xX + AddToCombosRX());
+}
+//4x
+int SAR4xY = 90;
+int SAR4xX = 8;
+int kick = 20
+combo Sar_Stand4x {
+	
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 98);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 52);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(100);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(20);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 26);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(60);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 91);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 84);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 41);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 84);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 30);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 51);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 73);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 90);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 28);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 21);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 94);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(50);
+	set_val(XB1_RT, 78);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 49);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 87);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 30);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX + 1 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 59);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX - 2 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 60);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX - 2 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 31);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 36);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 28);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 22);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 22);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY - kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY - 2 + AddToCombosRY());
+	wait(20);
+	set_val(XB1_RT, 18);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY + kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 67);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY - kick + AddToCombosRY()); // Using kick variable
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY - 2 + AddToCombosRY());
+	set_val(XB1_RX, SAR4xX + AddToCombosRX());
+}
+int SAR4xY2 = 69;
+int SAR4xX2 = 5;
+combo Sar_Crouched4x {
+
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 98);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX2 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 52);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX2 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(100);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(20);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX2 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 26);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + 1 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(60);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + 1 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 91);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX2 - 4 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 84);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 41);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX2 - 2 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 84);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 30);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX2 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 51);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 - 3+ AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 73);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX2 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 90);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 28);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX2 - 2+ AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 - 2+ AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 21);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 94);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX2 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(50);
+	set_val(XB1_RT, 78);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX2 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 49);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 87);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX2 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 30);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX2 + 1 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 59);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX2 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 60);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX2 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 31);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX2 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 36);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX2 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 28);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(60);
+	set_val(XB1_RT, 22);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX2 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(80);
+	set_val(XB1_RT, 22);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 - 2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 - 2 + AddToCombosRY());
+	wait(20);
+	set_val(XB1_RT, 18);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 67);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 -1 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, SAR4xX2 + AddToCombosRX());
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, SAR4xY2 + AddToCombosRY());
+
+}
+//M249 
+  
+combo M2_Stand {
+	
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RY, 90 + AddToCombosRY());
+	set_val(RX, -11 + AddToCombosRX());
+	wait(20);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RY, 90 + AddToCombosRY());
+	set_val(RX, -11 + AddToCombosRX());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RY, 40 + AddToCombosRY());
+	set_val(RX, -11 + AddToCombosRX());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RY, 0 + AddToCombosRY());
+	set_val(RX, -11 + AddToCombosRX());
+	wait(10);
+
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -11 + AddToCombosRX());
+	set_val(RY, 0 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -11 + AddToCombosRX());
+	set_val(RY, 0 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -11 + AddToCombosRX());
+	set_val(RY, 0 + AddToCombosRY());
+	wait(20);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -11 + AddToCombosRX());
+	set_val(RY, 0 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -5 + AddToCombosRX());
+	set_val(RY, 10 + AddToCombosRY());
+	wait(20);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -5 + AddToCombosRX());
+	set_val(RY, 5 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -5 + AddToCombosRX());
+	set_val(RY, 5 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -11 + AddToCombosRX());
+	set_val(RY, 5 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -15 + AddToCombosRX());
+	set_val(RY, 10 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -15 + AddToCombosRX());
+	set_val(RY, 10 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -15 + AddToCombosRX());
+	set_val(RY, 10 + AddToCombosRY());
+	wait(20);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -10 + AddToCombosRX());
+	set_val(RY, 60 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -11 + AddToCombosRX());
+	set_val(RY, 60 + AddToCombosRY());
+	wait(240);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	
+	set_val(RX, -11 + AddToCombosRX());
+	set_val(RY, 60 + AddToCombosRY());
+	wait(60);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -10 + AddToCombosRX());
+	set_val(RY, 55 + AddToCombosRY());
+	wait(1180);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -11 + AddToCombosRX());
+	set_val(RY, 55 + AddToCombosRY());
+	wait(1500);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -5 + AddToCombosRX());
+	set_val(RY, 56 + AddToCombosRY());
+	wait(4000);
+	set_val(RT, 100);
+	set_val(LT, 100);
+
+    set_val(RX, 0 + AddToCombosRX()); 
+	set_val(RY, 56 + AddToCombosRY());
+	wait(2120);
+	set_val(RT, 100);
+	set_val(LT, 100);
+
+	set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 55 + AddToCombosRY());
+	wait(2990);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -8 + AddToCombosRX());
+	set_val(RY, 56 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -8 + AddToCombosRX());
+	set_val(RY, 57 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -8 + AddToCombosRX());
+	set_val(RY, 58 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 0);
+	set_val(RX, -8 + AddToCombosRX());
+	set_val(RY, 55 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 95);
+
+	set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 12 + AddToCombosRY());
+	
+	wait(10);
+	set_val(RT, 0);
+	set_val(RX, 5 + AddToCombosRX());
+	set_val(RY, 53 + AddToCombosRY());
+
+
+}
+combo M2_Crouched {
+
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -5 + AddToCombosRX());
+	set_val(RY, 35 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -6 + AddToCombosRX());
+	set_val(RY, 35 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -8 + AddToCombosRX());
+	set_val(RY, 35 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 100);
+	set_val(RX, -8 + AddToCombosRX());
+	set_val(LT, 100);
+	set_val(RY, 35 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -8 + AddToCombosRX());
+	set_val(RY, 35 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -8 + AddToCombosRX());
+	set_val(RY, 40 + AddToCombosRY());
+	wait(30);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -8 + AddToCombosRX());
+	set_val(RY, 45 + AddToCombosRY());
+	wait(70);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -8 + AddToCombosRX());
+	set_val(RY,? 40 + AddToCombosRY());
+	wait(70);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -8 + AddToCombosRX());
+	set_val(RY,? 40 + AddToCombosRY());
+	wait(80);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -8 + AddToCombosRX());
+	set_val(RY,? 40 + AddToCombosRY());
+	wait(20);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -8 + AddToCombosRX());
+	set_val(RY,? 40 + AddToCombosRY());
+	wait(20);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -8 + AddToCombosRX());
+	set_val(RY,? 40 + AddToCombosRY());
+	wait(280);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -10 + AddToCombosRX());
+	set_val(RY,? 41 + AddToCombosRY());
+	wait(140);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -9 + AddToCombosRX());
+	set_val(RY,? 41 + AddToCombosRY());
+	wait(110);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -10 + AddToCombosRX());
+	set_val(RY,? 40 + AddToCombosRY());
+	wait(1990);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -9 + AddToCombosRX());
+	set_val(RY,? 40 + AddToCombosRY());
+	wait(360);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -9 + AddToCombosRX());
+	set_val(RY,? 40 + AddToCombosRY());
+	//Straight Down
+	wait(820);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -9 + AddToCombosRX());
+	set_val(RY,? 40 + AddToCombosRY());
+	
+	wait(1870);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -2 + AddToCombosRX());
+	set_val(RY,? 40 + AddToCombosRY());
+	wait(2000);
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RX, -3 + AddToCombosRX());
+	set_val(RY,? 39 + AddToCombosRY());
+	wait(2600);
+	set_val(RT, 100);
+	set_val(LT, 100);
+
+    set_val(RX, 0 + AddToCombosRX());
+	set_val(RY,? 39 + AddToCombosRY());
+	
+	wait(1130);
+	
+	set_val(RT, 100);
+	set_val(LT, 100);
+	set_val(RY,? 40 + AddToCombosRY());
+	set_val(RX, -10 + AddToCombosRX());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+
+    set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 33 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+
+    set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 28 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+    set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 23 + AddToCombosRY());
+	wait(10);
+	set_val(RT, 100);
+	set_val(LT, 100);
+    set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 13 + AddToCombosRY());
+	wait(100);
+	set_val(RT, 64);
+	set_val(LT, 100);
+    set_val(RX, 0 + AddToCombosRX());
+	set_val(RY, 8 + AddToCombosRY());
+	wait(10);
+	
+ 
+}
+// L43712 -   https://discord.gg/w5GJMuXzyy
+
+
+//LR //done
+combo LR_Crouched {
+	set_val(XB1_RT, 63);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 42 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 42 + AddToCombosRY());
+	wait(30);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 42 + AddToCombosRY());
+	wait(40);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 42 + AddToCombosRY());
+	wait(30);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 42 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 42 + AddToCombosRY());
+	wait(1390);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RX, 3 + AddToCombosRX());
+	set_val(XB1_RY, 41 + AddToCombosRY());
+	wait(960);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RX, 0 + AddToCombosRX());
+	set_val(XB1_RY, 42 + AddToCombosRY());
+	wait(1280);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 41 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 35 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 28 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 15 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 0);
+	set_val(XB1_RX, -4 + AddToCombosRX());
+	set_val(XB1_RY, 40 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 67);
+	set_val(XB1_RX, -5 + AddToCombosRX());
+	set_val(XB1_RY, 0 + AddToCombosRY());
+	wait(10);
+
+}
+
+combo LR_Stand {
+	set_val(XB1_RT, 83);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RX, 0 + AddToCombosRX());
+	set_val(XB1_RY, 24 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 27 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 60 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 60 + AddToCombosRY());
+	wait(20);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 60 + AddToCombosRY());
+	wait(30);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RX, 3 + AddToCombosRX());
+	set_val(XB1_RY, 60 + AddToCombosRY());
+	wait(800);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RX, 3 + AddToCombosRX());
+	set_val(XB1_RY, 58 + AddToCombosRY());
+	wait(2500);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RX, 4 + AddToCombosRX());
+	set_val(XB1_RY, 55 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RX, 2 + AddToCombosRX());
+	set_val(XB1_RY, 55 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RX, 0 + AddToCombosRX());
+	set_val(XB1_RY, 44 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RY, 38 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RX, -4 + AddToCombosRX());
+	set_val(XB1_RY, 30 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RX, -7 + AddToCombosRX());
+	set_val(XB1_RY, 17 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 35);
+	set_val(XB1_LT, 100);
+	set_val(XB1_RX, -9 + AddToCombosRX());
+	set_val(XB1_RY, 40 + AddToCombosRY());
+	wait(10);
+}
+
+	
+//----------------------------------------
+combo LR_Crouch_HIP {
+	set_val(XB1_RX, -4 + AddToCombosRX());
+	set_val(XB1_RY, 35 + AddToCombosRY());
+	wait(600);
+	set_val(XB1_RX, -4 + AddToCombosRX());
+	set_val(XB1_RY, 35 + AddToCombosRY());
+	wait(20);
+	set_val(XB1_RT, 71);
+	set_val(XB1_RX, -4 + AddToCombosRX());
+	set_val(XB1_RY, 35 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -4 + AddToCombosRX());
+	set_val(XB1_RY, 35 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -4 + AddToCombosRX());
+	set_val(XB1_RY, 35 + AddToCombosRY());
+	wait(30);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -4 + AddToCombosRX());
+	set_val(XB1_RY, 35 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -4 + AddToCombosRX());
+	set_val(XB1_RY, 35 + AddToCombosRY());
+	wait(90);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -5 + AddToCombosRX());
+	set_val(XB1_RY, 30 + AddToCombosRY());
+	wait(30);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -6 + AddToCombosRX());
+	set_val(XB1_RY, 35 + AddToCombosRY());
+	wait(100);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -6 + AddToCombosRX());
+	set_val(XB1_RY, 36 + AddToCombosRY());
+	wait(190);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -9 + AddToCombosRX());
+	set_val(XB1_RY, 31 + AddToCombosRY());
+
+	wait(80);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -7 + AddToCombosRX());
+	set_val(XB1_RY, 32 + AddToCombosRY());
+	
+	wait(260);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -2 + AddToCombosRX());
+	set_val(XB1_RY, 36 + AddToCombosRY());
+	
+	wait(830);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, 0 + AddToCombosRX());
+	set_val(XB1_RY, 35 + AddToCombosRY());
+	
+	wait(2180);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 29 + AddToCombosRY());
+	
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 23 + AddToCombosRY());
+	
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 12 + AddToCombosRY());
+	
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 6 + AddToCombosRY());
+	
+	wait(10);
+	set_val(XB1_RT, 0);
+	set_val(XB1_RY, 1 + AddToCombosRY());
+	
+	wait(30);
+	set_val(XB1_RX, -2 + AddToCombosRX());
+	set_val(XB1_RY, 0 + AddToCombosRY());
+	
+	wait(600);
+}
+
+//----------------------------------------
+combo LR_Stand_HIP {
+
+	set_val(XB1_RT, 28);
+	set_val(XB1_RY, 30 + AddToCombosRY());
+
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 30 + AddToCombosRY());
+
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 35 + AddToCombosRY());
+
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 35 + AddToCombosRY());
+
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 35 + AddToCombosRY());
+
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 35 + AddToCombosRY());
+
+	wait(20);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 35 + AddToCombosRY());
+
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 35 + AddToCombosRY());
+	
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 35 + AddToCombosRY());
+	
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 35 + AddToCombosRY());
+	
+	wait(120);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 35 + AddToCombosRY());
+	
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 54 + AddToCombosRY());
+	
+	wait(80);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 48 + AddToCombosRY());
+	
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 46 + AddToCombosRY());
+	
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 43 + AddToCombosRY());
+	
+	wait(20);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 39 + AddToCombosRY());
+	
+	wait(60);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 41 + AddToCombosRY());
+	
+	wait(20);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 44 + AddToCombosRY());
+	
+	wait(50);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 50 + AddToCombosRY());
+	
+	wait(1560);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 48 + AddToCombosRY());
+	
+	wait(200);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 43 + AddToCombosRY());
+	
+	wait(230);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, 6 + AddToCombosRX());
+	set_val(XB1_RY, 45 + AddToCombosRY());
+	
+	wait(170);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, 0 + AddToCombosRX());
+	set_val(XB1_RY, 45 + AddToCombosRY());
+	
+	wait(1200);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 42 + AddToCombosRY());
+	
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 33 + AddToCombosRY());
+	
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 23 + AddToCombosRY());
+	
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RY, 9 + AddToCombosRY());
+	
+	wait(10);
+	set_val(XB1_RT, 97);
+	set_val(XB1_RY, 0 + AddToCombosRY());
+	
+
+}
+
+
+//HMLMG 
+combo HMLMG_Stand {
+
+	set_val(XB1_RX, 11 + AddToCombosRX());
+	set_val(XB1_RY, 55 + AddToCombosRY());
+	wait(125000);
+}
+// L43712 -   https://discord.gg/w5GJMuXzyy
+
+combo HMLMG_Crouched {
+
+    set_val(XB1_RX, 9 + AddToCombosRX()); 
+    set_val(XB1_RY, 41 + AddToCombosRY());
+    wait(125000);  
+}
+
+// L43712 -   https://discord.gg/w5GJMuXzyy
+
+//HMSMG //done
+combo HMSMG_Stand {
+
+	set_val(XB1_RX, -1 + AddToCombosRX());
+	set_val(XB1_RY, 41 + AddToCombosRY());
+	wait(125000);
+}
+
+// L43712 -   https://discord.gg/w5GJMuXzyy
+combo HMSMG_Crouched {
+
+    set_val(XB1_RX, 0 + AddToCombosRX()); 
+    set_val(XB1_RY, 29 + AddToCombosRY());
+    wait(125000);  
+}
+// L43712 -   https://discord.gg/w5GJMuXzyy
+combo M39_Stand {
+	
+	set_val(XB1_RT, 100);
+  	set_val(XB1_RX, -12.5 + AddToCombosRX()); 
+	set_val(XB1_RY, 55.5 + AddToCombosRY());
+	wait(10);
+    set_val(XB1_RT, 0);
+    set_val(XB1_RT, 100);
+  	set_val(XB1_RX, -12.5 + AddToCombosRX()); 
+	set_val(XB1_RY, 55.5 + AddToCombosRY());
+	wait(10);
+    set_val(XB1_RT, 0);
+}
+// L43712 -   https://discord.gg/w5GJMuXzyy
+combo M39_Crouched {
+	
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -10 + AddToCombosRX()); 
+	set_val(XB1_RY, 42 + AddToCombosRY());
+    wait(10); 
+    set_val(XB1_RT, 0);
+    set_val(XB1_RT, 100);
+	set_val(XB1_RX, -10 + AddToCombosRX()); 
+	set_val(XB1_RY, 42 + AddToCombosRY());
+    wait(10); 
+    set_val(XB1_RT, 0);
+} 
+// L43712 -   https://discord.gg/w5GJMuXzyy
+combo CUSTOM_Stand {
+	
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 45 + AddToCombosRY());
+	wait(20000);
+	}
+// L43712 -   https://discord.gg/w5GJMuXzyy
+	combo CUSTOM_Crouched {
+	
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 33 + AddToCombosRY());
+	wait(20000);
+	}
+// L43712 -   https://discord.gg/w5GJMuXzyy
+combo P2_Stand {
+
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, -3 + AddToCombosRX());
+	set_val (XB1_RY, 46 + AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0);
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, -3 + AddToCombosRX());
+	set_val (XB1_RY, 46 + AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0);
+	}
+// L43712 -   https://discord.gg/w5GJMuXzyy
+combo P2_Crouched {
+
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 35 + AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0);
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 35 + AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0);
+	}
+// L43712 -   https://discord.gg/w5GJMuXzyy	
+combo HIGHCAL_Stand {
+	
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 60 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0);
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 60 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0)
+	}
+// L43712 -   https://discord.gg/w5GJMuXzyy
+combo HIGHCAL_Crouched {
+	
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 42 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0);
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 42 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0)
+	}
+// L43712 -   https://discord.gg/w5GJMuXzyy	
+combo M92_Stand {
+	
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 90.5 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0);
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 90.5 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0)
+	}
+// L43712 -   https://discord.gg/w5GJMuXzyy
+combo M92_Crouched {
+	
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 66.5 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0);
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 66.5 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0)
+	}
+	// L43712 -   https://discord.gg/w5GJMuXzyy	
+combo GLOCK_Stand {
+	
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 60 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0);
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 60 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0)
+	}
+// L43712 -   https://discord.gg/w5GJMuXzyy
+combo GLOCK_Crouched {
+	
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 40 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0);
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 40 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0)
+	}
+// L43712 -   https://discord.gg/w5GJMuXzyy	
+	combo PYTHON_Stand {
+	
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, -0.5 + AddToCombosRX());
+	set_val (XB1_RY, 130 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0);
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, -0.5 + AddToCombosRX());
+	set_val (XB1_RY, 130 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0)
+	}
+// L43712 -   https://discord.gg/w5GJMuXzyy
+combo PYTHON_Crouched {
+	
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0.5 + AddToCombosRX());
+	set_val (XB1_RY, 82.5 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0);
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0.5 + AddToCombosRX());
+	set_val (XB1_RY, 82.5 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0)
+	}
+	// L43712 -   https://discord.gg/w5GJMuXzyy	
+	combo REVO_Stand {
+	
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, -0.5 + AddToCombosRX());
+	set_val (XB1_RY, 67 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0);
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, -0.5 + AddToCombosRX());
+	set_val (XB1_RY, 67 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0)
+	}
+// L43712 -   https://discord.gg/w5GJMuXzyy
+combo REVO_Crouched {
+	
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0.5 + AddToCombosRX());
+	set_val (XB1_RY, 50 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0);
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0.5 + AddToCombosRX());
+	set_val (XB1_RY, 50 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0)
+	}
+		combo NAILGUN_Stand {
+	
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 74 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0);
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 74 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0)
+	}
+// L43712 -   https://discord.gg/w5GJMuXzyy
+combo NAILGUN_Crouched {
+	
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 49.5 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0);
+	set_val (XB1_RT, 100);
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 49.5 +AddToCombosRY());
+	wait(10);
+	set_val (XB1_RT, 0)
+	}
+	combo MINIGUN_Crouched {
+	
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 23 +AddToCombosRY());
+	wait(2000);
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 22 + AddToCombosRY());
+	wait(10000);
+	}
+	// L43712 -   https://discord.gg/w5GJMuXzyy
+combo MINIGUN_Stand {
+
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 31 +AddToCombosRY());
+	wait(2000);
+	set_val (XB1_RX, 0 + AddToCombosRX());
+	set_val (XB1_RY, 31 + AddToCombosRY());
+	wait(10000);
+	}
+	// SPAZ
+	
+	// M4
+combo AkMzb_Stand {
+	
+	set_val(XB1_RY, 43.5 +AddToCombosRY());
+	wait (300);
+	set_val (XB1_RY, 43.5 + AddToCombosRY());
+	set_val (XB1_RX, -11 + AddToCombosRX());
+	wait (700);
+	set_val (XB1_RX, -11.2 + AddToCombosRX());
+	set_val (XB1_RY, 43.3 + AddToCombosRY());
+ 	wait (500);
+ 	set_val (XB1_RX, -11.1 + AddToCombosRX());
+ 	set_val (XB1_RY, 43.5 + AddToCombosRY());
+	wait(10000);
+	}
+	combo AkMzb_Crouched {
+	
+	set_val (XB1_RY, 31 +AddToCombosRY());
+	wait (300);
+	set_val (XB1_RY, 31 + AddToCombosRY());
+	set_val (XB1_RX, -9 + AddToCombosRX());
+	wait (10000);
+	}
+	
+		int akY = 60
+int akX = 10
+combo AK_Crouched_HIP {
+
+	set_val(XB1_RT, 39);
+	set_val(XB1_RX, -6 + AddToCombosRX());
+	set_val(XB1_RY, 12 + AddToCombosRY());
+
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -7 + AddToCombosRX());
+	set_val(XB1_RY, 14 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -7 + AddToCombosRX());
+	set_val(XB1_RY, 17 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -8 + AddToCombosRX());
+	set_val(XB1_RY, 20 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -8 + AddToCombosRX());
+	set_val(XB1_RY, 24 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -8 + AddToCombosRX());
+	set_val(XB1_RY, 28 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -8 + AddToCombosRX());
+	set_val(XB1_RY, 34 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -10 + AddToCombosRX());
+	set_val(XB1_RY, 38 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -11 + AddToCombosRX());
+	set_val(XB1_RY, 42 + AddToCombosRY());
+	wait(20);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -12 + AddToCombosRX());
+	set_val(XB1_RY, 45 + AddToCombosRY());
+	wait(100);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -11 + AddToCombosRX());
+	set_val(XB1_RY, 44 + AddToCombosRY());
+	
+	wait(40);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -8 + AddToCombosRX());
+	set_val(XB1_RY, 42 + AddToCombosRY());
+	
+	wait(120);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -7 + AddToCombosRX());
+	set_val(XB1_RY, 37 + AddToCombosRY());
+	
+	wait(540);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -10 + AddToCombosRX());
+	set_val(XB1_RY, 37 + AddToCombosRY());
+	
+	wait(810);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -8 + AddToCombosRX());
+	set_val(XB1_RY, 37 + AddToCombosRY());
+	
+	wait(470);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -10 + AddToCombosRX());
+	set_val(XB1_RY, 36 + AddToCombosRY());
+	
+	wait(360);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -8 + AddToCombosRX());
+	set_val(XB1_RY, 36 + AddToCombosRY());
+	
+	wait(350);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -10 + AddToCombosRX());
+	set_val(XB1_RY, 35 + AddToCombosRY());
+	
+	wait(60);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -12 + AddToCombosRX());
+	set_val(XB1_RY, 39 + AddToCombosRY());
+	
+	wait(410);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -8 + AddToCombosRX());
+	set_val(XB1_RY, 35 + AddToCombosRY());
+	
+	wait(160);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -10 + AddToCombosRX());
+	set_val(XB1_RY, 34 + AddToCombosRY());
+	
+	wait(680);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -10 + AddToCombosRX());
+	set_val(XB1_RY, 39 + AddToCombosRY());
+	
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -8 + AddToCombosRX());
+	set_val(XB1_RY, 39 + AddToCombosRY());
+	
+	wait(20);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -7 + AddToCombosRX());
+	set_val(XB1_RY, 36 + AddToCombosRY());
+	
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -7 + AddToCombosRX());
+	set_val(XB1_RY, 27 + AddToCombosRY());
+	
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -7 + AddToCombosRX());
+	set_val(XB1_RY, 17 + AddToCombosRY());
+
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -6 + AddToCombosRX());
+	set_val(XB1_RY, 3 + AddToCombosRY());
+
+	wait(10);
+	set_val(XB1_RT, 90);
+	set_val(XB1_RX, -4 + AddToCombosRX());
+	set_val(XB1_RY, -1 + AddToCombosRY());
+
+
+}
+
+combo AK_Stand_HIP {
+	set_val(XB1_RT, 11);
+	set_val(XB1_RX, -11 + AddToCombosRX());
+	set_val(XB1_RY, 18 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -11 + AddToCombosRX());
+	set_val(XB1_RY, 22 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -11 + AddToCombosRX());
+	set_val(XB1_RY, 27 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -11 + AddToCombosRX());
+	set_val(XB1_RY, 30 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -7 + AddToCombosRX());
+	set_val(XB1_RY, 32 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -7 + AddToCombosRX());
+	set_val(XB1_RY, 34 + AddToCombosRY());
+	wait(30);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -5 + AddToCombosRX());
+	set_val(XB1_RY, 37 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -5 + AddToCombosRX());
+	set_val(XB1_RY, 39 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -5 + AddToCombosRX());
+	set_val(XB1_RY, 41 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -5 + AddToCombosRX());
+	set_val(XB1_RY, 45 + AddToCombosRY());
+	wait(20);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -6 + AddToCombosRX());
+	set_val(XB1_RY, 48 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -6 + AddToCombosRX());
+	set_val(XB1_RY, 50 + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -9 + AddToCombosRX());
+	set_val(XB1_RY, 53 + AddToCombosRY());
+	wait(420);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -6 + AddToCombosRX());
+	set_val(XB1_RY, 50 + AddToCombosRY());
+	wait(170);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -8 + AddToCombosRX());
+	set_val(XB1_RY, 51 + AddToCombosRY());
+	wait(40);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -11 + AddToCombosRX());
+	set_val(XB1_RY, 52 + AddToCombosRY());
+	wait(330);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -9 + AddToCombosRX());
+	set_val(XB1_RY, 52 + AddToCombosRY());
+	wait(120);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -11 + AddToCombosRX());
+	set_val(XB1_RY, 50 + AddToCombosRY());
+	wait(610);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -16 + AddToCombosRX());
+	set_val(XB1_RY, 46 + AddToCombosRY());
+	wait(260);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -14 + AddToCombosRX());
+	set_val(XB1_RY, 51 + AddToCombosRY());
+	wait(50);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -10 + AddToCombosRX());
+	set_val(XB1_RY, 52 + AddToCombosRY());
+	wait(30);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -7 + AddToCombosRX());
+	set_val(XB1_RY, 52 + AddToCombosRY());
+	wait(120);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -9 + AddToCombosRX());
+	set_val(XB1_RY, 53 + AddToCombosRY());
+	wait(110);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -14 + AddToCombosRX());
+	set_val(XB1_RY, 51 + AddToCombosRY());
+	wait(330);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -12 + AddToCombosRX());
+	set_val(XB1_RY, 49 + AddToCombosRY());
+	wait(320);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -13 + AddToCombosRX());
+	set_val(XB1_RY, 47 + AddToCombosRY());
+	wait(440);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -11 + AddToCombosRX());
+	set_val(XB1_RY, 49 + AddToCombosRY());
+	wait(100);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -6 + AddToCombosRX());
+	set_val(XB1_RY, 49 + AddToCombosRY());
+	wait(130);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -8 + AddToCombosRX());
+	set_val(XB1_RY, 48 + AddToCombosRY());
+	wait(70);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -12 + AddToCombosRX());
+	set_val(XB1_RY, 46 + AddToCombosRY());
+	wait(320);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -10 + AddToCombosRX());
+	set_val(XB1_RY, 45 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -8 + AddToCombosRX());
+	set_val(XB1_RY, 45 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -7 + AddToCombosRX());
+	set_val(XB1_RY, 43 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, -4 + AddToCombosRX());
+	set_val(XB1_RY, 38 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, 0 + AddToCombosRX());
+	set_val(XB1_RY, 32 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 100);
+	set_val(XB1_RX, 0 + AddToCombosRX());
+	set_val(XB1_RY, 24 + AddToCombosRY());
+	wait(10);
+	set_val(XB1_RT, 50);
+	set_val(XB1_RX, 0 + AddToCombosRX());
+	set_val(XB1_RY, 12 + AddToCombosRY());
+	wait(10);
+	
+} ????????????????
