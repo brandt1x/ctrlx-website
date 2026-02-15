@@ -131,10 +131,13 @@
 			const overviewView = document.getElementById('account-overview');
 			const signoutBtn = document.getElementById('account-signout');
 			const authPasswordInput = document.getElementById('auth-password-input');
-			const tabs = authForm.querySelectorAll('.account-tab');
+			const tabs = authForm ? authForm.querySelectorAll('.account-tab') : [];
 			const dashboardTabs = document.querySelectorAll('.account-tab-btn');
 			let mode = 'signin';
 			let purchasesLoaded = false;
+			// #region agent log
+			fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:setupAccount',message:'auth init',data:{authFormExists:!!authForm,tabsCount:tabs.length,oauthRedirectUrl},hypothesisId:'A',timestamp:Date.now()})}).catch(()=>{});
+			// #endregion
 
 			function updateAuthMode(newMode) {
 				mode = newMode;
@@ -148,6 +151,9 @@
 					t.classList.add('active');
 					updateAuthMode(t.dataset.tab);
 					authError.hidden = true;
+					// #region agent log
+					fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:tabClick',message:'tab clicked',data:{tab:t.dataset.tab,mode},hypothesisId:'B',timestamp:Date.now()})}).catch(()=>{});
+					// #endregion
 				});
 			});
 
@@ -158,6 +164,9 @@
 				const password = authPasswordInput.value;
 				if (!email || !password) return;
 				authSubmit.disabled = true;
+				// #region agent log
+				fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:submit',message:'form submit',data:{mode,btnText:authSubmit.textContent},hypothesisId:'C',timestamp:Date.now()})}).catch(()=>{});
+				// #endregion
 				try {
 					if (mode === 'signin') {
 						const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -183,6 +192,9 @@
 
 			document.getElementById('auth-google').addEventListener('click', async () => {
 				authError.hidden = true;
+				// #region agent log
+				fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:googleClick',message:'Google sign-in clicked',data:{oauthRedirectUrl},hypothesisId:'D',timestamp:Date.now()})}).catch(()=>{});
+				// #endregion
 				try {
 					const { error } = await supabase.auth.signInWithOAuth({
 						provider: 'google',
@@ -190,6 +202,9 @@
 					});
 					if (error) throw error;
 				} catch (err) {
+					// #region agent log
+					fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:googleError',message:'Google sign-in error',data:{errMsg:err?.message},hypothesisId:'E',timestamp:Date.now()})}).catch(()=>{});
+					// #endregion
 					authError.textContent = err.message || 'Google sign-in failed';
 					authError.hidden = false;
 				}
