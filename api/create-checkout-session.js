@@ -1,5 +1,5 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const { getUserFromRequest } = require('./auth-helpers');
+const { getUserFromRequest } = require('./_auth-helpers');
 
 module.exports = async (req, res) => {
 	if (req.method !== 'POST') {

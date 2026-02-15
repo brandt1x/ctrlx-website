@@ -1,8 +1,8 @@
 const path = require('path');
 const fs = require('fs');
 const archiver = require('archiver');
-const { getUserFromRequest, getOwnedPurchase } = require('./auth-helpers');
-const { getPurchaseFlags } = require('./items-utils');
+const { getUserFromRequest, getOwnedPurchase } = require('./_auth-helpers');
+const { getPurchaseFlags } = require('./_items-utils');
 
 const SCRIPT_MAP = {
 	'control-x': { file: 'CONTROL+X.gpc', filename: 'CONTROL+X.gpc', price: 75, nameMatch: 'control+x' },
@@ -56,7 +56,7 @@ module.exports = async (req, res) => {
 
 		if (type === 'vision-x') {
 			if (!flags.hasVisionX) return res.status(403).json({ error: 'Vision-X not purchased' });
-			const visionXDir = path.join(__dirname, 'vision-x-tempo');
+			const visionXDir = path.join(__dirname, '..', 'vision-x-tempo');
 			if (!fs.existsSync(visionXDir)) return res.status(500).json({ error: 'Vision-X package not found' });
 			res.setHeader('Content-Type', 'application/zip');
 			res.setHeader('Content-Disposition', 'attachment; filename="Vision-X-Tempo.zip"');

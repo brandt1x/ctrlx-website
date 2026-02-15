@@ -1,5 +1,5 @@
 # Prevent Vision-X Tempo node_modules from bloating deployment (Electron is ~150MB+)
-api/vision-x-tempo/node_modules
+vision-x-tempo/node_modules
 
 # Build artifacts and caches
 .next
