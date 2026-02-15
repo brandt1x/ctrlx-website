@@ -2858,6 +2858,12 @@ body.success-page .success-card .ultimate-product-content {
 	color: #f87171;
 	font-size: 0.875rem;
 }
+.account-divider {
+	text-align: center;
+	color: var(--muted);
+	font-size: 0.8125rem;
+	margin: 0.25rem 0;
+}
 .account-dashboard {
 	text-align: center;
 }

@@ -65,6 +65,8 @@
 						</div>
 						<div id="auth-error" class="account-error" hidden></div>
 						<button type="submit" class="btn" id="auth-submit">Sign in</button>
+						<div class="account-divider">or</div>
+						<button type="button" class="btn ghost" id="auth-google">Sign in with Google</button>
 					</form>
 				</div>
 
@@ -147,6 +149,20 @@
 					authError.hidden = false;
 				} finally {
 					authSubmit.disabled = false;
+				}
+			});
+
+			document.getElementById('auth-google').addEventListener('click', async () => {
+				authError.hidden = true;
+				try {
+					const { error } = await supabase.auth.signInWithOAuth({
+						provider: 'google',
+						options: { redirectTo: window.location.origin + '/account.html' }
+					});
+					if (error) throw error;
+				} catch (err) {
+					authError.textContent = err.message || 'Google sign-in failed';
+					authError.hidden = false;
 				}
 			});
 
