@@ -94,11 +94,12 @@
 	<script>
 		(async function setupAccount() {
 			let supabase;
+			let oauthRedirectUrl;
 			try {
 				const cfgRes = await fetch('/api/supabase-config');
 				const cfg = await cfgRes.json();
 				if (!cfg.url || !cfg.anonKey) throw new Error('Supabase not configured');
-				const oauthRedirectUrl = (cfg.siteUrl || window.location.origin) + '/account.html';
+				oauthRedirectUrl = (cfg.siteUrl || window.location.origin) + '/account.html';
 				const lib = window.supabase || window.supabaseJs;
 				const createClient = lib?.createClient || lib?.default?.createClient;
 				if (!createClient) throw new Error('Supabase script not loaded');
