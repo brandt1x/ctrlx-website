@@ -1855,6 +1855,10 @@ body.theme-light .hero {
 	border: 1px solid rgba(248, 113, 113, 0.35);
 }
 
+.account-interface-btn {
+	font-weight: 600;
+}
+
 .muted {
 	color: var(--muted);
 }
