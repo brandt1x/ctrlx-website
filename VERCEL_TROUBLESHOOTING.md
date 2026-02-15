@@ -53,7 +53,7 @@ If pushes to `main` don't create new deployments:
    git push origin main
    ```
 
----git 
+---git git 
 
 ## Step 5: Inspect Build Logs (if build fails)
 

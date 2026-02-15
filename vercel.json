@@ -1,9 +1,1 @@
-{
-  "functions": {
-    "api/create-checkout-session.js": { "memory": 256 },
-    "api/download.js": { "memory": 256 },
-    "api/my-purchases.js": { "memory": 256 },
-    "api/stripe-webhook.js": { "memory": 256 },
-    "api/supabase-config.js": { "memory": 256 }
-  }
-}
+{}
