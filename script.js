@@ -945,20 +945,12 @@ document.addEventListener('DOMContentLoaded', function () {
 			e.stopPropagation();
 			if (dropdown.hidden) {
 				openDropdown();
-				// #region agent log
-				fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'script.js:dropdown',message:'dropdown opened',data:{},hypothesisId:'F',timestamp:Date.now()})}).catch(()=>{});
-				// #endregion
 			} else {
 				closeDropdown();
 			}
 		});
 		document.addEventListener('click', () => {
-			if (!dropdown.hidden) {
-				// #region agent log
-				fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'script.js:dropdown',message:'document click closing dropdown',data:{},hypothesisId:'G',timestamp:Date.now()})}).catch(()=>{});
-				// #endregion
-				closeDropdown();
-			}
+			if (!dropdown.hidden) closeDropdown();
 		});
 		wrapper.addEventListener('click', (e) => e.stopPropagation());
 		hub.addEventListener('click', (e) => {

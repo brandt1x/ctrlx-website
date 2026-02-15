@@ -257,6 +257,7 @@ nav a.nav-ultimate::after,
 	background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.18), transparent);
 	transform: rotate(8deg);
 	transition: transform .65s ease;
+	pointer-events: none;
 }
 
 .ultimate-product:hover::after {
