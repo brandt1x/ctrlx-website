@@ -386,7 +386,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	// Subtle desktop tilt on core cards/blocks
 	(function setupGlobalTilt() {
 		if (prefersReducedMotion || !hasFinePointer || document.body.classList.contains('ultimate-page')) return;
-		const targets = document.querySelectorAll('.card, .how-step, .how-intro, .faq details, .contact-info');
+		const targets = document.querySelectorAll('.card, .how-step, .how-intro, .faq details, .contact-info, .success-card');
 		if (!targets.length) return;
 		targets.forEach((el) => {
 			el.addEventListener('mousemove', (e) => {

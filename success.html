@@ -6,6 +6,7 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1" />
 	<title>Thank You — Control-X</title>
 	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="ultimate.css">
 	<link rel="icon" type="image/png" href="images/logo.png">
 </head>
 
@@ -41,18 +42,20 @@
 	</header>
 
 	<main class="success-main">
-		<div class="success-card">
-			<h2 class="success-title">Thank you for your purchase!</h2>
-			<p class="success-subtitle">Your payment was successful. We'll be in touch shortly.</p>
-			<div id="success-downloads" class="success-downloads"></div>
-			<div class="success-support">
-				<p class="success-support-text">Questions or need help? <a href="contact.html">Contact us</a> or <a href="https://discord.gg/q9KWFd9xxH" target="_blank" rel="noopener">join our Discord</a>.</p>
-				<div class="success-support-btns">
-					<a href="contact.html" class="btn">Contact Page</a>
-					<a href="https://discord.gg/q9KWFd9xxH" target="_blank" rel="noopener" class="btn ghost">Join Discord</a>
+		<div class="success-card ultimate-product ultimate-tilt">
+			<div class="ultimate-product-glow"></div>
+			<div class="ultimate-product-content">
+				<h2 class="success-title">Thank you for your purchase&#8239;!</h2>
+				<p class="success-subtitle">Your payment was successful.</p>
+				<div id="success-downloads" class="success-downloads"></div>
+				<div class="success-slide-box">
+					<p class="success-support-text">Questions or need help? <a href="contact.html">Contact us</a> or <a href="https://discord.gg/q9KWFd9xxH" target="_blank" rel="noopener">join our Discord</a>.</p>
+					<div class="success-support-btns">
+						<a href="contact.html" class="btn">Contact Page</a>
+						<a href="https://discord.gg/q9KWFd9xxH" target="_blank" rel="noopener" class="btn ghost">Join Discord</a>
+					</div>
 				</div>
 			</div>
-			<a href="index.html" class="btn success-home-btn">Back to Home</a>
 		</div>
 	</main>
 
@@ -80,10 +83,10 @@
 						links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=control-x" class="btn success-dl-btn">⬇ Download CONTROL+X Ultimate Script (.gpc)</a>`);
 					}
 					if (data.hasVisionX) {
-						links.push(`<a href="/api/download-vision-x?session_id=${encodeURIComponent(sessionId)}" class="btn success-dl-btn">⬇ Download Vision-X Tempo (ZIP)</a>`);
+						links.push(`<a href="/api/download-vision-x?session_id=${encodeURIComponent(sessionId)}" class="btn success-dl-btn">⬇ Download Vision-X Tempo</a>`);
 					}
 					if (data.hasAllBundle) {
-						links.push(`<a href="/api/download-all-scripts?session_id=${encodeURIComponent(sessionId)}" class="btn success-dl-btn">⬇ Download All Scripts (ZIP)</a>`);
+						links.push(`<a href="/api/download-all-scripts?session_id=${encodeURIComponent(sessionId)}" class="btn success-dl-btn">⬇ Download All Scripts</a>`);
 					} else {
 						if (data.has2K) {
 							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=2k" class="btn success-dl-btn">⬇ Download 2K Script (.gpc)</a>`);
