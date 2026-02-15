@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>Account — Control-X</title>
+	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="ultimate.css">
+	<link rel="icon" type="image/png" href="images/logo.png">
+</head>
+
+<body class="success-page">
+	<canvas id="site-canvas-bg" class="site-canvas-bg" aria-hidden="true"></canvas>
+	<div class="site-vignette" aria-hidden="true"></div>
+
+	<header class="site-header">
+		<div class="container header-inner">
+			<a href="index.html"><img src="images/logo.png" alt="CTRLX Logo" class="logo-image logo-dark" /></a>
+			<a href="index.html"><img src="images/whitelogo.png" alt="CTRLX Logo" class="logo-image logo-light" /></a>
+			<div class="header-right">
+				<nav class="nav-center">
+					<div class="nav-group nav-left">
+						<a href="index.html">Home</a>
+						<a href="services.html">Services</a>
+						<a href="zen-scripts.html">Zen Scripts</a>
+					</div>
+					<a href="ultimate.html" class="nav-ultimate nav-center-link">ULTIMATE</a>
+					<div class="nav-group nav-right"></div>
+				</nav>
+				<div class="header-actions">
+					<a href="account.html" class="btn ghost">Account</a>
+					<a href="contact.html" class="btn">Contact</a>
+					<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light mode">
+						<span class="theme-toggle-switch">
+							<span class="theme-icon theme-icon-dark">☾</span>
+							<span class="theme-icon theme-icon-light">☀</span>
+						</span>
+					</button>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<main class="success-main">
+		<div class="success-card ultimate-product ultimate-tilt">
+			<div class="ultimate-product-glow"></div>
+			<div class="ultimate-product-content">
+				<h2 class="success-title">Your Account</h2>
+				<p class="success-subtitle">Sign in to view your purchases and download your files.</p>
+
+				<div id="account-auth" class="account-auth">
+					<form id="auth-form" class="account-auth-form">
+						<div class="account-auth-tabs">
+							<button type="button" class="account-tab active" data-tab="signin">Sign in</button>
+							<button type="button" class="account-tab" data-tab="signup">Sign up</button>
+						</div>
+						<div id="auth-email" class="account-field">
+							<label for="auth-email-input">Email</label>
+							<input type="email" id="auth-email-input" required placeholder="you@example.com" autocomplete="email" />
+						</div>
+						<div id="auth-password" class="account-field">
+							<label for="auth-password-input">Password</label>
+							<input type="password" id="auth-password-input" required placeholder="••••••••" autocomplete="current-password" />
+						</div>
+						<div id="auth-error" class="account-error" hidden></div>
+						<button type="submit" class="btn" id="auth-submit">Sign in</button>
+					</form>
+				</div>
+
+				<div id="account-dashboard" class="account-dashboard" hidden>
+					<p class="account-welcome">Signed in as <span id="account-email"></span></p>
+					<button type="button" class="btn ghost" id="account-signout">Sign out</button>
+					<div id="account-purchases" class="success-downloads"></div>
+				</div>
+				<div class="success-slide-box">
+					<p class="success-support-text">Questions or need help? <a href="contact.html">Contact us</a> or <a href="https://discord.gg/q9KWFd9xxH" target="_blank" rel="noopener">join our Discord</a>.</p>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<footer class="site-footer">
+		<div class="container">
+			<small>© <span id="year"></span> Control-X — All lawful services.</small>
+		</div>
+	</footer>
+
+	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+	<script src="script.js"></script>
+	<script src="cinematic.js"></script>
+	<script>
+		(async function setupAccount() {
+			let supabase;
+			try {
+				const cfgRes = await fetch('/api/supabase-config');
+				const cfg = await cfgRes.json();
+				if (!cfg.url || !cfg.anonKey) throw new Error('Supabase not configured');
+				const lib = window.supabase || window.supabaseJs;
+				const createClient = lib?.createClient || lib?.default?.createClient;
+				if (!createClient) throw new Error('Supabase script not loaded');
+				supabase = createClient(cfg.url, cfg.anonKey);
+			} catch (e) {
+				document.getElementById('auth-error').textContent = 'Supabase not configured. Add SUPABASE_URL and SUPABASE_ANON_KEY to your environment.';
+				document.getElementById('auth-error').hidden = false;
+				return;
+			}
+			const authEl = document.getElementById('account-auth');
+			const dashboardEl = document.getElementById('account-dashboard');
+			const authForm = document.getElementById('auth-form');
+			const authSubmit = document.getElementById('auth-submit');
+			const authError = document.getElementById('auth-error');
+			const accountEmail = document.getElementById('account-email');
+			const purchasesEl = document.getElementById('account-purchases');
+			const signoutBtn = document.getElementById('account-signout');
+			const tabs = document.querySelectorAll('.account-tab');
+			let mode = 'signin';
+
+			tabs.forEach(t => {
+				t.addEventListener('click', () => {
+					tabs.forEach(x => x.classList.remove('active'));
+					t.classList.add('active');
+					mode = t.dataset.tab;
+					authSubmit.textContent = mode === 'signin' ? 'Sign in' : 'Sign up';
+					authError.hidden = true;
+				});
+			});
+
+			authForm.addEventListener('submit', async (e) => {
+				e.preventDefault();
+				authError.hidden = true;
+				const email = document.getElementById('auth-email-input').value.trim();
+				const password = document.getElementById('auth-password-input').value;
+				if (!email || !password) return;
+				authSubmit.disabled = true;
+				try {
+					if (mode === 'signin') {
+						const { error } = await supabase.auth.signInWithPassword({ email, password });
+						if (error) throw error;
+					} else {
+						const { error } = await supabase.auth.signUp({ email, password });
+						if (error) throw error;
+					}
+					location.reload();
+				} catch (err) {
+					authError.textContent = err.message || 'Something went wrong';
+					authError.hidden = false;
+				} finally {
+					authSubmit.disabled = false;
+				}
+			});
+
+			signoutBtn.addEventListener('click', async () => {
+				await supabase.auth.signOut();
+				location.reload();
+			});
+
+			async function loadPurchases() {
+				const { data: { session } } = await supabase.auth.getSession();
+				if (!session?.access_token) return;
+				const res = await fetch('/api/my-purchases', {
+					headers: { 'Authorization': 'Bearer ' + session.access_token } });
+				const data = await res.json();
+				if (!res.ok) {
+					purchasesEl.innerHTML = '<p class="muted">Failed to load purchases.</p>';
+					return;
+				}
+				const purchases = data.purchases || [];
+				if (purchases.length === 0) {
+					purchasesEl.innerHTML = '<p class="muted">No purchases yet. Add items to your cart and checkout to get started.</p>';
+					return;
+				}
+				const html = purchases.map(p => {
+					const links = [];
+					if (p.hasControlX) links.push(`<a href="#" class="btn success-dl-btn" data-session="${p.session_id}" data-type="script" data-script="control-x">⬇ Download CONTROL+X Ultimate Script (.gpc)</a>`);
+					if (p.hasVisionX) links.push(`<a href="#" class="btn success-dl-btn" data-session="${p.session_id}" data-type="vision-x">⬇ Download Vision-X Tempo</a>`);
+					if (p.hasAllBundle) links.push(`<a href="#" class="btn success-dl-btn" data-session="${p.session_id}" data-type="all-scripts">⬇ Download All Scripts</a>`);
+					else {
+						if (p.has2K) links.push(`<a href="#" class="btn success-dl-btn" data-session="${p.session_id}" data-type="script" data-script="2k">⬇ Download 2K Script (.gpc)</a>`);
+						if (p.hasCOD) links.push(`<a href="#" class="btn success-dl-btn" data-session="${p.session_id}" data-type="script" data-script="cod">⬇ Download COD Script (.gpc)</a>`);
+						if (p.hasApex) links.push(`<a href="#" class="btn success-dl-btn" data-session="${p.session_id}" data-type="script" data-script="apex">⬇ Download Apex Script (.gpc)</a>`);
+						if (p.hasArc) links.push(`<a href="#" class="btn success-dl-btn" data-session="${p.session_id}" data-type="script" data-script="arc">⬇ Download ARC Script (.gpc)</a>`);
+						if (p.hasFortnite) links.push(`<a href="#" class="btn success-dl-btn" data-session="${p.session_id}" data-type="script" data-script="fortnite">⬇ Download Fortnite Script (.gpc)</a>`);
+						if (p.hasSiege) links.push(`<a href="#" class="btn success-dl-btn" data-session="${p.session_id}" data-type="script" data-script="siege">⬇ Download Siege Script (.gpc)</a>`);
+						if (p.hasRust) links.push(`<a href="#" class="btn success-dl-btn" data-session="${p.session_id}" data-type="script" data-script="rust">⬇ Download Rust Script (.gpc)</a>`);
+					}
+					const date = p.created_at ? new Date(p.created_at).toLocaleDateString() : '';
+					return '<div class="account-purchase-block"><h4>Purchase ' + date + '</h4><div class="success-download-list">' + links.join('') + '</div></div>';
+				}).join('');
+				purchasesEl.innerHTML = html + '<p class="success-instruction">Load the .gpc file(s) into Zen Studio and flash to your CronusZen.</p>';
+
+				purchasesEl.querySelectorAll('.success-dl-btn').forEach(btn => {
+					btn.addEventListener('click', async (e) => {
+						e.preventDefault();
+						const sessionId = btn.dataset.session;
+						const type = btn.dataset.type;
+						const script = btn.dataset.script;
+						const { data: { session } } = await supabase.auth.getSession();
+						if (!session?.access_token) return;
+						let url = '/api/';
+						if (type === 'vision-x') url += 'download-vision-x';
+						else if (type === 'all-scripts') url += 'download-all-scripts';
+						else url += 'download-script' + (script ? '?script=' + script : '');
+						url += (url.includes('?') ? '&' : '?') + 'session_id=' + encodeURIComponent(sessionId);
+						const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + session.access_token } });
+						if (!res.ok) { alert('Download failed.'); return; }
+						const blob = await res.blob();
+						const a = document.createElement('a');
+						a.href = URL.createObjectURL(blob);
+						a.download = type === 'vision-x' ? 'Vision-X-Tempo.zip' : type === 'all-scripts' ? 'Cntrl-X-All-Scripts.zip' : (script || 'script') + '.gpc';
+						a.click();
+						URL.revokeObjectURL(a.href);
+					});
+				});
+			}
+
+			supabase.auth.onAuthStateChange((event, session) => {
+				if (session) {
+					authEl.hidden = true;
+					dashboardEl.hidden = false;
+					accountEmail.textContent = session.user?.email || '';
+					loadPurchases();
+				} else {
+					authEl.hidden = false;
+					dashboardEl.hidden = true;
+				}
+			});
+
+			async function init() {
+				const { data: { session } } = await supabase.auth.getSession();
+				if (session) {
+					authEl.hidden = true;
+					dashboardEl.hidden = false;
+					accountEmail.textContent = session.user?.email || '';
+					loadPurchases();
+				} else {
+					authEl.hidden = false;
+					dashboardEl.hidden = true;
+				}
+			}
+			init();
+		})();
+	</script>
+</body>
+
+</html>

@@ -1,8 +1,14 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { getUserFromRequest } = require('./auth-helpers');
 
 module.exports = async (req, res) => {
 	if (req.method !== 'POST') {
 		return res.status(405).json({ error: 'Method not allowed' });
+	}
+
+	const user = await getUserFromRequest(req);
+	if (!user) {
+		return res.status(401).json({ error: 'Sign in required to checkout' });
 	}
 
 	const { items } = req.body;
@@ -26,9 +32,12 @@ module.exports = async (req, res) => {
 		const session = await stripe.checkout.sessions.create({
 			line_items,
 			mode: 'payment',
-			success_url: `${baseUrl}/success.html?session_id={CHECKOUT_SESSION_ID}`,
+			success_url: `${baseUrl}/account.html`,
 			cancel_url: `${baseUrl}/`,
-			metadata: { items: JSON.stringify(items.map(i => ({ name: i.name, price: i.price }))) },
+			metadata: {
+				items: JSON.stringify(items.map(i => ({ name: i.name, price: i.price }))),
+				user_id: user.id,
+			},
 		});
 		res.json({ url: session.url });
 	} catch (err) {

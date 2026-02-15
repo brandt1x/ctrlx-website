@@ -29,6 +29,7 @@
 					<div class="nav-group nav-right"></div>
 				</nav>
 				<div class="header-actions">
+					<a href="account.html" class="btn ghost">Account</a>
 					<a href="contact.html" class="btn">Contact</a>
 					<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light mode">
 						<span class="theme-toggle-switch">
@@ -68,61 +69,8 @@
 	<script src="script.js"></script>
 	<script src="cinematic.js"></script>
 	<script>
-		(function setupSuccessDownloads() {
-			const params = new URLSearchParams(window.location.search);
-			const sessionId = params.get('session_id');
-			const container = document.getElementById('success-downloads');
-			if (!sessionId || !container) return;
-
-			fetch(`${window.location.origin}/api/verify-session?session_id=${encodeURIComponent(sessionId)}`)
-				.then((r) => r.json())
-				.then((data) => {
-					if (!data.paid) return;
-					const links = [];
-					if (data.hasControlX) {
-						links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=control-x" class="btn success-dl-btn">⬇ Download CONTROL+X Ultimate Script (.gpc)</a>`);
-					}
-					if (data.hasVisionX) {
-						links.push(`<a href="/api/download-vision-x?session_id=${encodeURIComponent(sessionId)}" class="btn success-dl-btn">⬇ Download Vision-X Tempo</a>`);
-					}
-					if (data.hasAllBundle) {
-						links.push(`<a href="/api/download-all-scripts?session_id=${encodeURIComponent(sessionId)}" class="btn success-dl-btn">⬇ Download All Scripts</a>`);
-					} else {
-						if (data.has2K) {
-							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=2k" class="btn success-dl-btn">⬇ Download 2K Script (.gpc)</a>`);
-						}
-						if (data.hasCOD) {
-							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=cod" class="btn success-dl-btn">⬇ Download COD Script (.gpc)</a>`);
-						}
-						if (data.hasApex) {
-							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=apex" class="btn success-dl-btn">⬇ Download Apex Script (.gpc)</a>`);
-						}
-						if (data.hasArc) {
-							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=arc" class="btn success-dl-btn">⬇ Download ARC Script (.gpc)</a>`);
-						}
-						if (data.hasFortnite) {
-							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=fortnite" class="btn success-dl-btn">⬇ Download Fortnite Script (.gpc)</a>`);
-						}
-						if (data.hasSiege) {
-							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=siege" class="btn success-dl-btn">⬇ Download Siege Script (.gpc)</a>`);
-						}
-						if (data.hasRust) {
-							links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=rust" class="btn success-dl-btn">⬇ Download Rust Script (.gpc)</a>`);
-						}
-					}
-					if (links.length) {
-						let instructions = '';
-						if (data.hasVisionX && !data.hasControlX && !data.has2K && !data.hasCOD && !data.hasApex && !data.hasArc && !data.hasFortnite && !data.hasSiege && !data.hasRust && !data.hasAllBundle) {
-							instructions = '<p class="success-instruction">Extract the ZIP, run <code>npm install</code>, then double-click Launch Vision-X Tempo.bat.</p>';
-						} else if (data.hasVisionX || data.hasControlX || data.has2K || data.hasCOD || data.hasApex || data.hasArc || data.hasFortnite || data.hasSiege || data.hasRust || data.hasAllBundle) {
-							instructions = '<p class="success-instruction">Load the .gpc file(s) into Zen Studio and flash to your CronusZen.</p>';
-							if (data.hasVisionX) instructions += '<p class="success-instruction">For Vision-X: extract the ZIP, run <code>npm install</code>, then Launch Vision-X Tempo.bat.</p>';
-						}
-						container.innerHTML = '<div class="success-download-list">' + links.join('') + '</div>' + instructions;
-					}
-				})
-				.catch(() => {});
-		})();
+		// All checkouts redirect to account.html. Redirect legacy success URLs.
+		window.location.replace('/account.html');
 	</script>
 </body>
 

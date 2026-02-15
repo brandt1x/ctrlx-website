@@ -2799,6 +2799,78 @@ body.success-page .success-card .ultimate-product-content {
 	font-size: 0.8em;
 }
 
+/* Account page auth */
+.account-auth {
+	max-width: 360px;
+	margin: 0 auto 1.5rem;
+}
+.account-auth-form {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+.account-auth-tabs {
+	display: flex;
+	gap: 0.5rem;
+	margin-bottom: 0.25rem;
+}
+.account-tab {
+	background: transparent;
+	border: 1px solid var(--glass);
+	color: var(--muted);
+	padding: 8px 16px;
+	border-radius: 8px;
+	cursor: pointer;
+	font-size: 0.9rem;
+}
+.account-tab:hover,
+.account-tab.active {
+	background: rgba(239, 68, 68, 0.15);
+	color: var(--text);
+	border-color: rgba(239, 68, 68, 0.3);
+}
+.account-field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+}
+.account-field label {
+	font-size: 0.8125rem;
+	color: var(--muted);
+}
+.account-field input {
+	background: var(--panel);
+	border: 1px solid var(--glass);
+	border-radius: 8px;
+	padding: 10px 14px;
+	color: var(--text);
+	font-size: 1rem;
+}
+.account-field input:focus {
+	outline: none;
+	border-color: var(--accent);
+}
+.account-error {
+	color: #f87171;
+	font-size: 0.875rem;
+}
+.account-dashboard {
+	text-align: center;
+}
+.account-welcome {
+	margin-bottom: 0.75rem;
+	color: var(--muted);
+}
+.account-purchase-block {
+	margin-bottom: 1.5rem;
+	text-align: left;
+}
+.account-purchase-block h4 {
+	font-size: 0.9rem;
+	color: var(--muted);
+	margin-bottom: 0.5rem;
+}
+
 .success-slide-box {
 	background: rgba(248, 113, 113, 0.1);
 	border: 1px solid rgba(248, 113, 113, 0.25);

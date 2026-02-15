@@ -1,7 +1,8 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const path = require('path');
 const fs = require('fs');
 const archiver = require('archiver');
+const { getUserFromRequest, getOwnedPurchase } = require('./auth-helpers');
+const { getPurchaseFlags } = require('./items-utils');
 
 const BUNDLE_FILES = [
 	'Cntrl-X-Apex.gpc',
@@ -13,18 +14,14 @@ const BUNDLE_FILES = [
 	'Cntrl-X-2K.gpc',
 ];
 
-function hasAllBundle(items) {
-	return items.some(
-		(i) =>
-			(i.name || '').toLowerCase().includes('all zen scripts') ||
-			(i.name || '').toLowerCase().includes('all scripts') ||
-			Number(i.price) === 100
-	);
-}
-
 module.exports = async (req, res) => {
 	if (req.method !== 'GET') {
 		return res.status(405).json({ error: 'Method not allowed' });
+	}
+
+	const user = await getUserFromRequest(req);
+	if (!user) {
+		return res.status(401).json({ error: 'Sign in required' });
 	}
 
 	const sessionId = req.query.session_id;
@@ -33,28 +30,13 @@ module.exports = async (req, res) => {
 	}
 
 	try {
-		const session = await stripe.checkout.sessions.retrieve(sessionId);
-
-		if (session.payment_status !== 'paid') {
-			return res.status(403).json({ error: 'Payment not completed' });
+		const purchase = await getOwnedPurchase(user.id, sessionId);
+		if (!purchase) {
+			return res.status(403).json({ error: 'Purchase not found or access denied' });
 		}
 
-		let items = [];
-		if (session.metadata?.items) {
-			try {
-				items = JSON.parse(session.metadata.items);
-			} catch (_) {}
-		}
-		if (items.length === 0 && session.line_items?.data) {
-			for (const li of session.line_items.data) {
-				items.push({
-					name: li.description || li.price?.product?.name || '',
-					price: (li.amount_total || 0) / 100,
-				});
-			}
-		}
-
-		if (!hasAllBundle(items)) {
+		const { hasAllBundle } = getPurchaseFlags(purchase.items);
+		if (!hasAllBundle) {
 			return res.status(403).json({ error: 'Bundle not purchased' });
 		}
 

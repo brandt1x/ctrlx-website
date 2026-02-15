@@ -725,6 +725,36 @@ document.addEventListener('DOMContentLoaded', function () {
 				checkoutBtn.textContent = 'Checkout with Stripe';
 			}
 		}
+		async function getAuthToken() {
+			if (window.__supabaseClient) {
+				const { data: { session } } = await window.__supabaseClient.auth.getSession();
+				return session?.access_token || null;
+			}
+			try {
+				if (!window.supabase && !window.supabaseJs) {
+					await new Promise((resolve, reject) => {
+						const s = document.createElement('script');
+						s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+						s.async = true;
+						s.onload = resolve;
+						s.onerror = reject;
+						document.head.appendChild(s);
+					});
+				}
+				const cfgRes = await fetch('/api/supabase-config');
+				const cfg = await cfgRes.json();
+				if (!cfg?.url || !cfg?.anonKey) return null;
+				const lib = window.supabase || window.supabaseJs;
+				const createClient = lib?.createClient || lib?.default?.createClient;
+				if (!createClient) return null;
+				const client = createClient(cfg.url, cfg.anonKey);
+				window.__supabaseClient = client;
+				const { data: { session } } = await client.auth.getSession();
+				return session?.access_token || null;
+			} catch (_) {
+				return null;
+			}
+		}
 		if (checkoutBtn) {
 			checkoutBtn.addEventListener('click', async () => {
 				const items = Cart.getItems();
@@ -733,12 +763,23 @@ document.addEventListener('DOMContentLoaded', function () {
 					return;
 				}
 				checkoutBtn.disabled = true;
+				checkoutBtn.textContent = 'Checking...';
+				const token = await getAuthToken();
+				if (!token) {
+					checkoutBtn.textContent = 'Checkout with Stripe';
+					checkoutBtn.disabled = false;
+					window.location.href = '/account.html?returnTo=checkout';
+					return;
+				}
 				checkoutBtn.textContent = 'Redirecting...';
 				try {
 					const apiBase = window.location.origin;
 					const res = await fetch(`${apiBase}/api/create-checkout-session`, {
 						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': 'Bearer ' + token,
+						},
 						body: JSON.stringify({ items }),
 					});
 					const data = await res.json();
@@ -749,7 +790,7 @@ document.addEventListener('DOMContentLoaded', function () {
 					}
 				} catch (err) {
 					console.error(err);
-					alert('Checkout failed. Please try again.');
+					alert(err.message || 'Checkout failed. Please try again.');
 				} finally {
 					resetCheckoutButton();
 				}
