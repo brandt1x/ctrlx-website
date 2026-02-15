@@ -79,9 +79,9 @@
 		}
 	}
 
-	// Hook into hero reveal
+	// Hook into hero reveal (home hero or page-hero on services/zen/contact)
 	(function watchHero() {
-		var hero = document.querySelector('.hero, .hero-sequence');
+		var hero = document.querySelector('.hero, .hero-sequence, .page-hero');
 		if (!hero || !('IntersectionObserver' in window)) return;
 		var obs = new IntersectionObserver(function (entries) {
 			if (entries[0] && entries[0].isIntersecting) {

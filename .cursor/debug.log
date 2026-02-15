@@ -1,4 +1,30 @@
-{"location":"account.html:init","message":"OAuth redirect config","data":{"siteUrl":"https://ctrlx-website-n14jxt1ma-brandts-projects-785975d7.vercel.app","origin":"https://www.cntrl-x.com","isLocalhost":false,"oauthRedirectUrl":"https://ctrlx-website-n14jxt1ma-brandts-projects-785975d7.vercel.app/account.html"},"hypothesisId":"H1","timestamp":1771186129561}
-{"location":"account.html:init","message":"OAuth redirect config","data":{"siteUrl":"https://ctrlx-website-n14jxt1ma-brandts-projects-785975d7.vercel.app","origin":"https://www.cntrl-x.com","isLocalhost":false,"oauthRedirectUrl":"https://ctrlx-website-n14jxt1ma-brandts-projects-785975d7.vercel.app/account.html"},"hypothesisId":"H1","timestamp":1771186132822}
-{"location":"account.html:google-click","message":"Redirect URL sent to OAuth","data":{"oauthRedirectUrl":"https://ctrlx-website-n14jxt1ma-brandts-projects-785975d7.vercel.app/account.html","origin":"https://www.cntrl-x.com"},"hypothesisId":"H2","timestamp":1771186133366}
-{"location":"account.html:google-click","message":"Redirect URL sent to OAuth","data":{"oauthRedirectUrl":"https://ctrlx-website-n14jxt1ma-brandts-projects-785975d7.vercel.app/account.html","origin":"https://www.cntrl-x.com"},"hypothesisId":"H2","timestamp":1771186135165}
+{"location":"script.js:setupGlobalLetterGlow","message":"glow setup running","data":{"targetCount":20,"kickerCount":1},"hypothesisId":"D","timestamp":1771196315478}
+{"location":"script.js:setupGlobalLetterGlow","message":"processing page-kicker target","data":{"text":"Zen Script Arsenal"},"hypothesisId":"C","timestamp":1771196315480}
+{"location":"script.js:splitLetters","message":"page-kicker splitLetters entry","data":{"text":"Zen Script Arsenal","wordCount":5},"hypothesisId":"A","timestamp":1771196315481}
+{"location":"script.js:splitLetters","message":"page-kicker wrapper appended","data":{"childCount":1,"hasWrapper":true,"gap":"8px"},"hypothesisId":"B","timestamp":1771196315494}
+{"location":"script.js:setupGlobalLetterGlow","message":"glow setup running","data":{"targetCount":20,"kickerCount":1},"hypothesisId":"D","timestamp":1771196315803}
+{"location":"script.js:splitLetters","message":"page-kicker splitLetters entry","data":{"text":"Zen Script Arsenal","wordCount":5},"hypothesisId":"A","timestamp":1771196315805}
+{"location":"script.js:setupGlobalLetterGlow","message":"processing page-kicker target","data":{"text":"Zen Script Arsenal"},"hypothesisId":"C","timestamp":1771196315804}
+{"location":"script.js:splitLetters","message":"page-kicker wrapper appended","data":{"childCount":1,"hasWrapper":true,"gap":"8px"},"hypothesisId":"B","timestamp":1771196315818}
+{"location":"script.js:setupGlobalLetterGlow","message":"glow setup running","data":{"targetCount":28,"kickerCount":0},"hypothesisId":"D","timestamp":1771196395917}
+{"location":"script.js:setupGlobalLetterGlow","message":"glow setup running","data":{"targetCount":28,"kickerCount":0},"hypothesisId":"D","timestamp":1771196399725}
+{"location":"script.js:setupGlobalLetterGlow","message":"glow setup running","data":{"targetCount":28,"kickerCount":0},"hypothesisId":"D","timestamp":1771196414690}
+{"location":"script.js:setupGlobalLetterGlow","message":"glow setup running","data":{"targetCount":28,"kickerCount":0},"hypothesisId":"D","timestamp":1771196560322}
+{"location":"script.js:setupGlobalLetterGlow","message":"processing page-kicker target","data":{"text":"Zen Script Arsenal"},"hypothesisId":"C","timestamp":1771196564933}
+{"location":"script.js:setupGlobalLetterGlow","message":"glow setup running","data":{"targetCount":20,"kickerCount":1},"hypothesisId":"D","timestamp":1771196564932}
+{"location":"script.js:splitLetters","message":"page-kicker splitLetters entry","data":{"text":"Zen Script Arsenal","wordCount":5},"hypothesisId":"A","timestamp":1771196564933}
+{"location":"script.js:splitLetters","message":"page-kicker wrapper appended","data":{"childCount":1,"hasWrapper":true,"gap":"8px"},"hypothesisId":"B","timestamp":1771196564935}
+{"location":"script.js:setupGlobalLetterGlow","message":"glow setup running","data":{"targetCount":28,"kickerCount":0},"hypothesisId":"D","timestamp":1771196567136}
+{"location":"script.js:setupGlobalLetterGlow","message":"glow setup running","data":{"targetCount":18,"kickerCount":1},"hypothesisId":"D","timestamp":1771196568840}
+{"location":"script.js:setupGlobalLetterGlow","message":"processing page-kicker target","data":{"text":"Premium Service Stack"},"hypothesisId":"C","timestamp":1771196568841}
+{"location":"script.js:splitLetters","message":"page-kicker splitLetters entry","data":{"text":"Premium Service Stack","wordCount":5},"hypothesisId":"A","timestamp":1771196568841}
+{"location":"script.js:splitLetters","message":"page-kicker wrapper appended","data":{"childCount":1,"hasWrapper":true,"gap":"8px"},"hypothesisId":"B","timestamp":1771196568843}
+{"location":"script.js:splitLetters","message":"page-kicker splitLetters entry","data":{"text":"Let’s Build Your Setup","wordCount":7},"hypothesisId":"A","timestamp":1771196572300}
+{"location":"script.js:setupGlobalLetterGlow","message":"glow setup running","data":{"targetCount":15,"kickerCount":1},"hypothesisId":"D","timestamp":1771196572299}
+{"location":"script.js:setupGlobalLetterGlow","message":"processing page-kicker target","data":{"text":"Let’s Build Your Setup"},"hypothesisId":"C","timestamp":1771196572300}
+{"location":"script.js:splitLetters","message":"page-kicker wrapper appended","data":{"childCount":1,"hasWrapper":true,"gap":"8px"},"hypothesisId":"B","timestamp":1771196572303}
+{"location":"script.js:setupGlobalLetterGlow","message":"glow setup running","data":{"targetCount":28,"kickerCount":0},"hypothesisId":"D","timestamp":1771196574068}
+{"location":"script.js:setupGlobalLetterGlow","message":"glow setup running","data":{"targetCount":27,"kickerCount":0},"hypothesisId":"D","timestamp":1771196627626}
+{"location":"script.js:setupGlobalLetterGlow","message":"glow setup running","data":{"targetCount":27,"kickerCount":0},"hypothesisId":"D","timestamp":1771196627641}
+{"location":"script.js:setupGlobalLetterGlow","message":"glow setup running","data":{"targetCount":27,"kickerCount":0},"hypothesisId":"D","timestamp":1771196633942}
+{"location":"script.js:setupGlobalLetterGlow","message":"glow setup running","data":{"targetCount":27,"kickerCount":0},"hypothesisId":"D","timestamp":1771196633950}
