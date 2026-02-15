@@ -1,0 +1,7 @@
+{
+	"functions": {
+		"api/**": {
+			"excludeFiles": "api/vision-x-tempo/node_modules/**"
+		}
+	}
+}

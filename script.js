@@ -7,24 +7,146 @@ document.addEventListener('DOMContentLoaded', function () {
 	const cards = document.querySelectorAll('.card');
 	cards.forEach((c, i) => c.style.setProperty('--i', i));
 
-	// Scroll-based reveal animations for cards/sections
-	(function setupScrollReveal() {
-		if (!('IntersectionObserver' in window)) return;
-		const targets = document.querySelectorAll('.card, .hero, .how, .faq, .contact, .cart, .services h3');
-		if (!targets.length) return;
+	// ─── MOTION SYSTEM ───────────────────────────────────────────────
+	const Motion = (function () {
+		const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const finePointer = window.matchMedia && window.matchMedia('(pointer:fine)').matches;
+		const flags = { heroV2: true, cardsV2: true, parallaxV2: true, immersiveTier: true };
+		// Load overrides from localStorage (e.g. localStorage.setItem('motion.flags','{"heroV2":false}'))
+		try {
+			var stored = window.localStorage && localStorage.getItem('motion.flags');
+			if (stored) {
+				var ov = JSON.parse(stored);
+				Object.keys(ov).forEach(function (k) { if (k in flags) flags[k] = !!ov[k]; });
+			}
+		} catch (_) { }
 
-		targets.forEach(el => el.classList.add('js-reveal'));
+		function detectTier() {
+			if (reduced) return 'low';
+			const cores = navigator.hardwareConcurrency || 2;
+			const mem = navigator.deviceMemory || 4;
+			if (cores <= 2 || mem <= 2) return 'low';
+			if (cores <= 4 || mem <= 4) return 'balanced';
+			return 'immersive';
+		}
+		const tier = detectTier();
+		document.body.dataset.motionTier = tier;
 
-		const observer = new IntersectionObserver((entries) => {
-			entries.forEach(entry => {
-				if (entry.isIntersecting) {
-					entry.target.classList.add('js-reveal-visible');
-					observer.unobserve(entry.target);
-				}
+		// Unified RAF scheduler — one loop for all effects
+		const _cbs = new Map();
+		let _id = 0;
+		let _on = false;
+		function _tick(t) {
+			for (const [, fn] of _cbs) fn(t);
+			if (_cbs.size) { _id = requestAnimationFrame(_tick); } else { _on = false; }
+		}
+		function registerRAF(key, fn) {
+			_cbs.set(key, fn);
+			if (!_on) { _on = true; _id = requestAnimationFrame(_tick); }
+		}
+		function unregisterRAF(key) {
+			_cbs.delete(key);
+			if (!_cbs.size && _on) { cancelAnimationFrame(_id); _on = false; }
+		}
+
+		// Unified IntersectionObserver factory
+		function observe(els, cb, opts) {
+			opts = opts || {};
+			if (!els || !els.length) return null;
+			if (!('IntersectionObserver' in window)) {
+				els.forEach(function (el) { cb(el, true); });
+				return null;
+			}
+			const io = new IntersectionObserver(function (entries) {
+				entries.forEach(function (e) {
+					if (e.isIntersecting) {
+						cb(e.target, true);
+						if (!opts.persistent) io.unobserve(e.target);
+					} else if (opts.persistent) {
+						cb(e.target, false);
+					}
+				});
+			}, { threshold: opts.threshold || 0.15, rootMargin: opts.rootMargin || '0px 0px -50px 0px' });
+			els.forEach(function (el) { io.observe(el); });
+			return io;
+		}
+
+		return { reduced, finePointer, flags, tier, registerRAF, unregisterRAF, observe };
+	})();
+	window.__Motion = Motion; // expose for cinematic.js
+
+	// ─── Unified reveal system (replaces 3 separate reveal IIFEs) ───
+	(function initReveals() {
+		// 1. Section reveals with staggered children
+		const sections = document.querySelectorAll('[data-scroll-section]');
+		Motion.observe(sections, function (section) {
+			section.classList.add('scroll-visible');
+			const children = section.querySelectorAll('[data-scroll-item]');
+			children.forEach(function (child, i) {
+				setTimeout(function () { child.classList.add('scroll-visible'); }, i * 100);
 			});
-		}, { threshold: 0.18 });
+		}, { threshold: 0.12 });
 
-		targets.forEach(el => observer.observe(el));
+		// 2. Standalone element reveals
+		const standalones = document.querySelectorAll('.card, .hero, .how, .faq, .contact, .cart, .services h3');
+		if (standalones.length) {
+			standalones.forEach(function (el) { el.classList.add('js-reveal'); });
+			Motion.observe(standalones, function (el) {
+				el.classList.add('js-reveal-visible');
+			}, { threshold: 0.18 });
+		}
+
+		// 3. Headline cinematic reveals
+		const headlines = document.querySelectorAll('main h2, main h3, .card h4, .how-step h4, .site-cart-header h2');
+		if (headlines.length) {
+			headlines.forEach(function (h) { h.classList.add('headline-reveal'); });
+			Motion.observe(headlines, function (h) {
+				h.classList.add('headline-live');
+			}, { threshold: 0.25, rootMargin: '0px 0px -25px 0px' });
+		}
+	})();
+
+	// ─── Hero V2: entrance sequence + pointer parallax ───
+	(function initHeroSequence() {
+		if (!Motion.flags.heroV2) return;
+		const hero = document.querySelector('.hero-sequence');
+		if (!hero) return;
+
+		// Detect if the load overlay will play (mirrors setupSiteLoadAnimation conditions)
+		let overlayWillPlay = false;
+		if (!document.body.classList.contains('ultimate-page') && !Motion.reduced) {
+			const nav = performance.getEntriesByType?.('navigation')?.[0];
+			const navType = nav?.type || (performance.navigation?.type === 1 ? 'reload' : 'navigate');
+			const ref = document.referrer || '';
+			let sameOrigin = false;
+			if (ref) {
+				try { sameOrigin = new URL(ref).origin === window.location.origin; }
+				catch (_) { sameOrigin = ref.startsWith(window.location.origin || ''); }
+			}
+			overlayWillPlay = !(navType === 'navigate' && sameOrigin);
+		}
+		// Hero entrance starts as load overlay is fading, or immediately for internal nav
+		setTimeout(function () { hero.classList.add('hero-entered'); }, overlayWillPlay ? 1750 : 200);
+
+		// Pointer-driven parallax
+		if (!Motion.reduced && Motion.finePointer) {
+			const layer = hero.querySelector('.hero-parallax-layer');
+			if (layer) {
+				let mx = 0, my = 0, cx = 0, cy = 0;
+				hero.addEventListener('mousemove', function (e) {
+					const rect = hero.getBoundingClientRect();
+					mx = (e.clientX - rect.left) / rect.width - 0.5;
+					my = (e.clientY - rect.top) / rect.height - 0.5;
+				}, { passive: true });
+				hero.addEventListener('mouseleave', function () { mx = 0; my = 0; });
+
+				Motion.registerRAF('heroParallax', function () {
+					cx += (mx - cx) * 0.08;
+					cy += (my - cy) * 0.08;
+					layer.style.transform = 'translate(' + (cx * 30).toFixed(1) + 'px,' + (cy * 20).toFixed(1) + 'px) scale(1.06)';
+				});
+			}
+		}
 	})();
 
 	// Ensure add-to-cart helper exists even on pages without cart UI
@@ -41,31 +163,38 @@ document.addEventListener('DOMContentLoaded', function () {
 		};
 	}
 
-	// Enhanced scroll reveal for index page sections with up/down animations
-	(function setupEnhancedScrollReveal() {
-		if (!('IntersectionObserver' in window)) return;
-		const sections = document.querySelectorAll('[data-scroll-section]');
-		const items = document.querySelectorAll('[data-scroll-item]');
-		if (!sections.length && !items.length) return;
+	// ─── Motion card system: depth-shine + stagger indices ───
+	(function initMotionCards() {
+		if (!Motion.flags.cardsV2) return;
 
-		const sectionObserver = new IntersectionObserver((entries) => {
-			entries.forEach(entry => {
-				if (entry.isIntersecting) {
-					entry.target.classList.add('scroll-visible');
-					// Stagger child items with direction-based animations
-					const children = entry.target.querySelectorAll('[data-scroll-item]');
-					children.forEach((child, index) => {
-						setTimeout(() => {
-							child.classList.add('scroll-visible');
-						}, index * 120);
-					});
-					sectionObserver.unobserve(entry.target);
-				}
+		// Extend stagger indices beyond .card to how-steps, faq items, zen-products
+		const staggerGroups = [
+			'.cards .card', '.zen-grid .card', '.how-steps .how-step',
+			'.faq-vertical details', '.how-chips .how-chip'
+		];
+		staggerGroups.forEach(function (sel) {
+			document.querySelectorAll(sel).forEach(function (el, i) {
+				el.style.setProperty('--stagger-i', i);
 			});
-		}, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+		});
 
-		sections.forEach(section => sectionObserver.observe(section));
+		// Apply depth-shine cursor tracking on fine-pointer devices
+		if (Motion.finePointer && !Motion.reduced) {
+			const targets = document.querySelectorAll('.card, .how-step, .how-intro, .faq details');
+			targets.forEach(function (el) {
+				el.classList.add('depth-shine');
+				el.addEventListener('mousemove', function (e) {
+					var rect = el.getBoundingClientRect();
+					var x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+					var y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+					el.style.setProperty('--mx', x + '%');
+					el.style.setProperty('--my', y + '%');
+				}, { passive: true });
+			});
+		}
 	})();
+
+	// (Enhanced scroll reveal merged into unified reveal system above)
 
 	// THEME TOGGLE (dark red/black ↔ light)
 	(function setupThemeToggle() {
@@ -399,25 +528,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		});
 	})();
 
-	// Headline reveal to make sections feel cinematic
-	(function setupHeadlineReveal() {
-		const heads = document.querySelectorAll('main h2, main h3, .card h4, .how-step h4, .site-cart-header h2');
-		if (!heads.length) return;
-		heads.forEach(h => h.classList.add('headline-reveal'));
-		if (!('IntersectionObserver' in window)) {
-			heads.forEach(h => h.classList.add('headline-live'));
-			return;
-		}
-		const obs = new IntersectionObserver((entries) => {
-			entries.forEach((entry) => {
-				if (entry.isIntersecting) {
-					entry.target.classList.add('headline-live');
-					obs.unobserve(entry.target);
-				}
-			});
-		}, { threshold: 0.25, rootMargin: '0px 0px -25px 0px' });
-		heads.forEach(h => obs.observe(h));
-	})();
+	// (Headline reveal merged into unified reveal system above)
 
 	// Cinematic internal page hop (non-ultimate links)
 	(function setupPageHopTransition() {
@@ -445,7 +556,9 @@ document.addEventListener('DOMContentLoaded', function () {
 				active = true;
 				e.preventDefault();
 				const targetUrl = new URL(href, window.location.href).href;
-				const title = (link.textContent || 'Entering').trim() || 'Entering';
+				const path = new URL(targetUrl).pathname;
+				const isHome = /\/index\.html$|\/$/.test(path) || path.endsWith('/index.html');
+				const title = isHome ? 'HOME' : ((link.textContent || 'Entering').trim() || 'Entering');
 				const overlay = document.createElement('div');
 				overlay.className = 'page-hop-overlay';
 				if (document.body.classList.contains('theme-light')) {
@@ -660,36 +773,37 @@ document.addEventListener('DOMContentLoaded', function () {
 		};
 	})();
 
-	// Hide-on-scroll navbar: slide away when scrolling down, show when scrolling up
+	// Hide-on-scroll navbar: velocity-aware for smoother reveal
 	(function setupNavHide() {
 		const header = document.querySelector('.site-header');
 		if (!header) return;
 		header.classList.remove('hide');
 		let lastY = window.scrollY;
+		let lastT = Date.now();
 		let ticking = false;
-		const delta = 8; // threshold
+		const delta = 6;
+		const velocityThreshold = 0.4; // px/ms — ignore slow scrolls
 		const navLinks = document.querySelectorAll('.header-right nav a');
 		navLinks.forEach(link => {
-			link.addEventListener('click', () => {
-				header.classList.remove('hide');
-			});
+			link.addEventListener('click', () => { header.classList.remove('hide'); });
 		});
-		window.addEventListener('pageshow', () => {
-			header.classList.remove('hide');
-		});
+		window.addEventListener('pageshow', () => { header.classList.remove('hide'); });
 		function onScroll() {
 			const y = window.scrollY;
+			const now = Date.now();
 			if (!ticking) {
 				window.requestAnimationFrame(() => {
-					if (Math.abs(y - lastY) > delta) {
-						if (y > lastY && y > 80) {
-							// scrolling down
+					const dy = y - lastY;
+					const dt = Math.max(now - lastT, 1);
+					const velocity = Math.abs(dy) / dt;
+					if (Math.abs(dy) > delta) {
+						if (dy > 0 && y > 80 && velocity > velocityThreshold) {
 							header.classList.add('hide');
-						} else if (y < lastY) {
-							// scrolling up
+						} else if (dy < 0) {
 							header.classList.remove('hide');
 						}
 						lastY = y;
+						lastT = now;
 					}
 					ticking = false;
 				});
