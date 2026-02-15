@@ -1,7 +1,9 @@
 {
   "functions": {
-    "api/**": {
-      "excludeFiles": "api/vision-x-tempo/node_modules/**"
-    }
+    "api/create-checkout-session.js": {},
+    "api/download.js": {},
+    "api/my-purchases.js": {},
+    "api/stripe-webhook.js": {},
+    "api/supabase-config.js": {}
   }
 }
