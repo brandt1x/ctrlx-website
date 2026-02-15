@@ -99,7 +99,12 @@
 				const cfgRes = await fetch('/api/supabase-config');
 				const cfg = await cfgRes.json();
 				if (!cfg.url || !cfg.anonKey) throw new Error('Supabase not configured');
-				oauthRedirectUrl = (cfg.siteUrl || window.location.origin) + '/account.html';
+				const origin = window.location.origin;
+				const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
+				oauthRedirectUrl = (cfg.siteUrl || (isLocalhost ? 'https://www.cntrl-x.com' : origin)) + '/account.html';
+				// #region agent log
+				fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:init',message:'OAuth redirect config',data:{siteUrl:cfg.siteUrl||null,origin,isLocalhost,oauthRedirectUrl},hypothesisId:'H1',timestamp:Date.now()})}).catch(()=>{});
+				// #endregion
 				const lib = window.supabase || window.supabaseJs;
 				const createClient = lib?.createClient || lib?.default?.createClient;
 				if (!createClient) throw new Error('Supabase script not loaded');
@@ -156,6 +161,9 @@
 
 			document.getElementById('auth-google').addEventListener('click', async () => {
 				authError.hidden = true;
+				// #region agent log
+				fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:google-click',message:'Redirect URL sent to OAuth',data:{oauthRedirectUrl,origin:window.location.origin},hypothesisId:'H2',timestamp:Date.now()})}).catch(()=>{});
+				// #endregion
 				try {
 					const { error } = await supabase.auth.signInWithOAuth({
 						provider: 'google',
