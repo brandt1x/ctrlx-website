@@ -77,6 +77,9 @@
 					if (data.hasControlX) {
 						links.push(`<a href="/api/download-script?session_id=${encodeURIComponent(sessionId)}&script=control-x" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download CONTROL+X Ultimate Script (.gpc)</a>`);
 					}
+					if (data.hasVisionX) {
+						links.push(`<a href="/api/download-vision-x?session_id=${encodeURIComponent(sessionId)}" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download Vision-X Tempo (ZIP)</a>`);
+					}
 					if (data.hasAllBundle) {
 						links.push(`<a href="/api/download-all-scripts?session_id=${encodeURIComponent(sessionId)}" class="btn" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">⬇ Download All Scripts (ZIP)</a>`);
 					} else {

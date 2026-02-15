@@ -1,0 +1,22 @@
+{
+  "name": "vision-x-tempo",
+  "productName": "Vision-X Tempo",
+  "version": "0.6.2",
+  "description": "Control-X Vision-X Tempo - Red/Black branded GUI",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron ."
+  },
+  "keywords": [
+    "control-x",
+    "vision-x",
+    "tempo"
+  ],
+  "author": "Control-X",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "png-to-ico": "^3.0.1"
+  }
+}

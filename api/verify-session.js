@@ -83,6 +83,13 @@ module.exports = async (req, res) => {
 				Number(i.price) === 100
 		);
 
+		const hasVisionX = items.some(
+			(i) =>
+				(i.name || '').toLowerCase().includes('vision-x') ||
+				(i.name || '').toLowerCase().includes('vision x') ||
+				Number(i.price) === 500
+		);
+
 		res.json({
 			paid: true,
 			items,
@@ -95,6 +102,7 @@ module.exports = async (req, res) => {
 			hasSiege,
 			hasRust,
 			hasAllBundle,
+			hasVisionX,
 		});
 	} catch (err) {
 		console.error(err);

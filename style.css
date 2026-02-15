@@ -40,6 +40,11 @@ body.theme-light .site-cart {
 body.theme-light .site-cart-items li {
 	background: linear-gradient(180deg, #ffffff, #f3f4f6);
 	border: 1px solid rgba(185, 28, 28, 0.15);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+body.theme-light .site-cart-items li:hover {
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 body.theme-light .how-step,
@@ -291,6 +296,11 @@ body:not(.ultimate-page) .site-header {
 body:not(.ultimate-page) .site-cart-backdrop,
 body:not(.ultimate-page) .site-cart {
 	z-index: 110;
+}
+
+body:not(.ultimate-page) .site-cart {
+	top: 0;
+	padding-top: var(--header-height);
 }
 
 .cursor-halo {
