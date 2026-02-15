@@ -7,5 +7,7 @@ module.exports = async (req, res) => {
 	if (!url || !anonKey) {
 		return res.status(500).json({ error: 'Supabase not configured' });
 	}
-	res.json({ url, anonKey });
+	// Use production URL for OAuth redirect (avoids localhost after Google sign-in)
+	const siteUrl = process.env.SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null);
+	res.json({ url, anonKey, siteUrl });
 };

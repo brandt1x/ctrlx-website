@@ -98,6 +98,7 @@
 				const cfgRes = await fetch('/api/supabase-config');
 				const cfg = await cfgRes.json();
 				if (!cfg.url || !cfg.anonKey) throw new Error('Supabase not configured');
+				const oauthRedirectUrl = (cfg.siteUrl || window.location.origin) + '/account.html';
 				const lib = window.supabase || window.supabaseJs;
 				const createClient = lib?.createClient || lib?.default?.createClient;
 				if (!createClient) throw new Error('Supabase script not loaded');
@@ -157,7 +158,7 @@
 				try {
 					const { error } = await supabase.auth.signInWithOAuth({
 						provider: 'google',
-						options: { redirectTo: window.location.origin + '/account.html' }
+						options: { redirectTo: oauthRedirectUrl }
 					});
 					if (error) throw error;
 				} catch (err) {
@@ -171,6 +172,15 @@
 				location.reload();
 			});
 
+			function timeRemaining(expiresAt) {
+				const diff = new Date(expiresAt).getTime() - Date.now();
+				if (diff <= 0) return null;
+				const h = Math.floor(diff / 3600000);
+				const m = Math.floor((diff % 3600000) / 60000);
+				if (h > 0) return h + 'h ' + m + 'm remaining';
+				return m + 'm remaining';
+			}
+
 			async function loadPurchases() {
 				const { data: { session } } = await supabase.auth.getSession();
 				if (!session?.access_token) return;
@@ -178,30 +188,41 @@
 					headers: { 'Authorization': 'Bearer ' + session.access_token } });
 				const data = await res.json();
 				if (!res.ok) {
-					purchasesEl.innerHTML = '<p class="muted">Failed to load purchases.</p>';
+					purchasesEl.innerHTML = '<p class="muted">Something went wrong loading your purchases. Please try refreshing the page.</p>';
 					return;
 				}
 				const purchases = data.purchases || [];
 				if (purchases.length === 0) {
-					purchasesEl.innerHTML = '<p class="muted">No purchases yet. Add items to your cart and checkout to get started.</p>';
+					purchasesEl.innerHTML = '<p class="muted">No purchases yet. Browse our <a href="zen-scripts.html">Zen Scripts</a> or <a href="ultimate.html">Ultimate</a> page to get started.</p>';
 					return;
 				}
 				const html = purchases.map(p => {
+					const expired = p.isExpired;
+					const remaining = !expired && p.expiresAt ? timeRemaining(p.expiresAt) : null;
 					const links = [];
-					if (p.hasControlX) links.push(`<a href="#" class="btn success-dl-btn" data-session="${p.session_id}" data-type="script" data-script="control-x">⬇ Download CONTROL+X Ultimate Script (.gpc)</a>`);
-					if (p.hasVisionX) links.push(`<a href="#" class="btn success-dl-btn" data-session="${p.session_id}" data-type="vision-x">⬇ Download Vision-X Tempo</a>`);
-					if (p.hasAllBundle) links.push(`<a href="#" class="btn success-dl-btn" data-session="${p.session_id}" data-type="all-scripts">⬇ Download All Scripts</a>`);
+					function dlBtn(label, type, script) {
+						if (expired) {
+							return '<span class="btn btn-disabled success-dl-btn-expired">Download expired</span>';
+						}
+						return '<a href="#" class="btn success-dl-btn" data-session="' + p.session_id + '" data-type="' + type + '"' + (script ? ' data-script="' + script + '"' : '') + '>' + label + '</a>';
+					}
+					if (p.hasControlX) links.push(dlBtn('Download CONTROL+X Ultimate Script (.gpc)', 'script', 'control-x'));
+					if (p.hasVisionX) links.push(dlBtn('Download Vision-X Tempo', 'vision-x', ''));
+					if (p.hasAllBundle) links.push(dlBtn('Download All Scripts', 'all-scripts', ''));
 					else {
-						if (p.has2K) links.push(`<a href="#" class="btn success-dl-btn" data-session="${p.session_id}" data-type="script" data-script="2k">⬇ Download 2K Script (.gpc)</a>`);
-						if (p.hasCOD) links.push(`<a href="#" class="btn success-dl-btn" data-session="${p.session_id}" data-type="script" data-script="cod">⬇ Download COD Script (.gpc)</a>`);
-						if (p.hasApex) links.push(`<a href="#" class="btn success-dl-btn" data-session="${p.session_id}" data-type="script" data-script="apex">⬇ Download Apex Script (.gpc)</a>`);
-						if (p.hasArc) links.push(`<a href="#" class="btn success-dl-btn" data-session="${p.session_id}" data-type="script" data-script="arc">⬇ Download ARC Script (.gpc)</a>`);
-						if (p.hasFortnite) links.push(`<a href="#" class="btn success-dl-btn" data-session="${p.session_id}" data-type="script" data-script="fortnite">⬇ Download Fortnite Script (.gpc)</a>`);
-						if (p.hasSiege) links.push(`<a href="#" class="btn success-dl-btn" data-session="${p.session_id}" data-type="script" data-script="siege">⬇ Download Siege Script (.gpc)</a>`);
-						if (p.hasRust) links.push(`<a href="#" class="btn success-dl-btn" data-session="${p.session_id}" data-type="script" data-script="rust">⬇ Download Rust Script (.gpc)</a>`);
+						if (p.has2K) links.push(dlBtn('Download 2K Script (.gpc)', 'script', '2k'));
+						if (p.hasCOD) links.push(dlBtn('Download COD Script (.gpc)', 'script', 'cod'));
+						if (p.hasApex) links.push(dlBtn('Download Apex Script (.gpc)', 'script', 'apex'));
+						if (p.hasArc) links.push(dlBtn('Download ARC Script (.gpc)', 'script', 'arc'));
+						if (p.hasFortnite) links.push(dlBtn('Download Fortnite Script (.gpc)', 'script', 'fortnite'));
+						if (p.hasSiege) links.push(dlBtn('Download Siege Script (.gpc)', 'script', 'siege'));
+						if (p.hasRust) links.push(dlBtn('Download Rust Script (.gpc)', 'script', 'rust'));
 					}
 					const date = p.created_at ? new Date(p.created_at).toLocaleDateString() : '';
-					return '<div class="account-purchase-block"><h4>Purchase ' + date + '</h4><div class="success-download-list">' + links.join('') + '</div></div>';
+					const statusLabel = expired
+						? '<span class="purchase-status purchase-status-expired">Expired</span>'
+						: (remaining ? '<span class="purchase-status purchase-status-active">' + remaining + '</span>' : '');
+					return '<div class="account-purchase-block' + (expired ? ' purchase-expired' : '') + '"><h4>Purchase ' + date + ' ' + statusLabel + '</h4><div class="success-download-list">' + links.join('') + '</div></div>';
 				}).join('');
 				purchasesEl.innerHTML = html + '<p class="success-instruction">Load the .gpc file(s) into Zen Studio and flash to your CronusZen.</p>';
 
@@ -218,7 +239,11 @@
 						else if (type === 'all-scripts') url += 'all-scripts';
 						else url += 'script&script=' + (script || '');
 						const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + session.access_token } });
-						if (!res.ok) { alert('Download failed.'); return; }
+						if (!res.ok) {
+							const errData = await res.json().catch(() => ({}));
+							alert(errData.error || 'Download failed.');
+							return;
+						}
 						const blob = await res.blob();
 						const a = document.createElement('a');
 						a.href = URL.createObjectURL(blob);

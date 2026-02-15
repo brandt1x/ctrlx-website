@@ -30,13 +30,20 @@ module.exports = async (req, res) => {
 		return res.status(500).json({ error: 'Failed to load purchases' });
 	}
 
+	const EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+
 	const purchases = (rows || []).map((r) => {
 		const items = Array.isArray(r.items) ? r.items : [];
 		const flags = getPurchaseFlags(items);
+		const createdMs = new Date(r.created_at).getTime();
+		const expiresAt = new Date(createdMs + EXPIRY_MS).toISOString();
+		const isExpired = Date.now() > createdMs + EXPIRY_MS;
 		return {
 			session_id: r.session_id,
 			items,
 			created_at: r.created_at,
+			expiresAt,
+			isExpired,
 			...flags,
 		};
 	});

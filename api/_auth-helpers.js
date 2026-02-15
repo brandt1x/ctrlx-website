@@ -57,14 +57,14 @@ async function getOwnedPurchase(userId, sessionId) {
 	const supabase = createClient(supabaseUrl, supabaseServiceKey);
 	const { data, error } = await supabase
 		.from('purchases')
-		.select('items')
+		.select('items, created_at')
 		.eq('user_id', userId)
 		.eq('session_id', sessionId)
 		.maybeSingle();
 
 	if (error || !data) return null;
 	const items = Array.isArray(data.items) ? data.items : [];
-	return { items };
+	return { items, created_at: data.created_at };
 }
 
 module.exports = { getUserFromRequest, userOwnsSession, getOwnedPurchase };

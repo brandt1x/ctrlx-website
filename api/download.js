@@ -46,10 +46,20 @@ module.exports = async (req, res) => {
 		return res.status(400).json({ error: 'Missing session_id or type' });
 	}
 
+	const EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+
 	try {
 		const purchase = await getOwnedPurchase(user.id, sessionId);
 		if (!purchase) {
 			return res.status(403).json({ error: 'Purchase not found or access denied' });
+		}
+
+		// Enforce 24-hour download window
+		if (purchase.created_at) {
+			const createdMs = new Date(purchase.created_at).getTime();
+			if (Date.now() > createdMs + EXPIRY_MS) {
+				return res.status(403).json({ error: 'Download expired. Downloads are available for 24 hours after purchase.' });
+			}
 		}
 
 		const flags = getPurchaseFlags(purchase.items);

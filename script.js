@@ -814,6 +814,94 @@ document.addEventListener('DOMContentLoaded', function () {
 		};
 	})();
 
+	// ─── Profile menu: swap Account button for profile icon when signed in ───
+	(function setupProfileMenu() {
+		const accountBtn = document.querySelector('.account-interface-btn');
+		if (!accountBtn) return;
+		const headerActions = accountBtn.parentElement;
+		if (!headerActions) return;
+
+		// Build profile trigger + dropdown (hidden by default)
+		const wrapper = document.createElement('div');
+		wrapper.className = 'profile-menu';
+		wrapper.style.display = 'none';
+		wrapper.innerHTML =
+			'<button class="profile-trigger" type="button" aria-label="Profile menu" aria-expanded="false">' +
+				'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+					'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-3.3 3.6-6 8-6s8 2.7 8 6"/>' +
+				'</svg>' +
+			'</button>' +
+			'<div class="profile-dropdown" hidden>' +
+				'<a href="account.html" class="profile-dropdown-item">Account</a>' +
+				'<a href="account.html#purchases" class="profile-dropdown-item">View Purchases</a>' +
+				'<button type="button" class="profile-dropdown-item profile-signout-btn">Sign out</button>' +
+			'</div>';
+
+		// Insert as the very last child (rightmost) in header-actions
+		headerActions.appendChild(wrapper);
+
+		const trigger = wrapper.querySelector('.profile-trigger');
+		const dropdown = wrapper.querySelector('.profile-dropdown');
+
+		trigger.addEventListener('click', (e) => {
+			e.stopPropagation();
+			const open = dropdown.hidden;
+			dropdown.hidden = !open;
+			trigger.setAttribute('aria-expanded', String(open));
+		});
+
+		// Close dropdown when clicking elsewhere
+		document.addEventListener('click', () => {
+			dropdown.hidden = true;
+			trigger.setAttribute('aria-expanded', 'false');
+		});
+		wrapper.addEventListener('click', (e) => e.stopPropagation());
+
+		// Sign out handler
+		wrapper.querySelector('.profile-signout-btn').addEventListener('click', async () => {
+			if (window.__supabaseClient) {
+				await window.__supabaseClient.auth.signOut();
+			}
+			window.location.href = '/account.html';
+		});
+
+		// Detect session and swap button
+		async function checkSession() {
+			try {
+				let client = window.__supabaseClient;
+				if (!client) {
+					if (!window.supabase && !window.supabaseJs) {
+						await new Promise((resolve, reject) => {
+							const s = document.createElement('script');
+							s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+							s.async = true;
+							s.onload = resolve;
+							s.onerror = reject;
+							document.head.appendChild(s);
+						});
+					}
+					const cfgRes = await fetch('/api/supabase-config');
+					const cfg = await cfgRes.json();
+					if (!cfg?.url || !cfg?.anonKey) return;
+					const lib = window.supabase || window.supabaseJs;
+					const createClient = lib?.createClient || lib?.default?.createClient;
+					if (!createClient) return;
+					client = createClient(cfg.url, cfg.anonKey);
+					window.__supabaseClient = client;
+				}
+				const { data: { session } } = await client.auth.getSession();
+				if (session) {
+					accountBtn.style.display = 'none';
+					wrapper.style.display = '';
+				} else {
+					accountBtn.style.display = '';
+					wrapper.style.display = 'none';
+				}
+			} catch (_) { /* silently fall back to Account button */ }
+		}
+		checkSession();
+	})();
+
 	// Hide-on-scroll navbar: velocity-aware for smoother reveal
 	(function setupNavHide() {
 		const header = document.querySelector('.site-header');
