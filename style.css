@@ -3115,7 +3115,9 @@ body.success-page .success-card .ultimate-product-content {
 .profile-dropdown {
 	position: absolute;
 	top: calc(100% + 10px);
-	right: -8px;
+	left: 50%;
+	right: auto;
+	transform: translateX(-50%);
 	min-width: 210px;
 	background: var(--panel, #1a1a1a);
 	border: 1px solid var(--glass, rgba(255,255,255,0.08));
@@ -3125,6 +3127,9 @@ body.success-page .success-card .ultimate-product-content {
 	padding: 6px 0;
 	display: flex;
 	flex-direction: column;
+}
+.profile-dropdown[hidden] {
+	display: none !important;
 }
 .profile-dropdown-item {
 	display: block;
@@ -3853,6 +3858,15 @@ body[data-motion-tier="low"] .cursor-halo {
 	display: none;
 }
 
+/* Prevent first-paint flash before loader appears */
+html.site-preload body > * {
+	visibility: hidden;
+}
+html.site-preload .site-load-overlay,
+html.site-preload .site-load-overlay * {
+	visibility: visible;
+}
+
 /* Smooth mobile layout improvements */
 @media (max-width: 600px) {
 	/* Root mobile adjustments */
@@ -4360,6 +4374,7 @@ body[data-motion-tier="low"] .cursor-halo {
 	.profile-dropdown {
 		right: 0;
 		left: auto;
+		transform: none;
 		min-width: min(88vw, 260px);
 	}
 

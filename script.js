@@ -251,9 +251,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	// Site load animation – only on first load or refresh, not when navigating via links
 	(function setupSiteLoadAnimation() {
-		if (document.body.classList.contains('ultimate-page')) return;
+		const root = document.documentElement;
+		const releasePreloadGate = () => root.classList.remove('site-preload');
+		if (document.body.classList.contains('ultimate-page')) {
+			releasePreloadGate();
+			return;
+		}
 		const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		if (prefersReduced) return;
+		if (prefersReduced) {
+			releasePreloadGate();
+			return;
+		}
 
 		const nav = performance.getEntriesByType?.('navigation')?.[0];
 		const navType = nav?.type || (performance.navigation?.type === 1 ? 'reload' : 'navigate');
@@ -266,7 +274,10 @@ document.addEventListener('DOMContentLoaded', function () {
 				sameOrigin = referrer.startsWith(window.location.origin || '');
 			}
 		}
-		if (navType === 'navigate' && sameOrigin) return; // Came from our site via link – skip
+		if (navType === 'navigate' && sameOrigin) {
+			releasePreloadGate();
+			return; // Came from our site via link – skip
+		}
 
 		const isLight = document.body.classList.contains('theme-light');
 		const logoSrc = isLight ? 'images/whitelogo.png' : 'images/logo.png';
@@ -302,6 +313,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			</div>
 		`;
 		document.body.insertBefore(overlay, document.body.firstChild);
+		releasePreloadGate();
 
 		// After initial animation: rapid line generation + zoom
 		setTimeout(() => {
