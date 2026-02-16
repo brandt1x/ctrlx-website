@@ -133,6 +133,7 @@
 			const authPasswordInput = document.getElementById('auth-password-input');
 			const tabs = authForm ? authForm.querySelectorAll('.account-tab') : [];
 			const dashboardTabs = document.querySelectorAll('.account-tab-btn');
+			console.log('[account] auth-form:', !!authForm, 'tabs:', tabs.length, 'auth-google:', !!document.getElementById('auth-google'));
 			let mode = 'signin';
 			let purchasesLoaded = false;
 
