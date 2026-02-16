@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		}, { threshold: 0.12 });
 
 		// 2. Standalone element reveals
-		const standalones = document.querySelectorAll('.card, .hero, .hero-sequence, .page-hero, .how, .faq, .contact, .cart, .services h3, .section-accent');
+		const standalones = document.querySelectorAll('.card, .hero, .how, .faq, .contact, .cart, .services h3');
 		if (standalones.length) {
 			standalones.forEach(function (el) { el.classList.add('js-reveal'); });
 			Motion.observe(standalones, function (el) {
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 
 		// 3. Headline cinematic reveals
-		const headlines = document.querySelectorAll('main h2, main h3, .card h4, .how-step h4, .site-cart-header h2, .page-title, .page-kicker, .section-accent');
+		const headlines = document.querySelectorAll('main h2, main h3, .card h4, .how-step h4, .site-cart-header h2');
 		if (headlines.length) {
 			headlines.forEach(function (h) { h.classList.add('headline-reveal'); });
 			Motion.observe(headlines, function (h) {
@@ -106,29 +106,11 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 	})();
 
-	// ─── Page hero entrance (services, zen-scripts, contact) ───
-	(function initPageHeroSequence() {
-		const pageHero = document.querySelector('.page-hero');
-		if (!pageHero) return;
-		if (Motion.observe) {
-			Motion.observe([pageHero], function () {
-				pageHero.classList.add('page-hero-entered');
-			}, { threshold: 0.1 });
-		}
-		setTimeout(function () {
-			const rect = pageHero.getBoundingClientRect();
-			if (rect.top < window.innerHeight * 0.9) {
-				pageHero.classList.add('page-hero-entered');
-			}
-		}, 100);
-	})();
-
 	// ─── Hero V2: entrance sequence + pointer parallax ───
 	(function initHeroSequence() {
 		if (!Motion.flags.heroV2) return;
 		const hero = document.querySelector('.hero-sequence');
 		if (!hero) return;
-		const aurora = hero.querySelector('.hero-aurora');
 
 		// Detect if the load overlay will play (mirrors setupSiteLoadAnimation conditions)
 		let overlayWillPlay = false;
@@ -155,12 +137,6 @@ document.addEventListener('DOMContentLoaded', function () {
 					const rect = hero.getBoundingClientRect();
 					mx = (e.clientX - rect.left) / rect.width - 0.5;
 					my = (e.clientY - rect.top) / rect.height - 0.5;
-					if (aurora) {
-						const px = ((e.clientX - rect.left) / rect.width * 100).toFixed(2) + '%';
-						const py = ((e.clientY - rect.top) / rect.height * 100).toFixed(2) + '%';
-						aurora.style.setProperty('--hx', px);
-						aurora.style.setProperty('--hy', py);
-					}
 				}, { passive: true });
 				hero.addEventListener('mouseleave', function () { mx = 0; my = 0; });
 
@@ -171,16 +147,6 @@ document.addEventListener('DOMContentLoaded', function () {
 				});
 			}
 		}
-	})();
-
-	// Subtle nav choreography (staggered reveal + hover rhythm)
-	(function setupNavChoreography() {
-		const navLinks = document.querySelectorAll('.header-right nav a, .header-right a.nav-ultimate');
-		if (!navLinks.length) return;
-		navLinks.forEach((link, idx) => {
-			link.style.setProperty('--nav-delay', (idx * 0.045).toFixed(2) + 's');
-		});
-		requestAnimationFrame(() => document.body.classList.add('nav-choreo-ready'));
 	})();
 
 	// Ensure add-to-cart helper exists even on pages without cart UI
@@ -201,11 +167,10 @@ document.addEventListener('DOMContentLoaded', function () {
 	(function initMotionCards() {
 		if (!Motion.flags.cardsV2) return;
 
-		// Extend stagger indices beyond .card to how-steps, faq items, zen-products, page-hero
+		// Extend stagger indices beyond .card to how-steps, faq items, zen-products
 		const staggerGroups = [
 			'.cards .card', '.zen-grid .card', '.how-steps .how-step',
-			'.faq-vertical details', '.how-chips .how-chip',
-			'.page-hero [data-scroll-item]'
+			'.faq-vertical details', '.how-chips .how-chip'
 		];
 		staggerGroups.forEach(function (sel) {
 			document.querySelectorAll(sel).forEach(function (el, i) {
@@ -213,7 +178,20 @@ document.addEventListener('DOMContentLoaded', function () {
 			});
 		});
 
-		// Depth-shine removed from content blocks – animations now on letters only
+		// Apply depth-shine cursor tracking on fine-pointer devices
+		if (Motion.finePointer && !Motion.reduced) {
+			const targets = document.querySelectorAll('.card, .how-step, .how-intro, .faq details');
+			targets.forEach(function (el) {
+				el.classList.add('depth-shine');
+				el.addEventListener('mousemove', function (e) {
+					var rect = el.getBoundingClientRect();
+					var x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+					var y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+					el.style.setProperty('--mx', x + '%');
+					el.style.setProperty('--my', y + '%');
+				}, { passive: true });
+			});
+		}
 	})();
 
 	// (Enhanced scroll reveal merged into unified reveal system above)
@@ -387,7 +365,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	// Spotlight feedback on interactive elements
 	(function setupInteractiveSpotlight() {
 		if (prefersReducedMotion || !hasFinePointer) return;
-		const targets = document.querySelectorAll('nav a, .btn, .select-btn, .contact-link');
+		const targets = document.querySelectorAll('nav a, .btn, .select-btn, .card, .how-step, .how-intro, .faq details, .contact-info, .contact-link');
 		if (!targets.length) return;
 		targets.forEach((el) => {
 			el.classList.add('interactive-spot');
@@ -405,7 +383,25 @@ document.addEventListener('DOMContentLoaded', function () {
 		});
 	})();
 
-	// Tilt removed – animations on letters only, no box effects
+	// Subtle desktop tilt on core cards/blocks
+	(function setupGlobalTilt() {
+		if (prefersReducedMotion || !hasFinePointer || document.body.classList.contains('ultimate-page')) return;
+		const targets = document.querySelectorAll('.card, .how-step, .how-intro, .faq details, .contact-info, .success-card');
+		if (!targets.length) return;
+		targets.forEach((el) => {
+			el.addEventListener('mousemove', (e) => {
+				const rect = el.getBoundingClientRect();
+				const px = (e.clientX - rect.left) / rect.width;
+				const py = (e.clientY - rect.top) / rect.height;
+				const rx = (0.5 - py) * 5.5;
+				const ry = (px - 0.5) * 6.5;
+				el.style.transform = `perspective(900px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+			}, { passive: true });
+			el.addEventListener('mouseleave', () => {
+				el.style.transform = '';
+			});
+		});
+	})();
 
 	// Premium magnetic feel on key controls
 	(function setupMagneticControls() {
@@ -458,7 +454,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		if (prefersReducedMotion || !hasFinePointer) return;
 		if (document.body.classList.contains('ultimate-page')) return;
 
-		const selectors = 'main h2, main h3, .card h4, .how-step h4, .hero h2, .page-title, .page-kicker, .page-lead, .section-accent, .price strong, nav a, .btn:not(.card-action-btn), .contact-info h4, .how-intro h4, .how-intro-label, .how-chip, .site-footer small';
+		const selectors = 'main h2, main h3, .card h4, .how-step h4, .hero h2, .price strong, nav a, .btn:not(.card-action-btn), .contact-info h4, .how-intro h4, .how-intro-label, .how-chip, .site-footer small';
 		const targets = document.querySelectorAll(selectors);
 		if (!targets.length) return;
 
@@ -467,43 +463,15 @@ document.addEventListener('DOMContentLoaded', function () {
 			const text = node.textContent || '';
 			if (!text.trim()) return;
 			const frag = document.createDocumentFragment();
-			const words = text.split(/(\s+)/);
-
-			const useCompactSpaces = node.classList.contains('page-kicker');
-			for (let i = 0; i < words.length; i++) {
-				const word = words[i];
-				if (/^\s+$/.test(word)) {
-					if (useCompactSpaces) {
-						frag.appendChild(document.createTextNode('\u00A0'));
-					} else {
-						for (let j = 0; j < word.length; j++) {
-							const sp = document.createElement('span');
-							sp.className = 'glow-letter glow-letter-space';
-							sp.textContent = '\u00A0';
-							frag.appendChild(sp);
-						}
-					}
-				} else {
-					const wordSpan = document.createElement('span');
-					wordSpan.className = 'glow-word';
-					for (let j = 0; j < word.length; j++) {
-						const span = document.createElement('span');
-						span.className = 'glow-letter';
-						span.textContent = word[j];
-						wordSpan.appendChild(span);
-					}
-					frag.appendChild(wordSpan);
-				}
+			for (let i = 0; i < text.length; i++) {
+				const ch = text[i];
+				const span = document.createElement('span');
+				span.className = ch === ' ' ? 'glow-letter glow-letter-space' : 'glow-letter';
+				span.textContent = ch === ' ' ? '\u00A0' : ch;
+				frag.appendChild(span);
 			}
 			node.textContent = '';
-			if (useCompactSpaces) {
-				const wrapper = document.createElement('span');
-				wrapper.className = 'page-kicker-text';
-				wrapper.appendChild(frag);
-				node.appendChild(wrapper);
-			} else {
-				node.appendChild(frag);
-			}
+			node.appendChild(frag);
 			node.dataset.glowReady = '1';
 		}
 
@@ -551,7 +519,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		if (prefersReducedMotion || !hasFinePointer) return;
 		if (document.body.classList.contains('ultimate-page')) return;
 
-		const selectors = '.hero p, .hero-sequence p, .page-lead, .card p, .card li, .how-step p, .how-intro p, .faq details summary, .faq details p, .contact-info p, .contact-link span, .zen-product p, .zen-product .price, .price, .services > .muted';
+		const selectors = '.hero p, .card p, .card li, .how-step p, .how-intro p, .faq details summary, .faq details p, .contact-info p, .contact-link span, .zen-product p, .zen-product .price, .price, .services > .muted';
 		const targets = document.querySelectorAll(selectors);
 		if (!targets.length) return;
 
@@ -601,7 +569,7 @@ document.addEventListener('DOMContentLoaded', function () {
 				requestAnimationFrame(() => overlay.classList.add('active'));
 				setTimeout(() => {
 					window.location.href = targetUrl;
-				}, 520);
+				}, 460);
 			});
 		});
 	})();
@@ -846,13 +814,14 @@ document.addEventListener('DOMContentLoaded', function () {
 		};
 	})();
 
-	// ─── Profile menu: session-aware account hub ────────────────────────────────
+	// ─── Profile menu: swap Account button for profile icon when signed in ───
 	(function setupProfileMenu() {
 		const accountBtn = document.querySelector('.account-interface-btn');
 		if (!accountBtn) return;
 		const headerActions = accountBtn.parentElement;
 		if (!headerActions) return;
 
+		// Build profile trigger + dropdown (hidden by default)
 		const wrapper = document.createElement('div');
 		wrapper.className = 'profile-menu';
 		wrapper.style.display = 'none';
@@ -863,192 +832,63 @@ document.addEventListener('DOMContentLoaded', function () {
 				'</svg>' +
 			'</button>' +
 			'<div class="profile-dropdown" hidden>' +
-				'<button type="button" class="profile-dropdown-item" data-action="account">Account</button>' +
-				'<button type="button" class="profile-dropdown-item" data-action="purchases">View Purchases</button>' +
-				'<button type="button" class="profile-dropdown-item profile-signout-btn" data-action="signout">Sign out</button>' +
+				'<a href="account.html" class="profile-dropdown-item">Account</a>' +
+				'<a href="account.html#purchases" class="profile-dropdown-item">View Purchases</a>' +
+				'<button type="button" class="profile-dropdown-item profile-signout-btn">Sign out</button>' +
 			'</div>';
-		headerActions.appendChild(wrapper);
 
-		const hub = document.createElement('div');
-		hub.className = 'account-hub';
-		hub.hidden = true;
-		hub.innerHTML =
-			'<div class="account-hub-backdrop" data-close="1"></div>' +
-			'<section class="account-hub-panel" role="dialog" aria-modal="true" aria-label="Account">' +
-				'<header class="account-hub-header">' +
-					'<h3 class="account-hub-title">Your Account</h3>' +
-					'<button class="account-hub-close" type="button" aria-label="Close">×</button>' +
-				'</header>' +
-				'<div class="account-hub-tabs">' +
-					'<button type="button" class="account-hub-tab active" data-hub-tab="account">Account</button>' +
-					'<button type="button" class="account-hub-tab" data-hub-tab="purchases">View Purchases</button>' +
-				'</div>' +
-				'<div class="account-hub-body">' +
-					'<div class="account-hub-view" data-hub-view="account">' +
-						'<p class="account-hub-email"></p>' +
-						'<p class="account-hub-copy">Manage your sign-in and purchase access from one place.</p>' +
-						'<div class="account-hub-actions">' +
-							'<a class="btn ghost" href="/account.html">Open Full Account Page</a>' +
-						'</div>' +
-					'</div>' +
-					'<div class="account-hub-view" data-hub-view="purchases" hidden>' +
-						'<div class="account-hub-purchases"><p class="muted">Loading purchases...</p></div>' +
-					'</div>' +
-				'</div>' +
-			'</section>';
-		document.body.appendChild(hub);
+		// Insert as the very last child (rightmost) in header-actions
+		headerActions.appendChild(wrapper);
 
 		const trigger = wrapper.querySelector('.profile-trigger');
 		const dropdown = wrapper.querySelector('.profile-dropdown');
-		let dropdownBackdrop = null;
-
-		function closeDropdown() {
-			dropdown.hidden = true;
-			trigger.setAttribute('aria-expanded', 'false');
-			if (dropdownBackdrop && dropdownBackdrop.parentNode) {
-				dropdownBackdrop.remove();
-				dropdownBackdrop = null;
-			}
-		}
-		function openDropdown() {
-			dropdown.hidden = false;
-			trigger.setAttribute('aria-expanded', 'true');
-			if (!dropdownBackdrop) {
-				dropdownBackdrop = document.createElement('div');
-				dropdownBackdrop.className = 'profile-dropdown-backdrop';
-				dropdownBackdrop.setAttribute('data-profile-dropdown-backdrop', '1');
-				dropdownBackdrop.addEventListener('click', closeDropdown);
-				document.body.appendChild(dropdownBackdrop);
-			}
-		}
-
-		const tabs = hub.querySelectorAll('.account-hub-tab');
-		const views = hub.querySelectorAll('.account-hub-view');
-		const purchasesEl = hub.querySelector('.account-hub-purchases');
-		const emailEl = hub.querySelector('.account-hub-email');
-
-		function setHubTab(tabName) {
-			tabs.forEach((t) => t.classList.toggle('active', t.dataset.hubTab === tabName));
-			views.forEach((v) => { v.hidden = v.dataset.hubView !== tabName; });
-		}
-		function openHub(tabName) {
-			setHubTab(tabName || 'account');
-			hub.hidden = false;
-			document.body.classList.add('account-hub-open');
-		}
-		function closeHub() {
-			hub.hidden = true;
-			document.body.classList.remove('account-hub-open');
-		}
 
 		trigger.addEventListener('click', (e) => {
 			e.stopPropagation();
-			if (dropdown.hidden) {
-				openDropdown();
-			} else {
-				closeDropdown();
-			}
+			const open = dropdown.hidden;
+			dropdown.hidden = !open;
+			trigger.setAttribute('aria-expanded', String(open));
 		});
+
+		// Close dropdown when clicking elsewhere
 		document.addEventListener('click', () => {
-			if (!dropdown.hidden) closeDropdown();
+			dropdown.hidden = true;
+			trigger.setAttribute('aria-expanded', 'false');
 		});
 		wrapper.addEventListener('click', (e) => e.stopPropagation());
-		hub.addEventListener('click', (e) => {
-			const target = e.target;
-			if (!(target instanceof HTMLElement)) return;
-			if (target.dataset.close === '1' || target.classList.contains('account-hub-close')) closeHub();
-		});
-		window.addEventListener('keydown', (e) => {
-			if (e.key === 'Escape') {
-				if (!dropdown.hidden) closeDropdown();
-				else closeHub();
+
+		// Sign out handler
+		wrapper.querySelector('.profile-signout-btn').addEventListener('click', async () => {
+			if (window.__supabaseClient) {
+				await window.__supabaseClient.auth.signOut();
 			}
+			window.location.href = '/account.html';
 		});
 
-		async function loadPurchasesIntoHub(client) {
-			purchasesEl.innerHTML = '<p class="muted">Loading purchases...</p>';
-			try {
-				const { data: { session } } = await client.auth.getSession();
-				if (!session?.access_token) {
-					purchasesEl.innerHTML = '<p class="muted">Sign in to view purchases.</p>';
-					return;
-				}
-				const res = await fetch('/api/my-purchases', { headers: { 'Authorization': 'Bearer ' + session.access_token } });
-				const data = await res.json();
-				if (!res.ok) {
-					purchasesEl.innerHTML = '<p class="muted">Could not load purchases right now. Please try again.</p>';
-					return;
-				}
-				const purchases = data.purchases || [];
-				if (!purchases.length) {
-					purchasesEl.innerHTML = '<p class="muted">You don\'t have any purchases to view yet. When you check out, your products will appear here instantly.</p>';
-					return;
-				}
-				const items = purchases.map((p) => {
-					const date = p.created_at ? new Date(p.created_at).toLocaleDateString() : 'Unknown date';
-					const badge = p.isExpired ? '<span class="purchase-status purchase-status-expired">Expired</span>' : '<span class="purchase-status purchase-status-active">Active</span>';
-					return '<div class="account-hub-purchase-item"><strong>Purchase ' + date + '</strong>' + badge + '</div>';
-				}).join('');
-				purchasesEl.innerHTML = items + '<div class="account-hub-actions"><a class="btn ghost" href="/account.html#purchases">Open detailed downloads</a></div>';
-			} catch (_) {
-				purchasesEl.innerHTML = '<p class="muted">Could not load purchases right now. Please try again.</p>';
-			}
-		}
-
-		async function ensureClient() {
-			let client = window.__supabaseClient;
-			if (client) return client;
-			if (!window.supabase && !window.supabaseJs) {
-				await new Promise((resolve, reject) => {
-					const s = document.createElement('script');
-					s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-					s.async = true;
-					s.onload = resolve;
-					s.onerror = reject;
-					document.head.appendChild(s);
-				});
-			}
-			const cfgRes = await fetch('/api/supabase-config');
-			const cfg = await cfgRes.json();
-			if (!cfg?.url || !cfg?.anonKey) return null;
-			const lib = window.supabase || window.supabaseJs;
-			const createClient = lib?.createClient || lib?.default?.createClient;
-			if (!createClient) return null;
-			client = createClient(cfg.url, cfg.anonKey);
-			window.__supabaseClient = client;
-			return client;
-		}
-
-		wrapper.querySelectorAll('.profile-dropdown-item').forEach((btn) => {
-			btn.addEventListener('click', async () => {
-				const action = btn.dataset.action;
-				closeDropdown();
-				const client = await ensureClient();
-				if (!client) return;
-				if (action === 'signout') {
-					await client.auth.signOut();
-					window.location.href = '/account.html';
-					return;
-				}
-				const { data: { session } } = await client.auth.getSession();
-				if (!session) {
-					window.location.href = '/account.html';
-					return;
-				}
-				emailEl.textContent = 'Signed in as ' + (session.user?.email || 'your account');
-				if (action === 'purchases') {
-					await loadPurchasesIntoHub(client);
-					openHub('purchases');
-				} else {
-					openHub('account');
-				}
-			});
-		});
-
+		// Detect session and swap button
 		async function checkSession() {
 			try {
-				const client = await ensureClient();
-				if (!client) return;
+				let client = window.__supabaseClient;
+				if (!client) {
+					if (!window.supabase && !window.supabaseJs) {
+						await new Promise((resolve, reject) => {
+							const s = document.createElement('script');
+							s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+							s.async = true;
+							s.onload = resolve;
+							s.onerror = reject;
+							document.head.appendChild(s);
+						});
+					}
+					const cfgRes = await fetch('/api/supabase-config');
+					const cfg = await cfgRes.json();
+					if (!cfg?.url || !cfg?.anonKey) return;
+					const lib = window.supabase || window.supabaseJs;
+					const createClient = lib?.createClient || lib?.default?.createClient;
+					if (!createClient) return;
+					client = createClient(cfg.url, cfg.anonKey);
+					window.__supabaseClient = client;
+				}
 				const { data: { session } } = await client.auth.getSession();
 				if (session) {
 					accountBtn.style.display = 'none';
@@ -1057,7 +897,7 @@ document.addEventListener('DOMContentLoaded', function () {
 					accountBtn.style.display = '';
 					wrapper.style.display = 'none';
 				}
-			} catch (_) { }
+			} catch (_) { /* silently fall back to Account button */ }
 		}
 		checkSession();
 	})();

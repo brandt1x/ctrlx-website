@@ -19,12 +19,15 @@
 			<a href="index.html"><img src="images/logo.png" alt="CTRLX Logo" class="logo-image logo-dark" /></a>
 			<a href="index.html"><img src="images/whitelogo.png" alt="CTRLX Logo" class="logo-image logo-light" /></a>
 			<div class="header-right">
-				<nav class="nav-left">
-					<a href="index.html">Home</a>
-					<a href="services.html">Services</a>
-					<a href="zen-scripts.html">Zen Scripts</a>
+				<nav class="nav-center">
+					<div class="nav-group nav-left">
+						<a href="index.html">Home</a>
+						<a href="services.html">Services</a>
+						<a href="zen-scripts.html">Zen Scripts</a>
+					</div>
+					<a href="ultimate.html" class="nav-ultimate nav-center-link">ULTIMATE</a>
+					<div class="nav-group nav-right"></div>
 				</nav>
-				<a href="ultimate.html" class="nav-ultimate nav-center-link">ULTIMATE</a>
 				<div class="header-actions">
 					<a href="account.html" class="btn account-interface-btn">Account</a>
 					<a href="contact.html" class="btn">Contact</a>
@@ -69,19 +72,8 @@
 
 				<div id="account-dashboard" class="account-dashboard" hidden>
 					<p class="account-welcome">Signed in as <span id="account-email"></span></p>
-					<div class="account-dashboard-tabs">
-						<button type="button" class="account-tab-btn active" data-dashboard-view="account">Account</button>
-						<button type="button" class="account-tab-btn" data-dashboard-view="purchases">View Purchases</button>
-					</div>
-					<div id="account-overview" class="account-overview">
-						<p class="muted">You are securely connected. Use this panel to manage your session and access your purchase history when needed.</p>
-						<div class="account-overview-actions">
-							<button type="button" class="btn ghost" id="account-signout">Sign out</button>
-						</div>
-					</div>
-					<div id="account-purchases-view" hidden>
-						<div id="account-purchases" class="success-downloads"></div>
-					</div>
+					<button type="button" class="btn ghost" id="account-signout">Sign out</button>
+					<div id="account-purchases" class="success-downloads"></div>
 				</div>
 				<div class="success-slide-box">
 					<p class="success-support-text">Questions or need help? <a href="contact.html">Contact us</a> or <a href="https://discord.gg/q9KWFd9xxH" target="_blank" rel="noopener">join our Discord</a>.</p>
@@ -109,8 +101,7 @@
 				if (!cfg.url || !cfg.anonKey) throw new Error('Supabase not configured');
 				const origin = window.location.origin;
 				const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
-				const baseUrl = cfg.siteUrl || (isLocalhost ? 'https://www.cntrl-x.com' : origin);
-				oauthRedirectUrl = baseUrl.replace(/\/$/, '') + '/account.html';
+				oauthRedirectUrl = (cfg.siteUrl || (isLocalhost ? 'https://www.cntrl-x.com' : origin)) + '/account.html';
 				const lib = window.supabase || window.supabaseJs;
 				const createClient = lib?.createClient || lib?.default?.createClient;
 				if (!createClient) throw new Error('Supabase script not loaded');
@@ -127,26 +118,16 @@
 			const authError = document.getElementById('auth-error');
 			const accountEmail = document.getElementById('account-email');
 			const purchasesEl = document.getElementById('account-purchases');
-			const purchasesView = document.getElementById('account-purchases-view');
-			const overviewView = document.getElementById('account-overview');
 			const signoutBtn = document.getElementById('account-signout');
-			const authPasswordInput = document.getElementById('auth-password-input');
-			const tabs = authForm ? authForm.querySelectorAll('.account-tab') : [];
-			const dashboardTabs = document.querySelectorAll('.account-tab-btn');
+			const tabs = document.querySelectorAll('.account-tab');
 			let mode = 'signin';
-			let purchasesLoaded = false;
-
-			function updateAuthMode(newMode) {
-				mode = newMode;
-				authSubmit.textContent = mode === 'signin' ? 'Sign in' : 'Sign up';
-				authPasswordInput.setAttribute('autocomplete', mode === 'signin' ? 'current-password' : 'new-password');
-			}
 
 			tabs.forEach(t => {
 				t.addEventListener('click', () => {
 					tabs.forEach(x => x.classList.remove('active'));
 					t.classList.add('active');
-					updateAuthMode(t.dataset.tab);
+					mode = t.dataset.tab;
+					authSubmit.textContent = mode === 'signin' ? 'Sign in' : 'Sign up';
 					authError.hidden = true;
 				});
 			});
@@ -155,24 +136,18 @@
 				e.preventDefault();
 				authError.hidden = true;
 				const email = document.getElementById('auth-email-input').value.trim();
-				const password = authPasswordInput.value;
+				const password = document.getElementById('auth-password-input').value;
 				if (!email || !password) return;
 				authSubmit.disabled = true;
 				try {
 					if (mode === 'signin') {
 						const { error } = await supabase.auth.signInWithPassword({ email, password });
 						if (error) throw error;
-						location.reload();
 					} else {
-						const { data, error } = await supabase.auth.signUp({ email, password });
+						const { error } = await supabase.auth.signUp({ email, password });
 						if (error) throw error;
-						if (data?.user && (!data.user.identities || data.user.identities.length === 0)) {
-							authError.textContent = 'Check your email to confirm your account.';
-							authError.hidden = false;
-						} else {
-							location.reload();
-						}
 					}
+					location.reload();
 				} catch (err) {
 					authError.textContent = err.message || 'Something went wrong';
 					authError.hidden = false;
@@ -200,20 +175,6 @@
 				location.reload();
 			});
 
-			function setDashboardView(view) {
-				dashboardTabs.forEach((b) => b.classList.toggle('active', b.dataset.dashboardView === view));
-				const showPurchases = view === 'purchases';
-				purchasesView.hidden = !showPurchases;
-				overviewView.hidden = showPurchases;
-				if (showPurchases && !purchasesLoaded) {
-					loadPurchases();
-					purchasesLoaded = true;
-				}
-			}
-			dashboardTabs.forEach((btn) => {
-				btn.addEventListener('click', () => setDashboardView(btn.dataset.dashboardView));
-			});
-
 			function timeRemaining(expiresAt) {
 				const diff = new Date(expiresAt).getTime() - Date.now();
 				if (diff <= 0) return null;
@@ -235,7 +196,7 @@
 				}
 				const purchases = data.purchases || [];
 				if (purchases.length === 0) {
-					purchasesEl.innerHTML = '<p class="muted">You don\\'t have any purchases to view yet. Browse our <a href="zen-scripts.html">Zen Scripts</a> or <a href="ultimate.html">Ultimate</a> page and your items will appear here instantly.</p>';
+					purchasesEl.innerHTML = '<p class="muted">No purchases yet. Browse our <a href="zen-scripts.html">Zen Scripts</a> or <a href="ultimate.html">Ultimate</a> page to get started.</p>';
 					return;
 				}
 				const html = purchases.map(p => {
@@ -301,8 +262,7 @@
 					authEl.hidden = true;
 					dashboardEl.hidden = false;
 					accountEmail.textContent = session.user?.email || '';
-					purchasesLoaded = false;
-					setDashboardView('account');
+					loadPurchases();
 				} else {
 					authEl.hidden = false;
 					dashboardEl.hidden = true;
@@ -311,13 +271,11 @@
 
 			async function init() {
 				const { data: { session } } = await supabase.auth.getSession();
-				const startOnPurchases = location.hash === '#purchases';
 				if (session) {
 					authEl.hidden = true;
 					dashboardEl.hidden = false;
 					accountEmail.textContent = session.user?.email || '';
-					purchasesLoaded = false;
-					setDashboardView(startOnPurchases ? 'purchases' : 'account');
+					loadPurchases();
 				} else {
 					authEl.hidden = false;
 					dashboardEl.hidden = true;
