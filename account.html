@@ -5,6 +5,8 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width,initial-scale=1" />
 	<title>Account — Control-X</title>
+	<meta name="description" content="Access your Control-X account to manage sign-in, purchases, and secure product downloads in one place." />
+	<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 	<link rel="stylesheet" href="style.css">
 	<link rel="stylesheet" href="ultimate.css">
 	<link rel="icon" type="image/png" href="images/logo.png">
@@ -44,7 +46,7 @@
 			<div class="ultimate-product-glow"></div>
 			<div class="ultimate-product-content">
 				<h2 class="success-title">Your Account</h2>
-				<p class="success-subtitle">Sign in to view your purchases and download your files.</p>
+				<p class="success-subtitle">Sign in to unlock instant downloads, license access, and purchase history.</p>
 
 				<div id="account-auth" class="account-auth">
 					<form id="auth-form" class="account-auth-form">
@@ -74,7 +76,7 @@
 						<button type="button" class="account-tab-btn" data-dashboard-view="purchases">View Purchases</button>
 					</div>
 					<div id="account-overview" class="account-overview">
-						<p class="muted">You are securely connected. Use this panel to manage your session and access your purchase history when needed.</p>
+						<p class="muted">You are securely connected. Use this dashboard to manage access, review purchases, and launch downloads quickly.</p>
 						<div class="account-overview-actions">
 							<button type="button" class="btn ghost" id="account-signout">Sign out</button>
 						</div>
@@ -84,7 +86,7 @@
 					</div>
 				</div>
 				<div class="success-slide-box">
-					<p class="success-support-text">Questions or need help? <a href="contact.html">Contact us</a> or <a href="https://discord.gg/q9KWFd9xxH" target="_blank" rel="noopener">join our Discord</a>.</p>
+					<p class="success-support-text">Need help fast? <a href="contact.html">Contact support</a> or <a href="https://discord.gg/q9KWFd9xxH" target="_blank" rel="noopener">join our Discord</a> for live updates.</p>
 				</div>
 			</div>
 		</div>
@@ -131,9 +133,9 @@
 			const overviewView = document.getElementById('account-overview');
 			const signoutBtn = document.getElementById('account-signout');
 			const authPasswordInput = document.getElementById('auth-password-input');
+			const authGoogleBtn = document.getElementById('auth-google');
 			const tabs = authForm ? authForm.querySelectorAll('.account-tab') : [];
 			const dashboardTabs = document.querySelectorAll('.account-tab-btn');
-			console.log('[account] auth-form:', !!authForm, 'tabs:', tabs.length, 'auth-google:', !!document.getElementById('auth-google'));
 			let mode = 'signin';
 			let purchasesLoaded = false;
 
@@ -182,7 +184,7 @@
 				}
 			});
 
-			document.getElementById('auth-google').addEventListener('click', async () => {
+			authGoogleBtn.addEventListener('click', async () => {
 				authError.hidden = true;
 				try {
 					const { error } = await supabase.auth.signInWithOAuth({

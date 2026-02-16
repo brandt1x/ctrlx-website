@@ -3026,11 +3026,16 @@ body.success-page .success-card .ultimate-product-content {
 	gap: 1rem;
 }
 .account-auth-tabs {
-	display: flex;
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 0.5rem;
 	margin-bottom: 0.25rem;
 }
 .account-tab {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
 	background: transparent;
 	border: 1px solid var(--glass);
 	color: var(--muted);
@@ -3109,9 +3114,9 @@ body.success-page .success-card .ultimate-product-content {
 }
 .profile-dropdown {
 	position: absolute;
-	top: calc(100% + 8px);
-	right: 0;
-	min-width: 170px;
+	top: calc(100% + 10px);
+	right: -8px;
+	min-width: 210px;
 	background: var(--panel, #1a1a1a);
 	border: 1px solid var(--glass, rgba(255,255,255,0.08));
 	border-radius: 10px;
@@ -3136,6 +3141,11 @@ body.success-page .success-card .ultimate-product-content {
 }
 .profile-dropdown-item:hover {
 	background: rgba(239, 68, 68, 0.12);
+}
+.profile-dropdown-divider {
+	margin-top: 2px;
+	border-top: 1px solid var(--glass, rgba(255,255,255,0.06));
+	padding-top: 10px;
 }
 .profile-signout-btn {
 	color: #f87171;

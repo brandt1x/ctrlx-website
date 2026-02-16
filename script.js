@@ -863,8 +863,11 @@ document.addEventListener('DOMContentLoaded', function () {
 				'</svg>' +
 			'</button>' +
 			'<div class="profile-dropdown" hidden>' +
-				'<button type="button" class="profile-dropdown-item" data-action="account">Account</button>' +
+				'<button type="button" class="profile-dropdown-item" data-action="account">Account Overview</button>' +
 				'<button type="button" class="profile-dropdown-item" data-action="purchases">View Purchases</button>' +
+				'<button type="button" class="profile-dropdown-item" data-action="downloads">Open Downloads</button>' +
+				'<button type="button" class="profile-dropdown-item profile-dropdown-divider" data-action="support">Contact Support</button>' +
+				'<button type="button" class="profile-dropdown-item" data-action="discord">Join Discord</button>' +
 				'<button type="button" class="profile-dropdown-item profile-signout-btn" data-action="signout">Sign out</button>' +
 			'</div>';
 		headerActions.appendChild(wrapper);
@@ -886,7 +889,7 @@ document.addEventListener('DOMContentLoaded', function () {
 				'<div class="account-hub-body">' +
 					'<div class="account-hub-view" data-hub-view="account">' +
 						'<p class="account-hub-email"></p>' +
-						'<p class="account-hub-copy">Manage your sign-in and purchase access from one place.</p>' +
+						'<p class="account-hub-copy">Manage your scripts, secure downloads, and account access from one command center.</p>' +
 						'<div class="account-hub-actions">' +
 							'<a class="btn ghost" href="/account.html">Open Full Account Page</a>' +
 						'</div>' +
@@ -949,6 +952,12 @@ document.addEventListener('DOMContentLoaded', function () {
 				closeDropdown();
 			}
 		});
+		document.addEventListener('pointerdown', (e) => {
+			if (dropdown.hidden) return;
+			const target = e.target;
+			if (target instanceof Node && wrapper.contains(target)) return;
+			closeDropdown();
+		}, true);
 		document.addEventListener('click', () => {
 			if (!dropdown.hidden) closeDropdown();
 		});
@@ -958,6 +967,10 @@ document.addEventListener('DOMContentLoaded', function () {
 			if (!(target instanceof HTMLElement)) return;
 			if (target.dataset.close === '1' || target.classList.contains('account-hub-close')) closeHub();
 		});
+		window.addEventListener('blur', closeDropdown);
+		window.addEventListener('scroll', () => {
+			if (!dropdown.hidden) closeDropdown();
+		}, { passive: true });
 		window.addEventListener('keydown', (e) => {
 			if (e.key === 'Escape') {
 				if (!dropdown.hidden) closeDropdown();
@@ -1023,8 +1036,23 @@ document.addEventListener('DOMContentLoaded', function () {
 			btn.addEventListener('click', async () => {
 				const action = btn.dataset.action;
 				closeDropdown();
+				if (action === 'downloads') {
+					window.location.href = '/account.html#purchases';
+					return;
+				}
+				if (action === 'support') {
+					window.location.href = '/contact.html';
+					return;
+				}
+				if (action === 'discord') {
+					window.open('https://discord.gg/q9KWFd9xxH', '_blank', 'noopener');
+					return;
+				}
 				const client = await ensureClient();
-				if (!client) return;
+				if (!client) {
+					window.location.href = '/account.html';
+					return;
+				}
 				if (action === 'signout') {
 					await client.auth.signOut();
 					window.location.href = '/account.html';
