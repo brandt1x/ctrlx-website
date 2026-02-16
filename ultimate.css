@@ -67,6 +67,7 @@
 	padding: 0 16px;
 	border-radius: 999px;
 	text-decoration: none;
+	font-family: var(--font-sans);
 	font-weight: 700;
 	letter-spacing: 0.02em;
 	color: #f9fafb;
@@ -132,9 +133,12 @@
 }
 
 .nav-ultimate {
+	background: linear-gradient(180deg, #2e2d3a 0%, #2c2b3c 50%, #26242d 100%) !important;
+	border: 1px solid var(--accent) !important;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 	color: var(--accent) !important;
-	border-color: rgba(239, 68, 68, 0.55) !important;
-	box-shadow: 0 0 22px rgba(239, 68, 68, 0.28) !important;
+	text-decoration: none !important;
+	border-radius: 8px !important;
 	font-size: 0.95rem;
 	letter-spacing: 0.08em;
 	padding-left: 26px;
@@ -142,7 +146,17 @@
 }
 
 .nav-ultimate:hover {
-	box-shadow: 0 0 34px rgba(239, 68, 68, 0.52) !important;
+	background: linear-gradient(180deg, #35344a 0%, #2e2d3a 50%, #2a2832 100%) !important;
+	border-color: var(--accent) !important;
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
+	color: var(--accent) !important;
+}
+
+/* Ensure no link underline on ULTIMATE */
+nav a.nav-ultimate::after,
+.header-right nav a.nav-ultimate::after {
+	display: none !important;
+	content: none !important;
 }
 
 /* Hero */
@@ -243,6 +257,7 @@
 	background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.18), transparent);
 	transform: rotate(8deg);
 	transition: transform .65s ease;
+	pointer-events: none;
 }
 
 .ultimate-product:hover::after {
