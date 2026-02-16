@@ -221,8 +221,13 @@
 					purchasesLoaded = true;
 				}
 			}
-			dashboardTabs.forEach((btn) => {
-				btn.addEventListener('click', () => setDashboardView(btn.dataset.dashboardView));
+			dashboardEl.addEventListener('click', (e) => {
+				const target = e.target;
+				if (!(target instanceof Element)) return;
+				const btn = target.closest('.account-tab-btn');
+				if (!btn) return;
+				e.preventDefault();
+				setDashboardView(btn.dataset.dashboardView || 'account');
 			});
 
 			function timeRemaining(expiresAt) {
@@ -235,18 +240,27 @@
 			}
 
 			async function loadPurchases() {
+				const renderEmptyPurchases = (leadText) => {
+					purchasesEl.innerHTML =
+						'<p class="muted">' + leadText + '</p>' +
+						'<div class="success-support-btns">' +
+						'<a href="ultimate.html" class="btn">Browse Ultimate</a>' +
+						'<a href="zen-scripts.html" class="btn ghost">View Zen Scripts</a>' +
+						'<a href="services.html" class="btn ghost">Explore Services</a>' +
+						'</div>';
+				};
 				const { data: { session } } = await supabase.auth.getSession();
 				if (!session?.access_token) return;
 				const res = await fetch('/api/my-purchases', {
 					headers: { 'Authorization': 'Bearer ' + session.access_token } });
 				const data = await res.json();
 				if (!res.ok) {
-					purchasesEl.innerHTML = '<p class="muted">Something went wrong loading your purchases. Please try refreshing the page.</p>';
+					renderEmptyPurchases('You have no purchases available to show right now.');
 					return;
 				}
 				const purchases = data.purchases || [];
 				if (purchases.length === 0) {
-					purchasesEl.innerHTML = '<p class="muted">You don\'t have any purchases to view yet. Browse our <a href="zen-scripts.html">Zen Scripts</a> or <a href="ultimate.html">Ultimate</a> page and your items will appear here instantly.</p>';
+					renderEmptyPurchases('You have no purchases yet. Start with one of our top products below.');
 					return;
 				}
 				const html = purchases.map(p => {
@@ -273,9 +287,12 @@
 					}
 					const date = p.created_at ? new Date(p.created_at).toLocaleDateString() : '';
 					const statusLabel = expired
-						? '<span class="purchase-status purchase-status-expired">Expired</span>'
+						? '<span class="purchase-status purchase-status-expired">Purchased • Download window expired</span>'
 						: (remaining ? '<span class="purchase-status purchase-status-active">' + remaining + '</span>' : '');
-					return '<div class="account-purchase-block' + (expired ? ' purchase-expired' : '') + '"><h4>Purchase ' + date + ' ' + statusLabel + '</h4><div class="success-download-list">' + links.join('') + '</div></div>';
+					const expiredMeta = expired
+						? '<p class="purchase-expired-note">This purchase is still on your account, but the 24-hour download window has ended.</p><div class="purchase-expired-actions"><a href="contact.html" class="btn ghost">Contact Support</a></div>'
+						: '';
+					return '<div class="account-purchase-block' + (expired ? ' purchase-expired' : '') + '"><h4>Purchase ' + date + ' ' + statusLabel + '</h4><div class="success-download-list">' + links.join('') + '</div>' + expiredMeta + '</div>';
 				}).join('');
 				purchasesEl.innerHTML = html + '<p class="success-instruction">Load the .gpc file(s) into Zen Studio and flash to your CronusZen.</p>';
 

@@ -991,32 +991,43 @@ document.addEventListener('DOMContentLoaded', function () {
 		});
 
 		async function loadPurchasesIntoHub(client) {
+			const renderHubEmpty = (leadText) => {
+				purchasesEl.innerHTML =
+					'<p class="muted">' + leadText + '</p>' +
+					'<div class="account-hub-actions">' +
+					'<a class="btn ghost" href="/ultimate.html">Browse Ultimate</a>' +
+					'<a class="btn ghost" href="/zen-scripts.html">View Zen Scripts</a>' +
+					'<a class="btn ghost" href="/services.html">Explore Services</a>' +
+					'</div>';
+			};
 			purchasesEl.innerHTML = '<p class="muted">Loading purchases...</p>';
 			try {
 				const { data: { session } } = await client.auth.getSession();
 				if (!session?.access_token) {
-					purchasesEl.innerHTML = '<p class="muted">Sign in to view purchases.</p>';
+					renderHubEmpty('Sign in to view purchases.');
 					return;
 				}
 				const res = await fetch('/api/my-purchases', { headers: { 'Authorization': 'Bearer ' + session.access_token } });
 				const data = await res.json();
 				if (!res.ok) {
-					purchasesEl.innerHTML = '<p class="muted">Could not load purchases right now. Please try again.</p>';
+					renderHubEmpty('You have no purchases available to show right now.');
 					return;
 				}
 				const purchases = data.purchases || [];
 				if (!purchases.length) {
-					purchasesEl.innerHTML = '<p class="muted">You don\'t have any purchases to view yet. When you check out, your products will appear here instantly.</p>';
+					renderHubEmpty('You have no purchases yet. Start with one of our top products below.');
 					return;
 				}
 				const items = purchases.map((p) => {
 					const date = p.created_at ? new Date(p.created_at).toLocaleDateString() : 'Unknown date';
-					const badge = p.isExpired ? '<span class="purchase-status purchase-status-expired">Expired</span>' : '<span class="purchase-status purchase-status-active">Active</span>';
+					const badge = p.isExpired
+						? '<span class="purchase-status purchase-status-expired">Purchased • Window expired</span>'
+						: '<span class="purchase-status purchase-status-active">Active</span>';
 					return '<div class="account-hub-purchase-item"><strong>Purchase ' + date + '</strong>' + badge + '</div>';
 				}).join('');
 				purchasesEl.innerHTML = items + '<div class="account-hub-actions"><a class="btn ghost" href="/account.html#purchases">Open detailed downloads</a></div>';
 			} catch (_) {
-				purchasesEl.innerHTML = '<p class="muted">Could not load purchases right now. Please try again.</p>';
+				renderHubEmpty('You have no purchases available to show right now.');
 			}
 		}
 
