@@ -4336,4 +4336,54 @@ body[data-motion-tier="low"] .cursor-halo {
 			transform: translateX(4px) scale(1.01);
 		}
 	}
+
+	/* Mobile nav/account ergonomics */
+	.header-actions {
+		flex-wrap: wrap;
+		justify-content: center;
+		row-gap: 8px;
+	}
+
+	.header-actions a.btn {
+		flex: 1 1 calc(50% - 10px);
+		min-width: 126px;
+		max-width: none;
+	}
+
+	.profile-trigger,
+	.cart-toggle,
+	.theme-toggle {
+		min-width: 46px;
+		min-height: 46px;
+	}
+
+	.profile-dropdown {
+		right: 0;
+		left: auto;
+		min-width: min(88vw, 260px);
+	}
+
+	.profile-dropdown-item {
+		padding: 12px 16px;
+		font-size: 0.94rem;
+	}
+
+	.account-auth {
+		max-width: 100%;
+	}
+
+	.account-tab {
+		min-height: 46px;
+	}
+
+	.account-dashboard-tabs {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 8px;
+	}
+
+	.success-support-text {
+		font-size: 0.9rem;
+		line-height: 1.6;
+	}
 }

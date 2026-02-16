@@ -107,6 +107,10 @@
 			let oauthRedirectUrl;
 			try {
 				const cfgRes = await fetch('/api/supabase-config');
+				if (!cfgRes.ok) {
+					const cfgErr = await cfgRes.json().catch(() => ({}));
+					throw new Error(cfgErr.error || ('Failed to load config (' + cfgRes.status + ')'));
+				}
 				const cfg = await cfgRes.json();
 				if (!cfg.url || !cfg.anonKey) throw new Error('Supabase not configured');
 				const origin = window.location.origin;
@@ -118,7 +122,10 @@
 				if (!createClient) throw new Error('Supabase script not loaded');
 				supabase = createClient(cfg.url, cfg.anonKey);
 			} catch (e) {
-				document.getElementById('auth-error').textContent = 'Supabase not configured. Add SUPABASE_URL and SUPABASE_ANON_KEY to your environment.';
+				const localHint = /^localhost$|^127\.0\.0\.1$/.test(window.location.hostname)
+					? ' Run with "vercel dev" and set SUPABASE_URL and SUPABASE_ANON_KEY in .env.local.'
+					: ' Set SUPABASE_URL and SUPABASE_ANON_KEY in your Vercel environment variables and redeploy.';
+				document.getElementById('auth-error').textContent = (e?.message || 'Supabase not configured.') + localHint;
 				document.getElementById('auth-error').hidden = false;
 				return;
 			}

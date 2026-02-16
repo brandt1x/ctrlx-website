@@ -22,6 +22,10 @@ Add these in your Vercel project settings:
 | `SUPABASE_ANON_KEY` | Your Supabase anon/public key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Your Supabase service_role key |
 
+### Local development
+
+If you run locally, use `vercel dev` (not a static server) and create `.env.local` from `.env.local.example`.
+
 ## 3. Stripe Webhook
 
 1. In [Stripe Dashboard](https://dashboard.stripe.com/webhooks), click **Add endpoint**
