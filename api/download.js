@@ -11,13 +11,14 @@ const SCRIPT_MAP = {
 	'apex': { file: 'Cntrl-X-Apex.gpc', filename: 'Cntrl-X-Apex.gpc', price: 15, nameMatch: 'apex' },
 	'arc': { file: 'Cntrl-X-Arc.gpc', filename: 'Cntrl-X-Arc.gpc', price: 15, nameMatch: 'arc' },
 	'fortnite': { file: 'Cntrl-X-Fortnite.gpc', filename: 'Cntrl-X-Fortnite.gpc', price: 20, nameMatch: 'fortnite' },
-	'siege': { file: 'Cntrl-X-Siege.gpc', filename: 'Cntrl-X-Siege.gpc', price: 20, nameMatch: 'siege' },
 	'rust': { file: 'Cntrl-X-Rust.gpc', filename: 'Cntrl-X-Rust.gpc', price: 20, nameMatch: 'rust' },
 };
 
 const BUNDLE_FILES = [
 	'Cntrl-X-Apex.gpc', 'Cntrl-X-Arc.gpc', 'Cntrl-X-COD.gpc',
-	'Cntrl-X-Fortnite.gpc', 'Cntrl-X-Rust.gpc', 'Cntrl-X-Siege.gpc', 'Cntrl-X-2K.gpc',
+	'Cntrl-X-Fortnite.gpc', 'Cntrl-X-Rust.gpc',
+	'Cntrl-X-R6-Attackers.gpc', 'Cntrl-X-R6-Defenders.gpc', 'R6-Read-Me.txt',
+	'Cntrl-X-2K.gpc',
 ];
 
 function hasPurchased(items, script) {
@@ -63,6 +64,30 @@ module.exports = async (req, res) => {
 		}
 
 		const flags = getPurchaseFlags(purchase.items);
+
+		if (type === 'siege' || (type === 'script' && script === 'siege')) {
+			if (!flags.hasSiege) return res.status(403).json({ error: 'Siege not purchased' });
+			const scriptsDir = path.join(__dirname, 'scripts');
+			const siegeFiles = [
+				{ src: 'Cntrl-X-R6-Attackers.gpc', name: 'Cntrl-X-R6-Attackers.gpc' },
+				{ src: 'Cntrl-X-R6-Defenders.gpc', name: 'Cntrl-X-R6-Defenders.gpc' },
+				{ src: 'R6-Read-Me.txt', name: 'R6 Read.Me.txt' },
+			];
+			for (const f of siegeFiles) {
+				if (!fs.existsSync(path.join(scriptsDir, f.src))) {
+					return res.status(500).json({ error: `Script file not found: ${f.src}` });
+				}
+			}
+			res.setHeader('Content-Type', 'application/zip');
+			res.setHeader('Content-Disposition', 'attachment; filename="Cntrl-X-R6-Siege.zip"');
+			const archive = archiver('zip', { zlib: { level: 9 } });
+			archive.pipe(res);
+			for (const f of siegeFiles) {
+				archive.file(path.join(scriptsDir, f.src), { name: f.name });
+			}
+			await archive.finalize();
+			return;
+		}
 
 		if (type === 'vision-x') {
 			if (!flags.hasVisionX) return res.status(403).json({ error: 'Vision-X not purchased' });
@@ -110,7 +135,7 @@ module.exports = async (req, res) => {
 			return;
 		}
 
-		return res.status(400).json({ error: 'Invalid type. Use type=vision-x|all-scripts|script' });
+		return res.status(400).json({ error: 'Invalid type. Use type=vision-x|siege|all-scripts|script' });
 	} catch (err) {
 		console.error(err);
 		res.status(500).json({ error: err.message || 'Download failed' });

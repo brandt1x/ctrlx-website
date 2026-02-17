@@ -1,776 +1,25 @@
-																									/*
+/*
 _________   ____________________________.____              ____  ___
 \_   ___ \  \      \__    ___/\______   \    |             \   \/  /
 /    \  \/  /   |   \|    |    |       _/    |      ______  \     / 
 \     \____/    |    \    |    |    |   \    |___  /_____/  /     \ 
  \______  /\____|__  /____|    |____|_  /_______ \         /___/\  \
-        \/         \/                 \/        \/               \_/																																	/*
+        \/         \/                 \/        \/               \_/
 
-Welcome to Cntrl-x R6! This is the Premium model R6 Cronus Zen script.
+Welcome to Cntrl-x Siege Defenders! This is the Premium model Siege Defenders Cronus Zen script.
 
 To protect the quality of our scripts and community, all guides and settings are private.
 To unlock full access, open a ticket in our Discord and verify your order. Once verified, you'll unlock private guides, fast support and personalized help.
 
 Support:
-Cntrl-x.com																																													*/
-
-/*
-STOMPN SIEGE SETTINGS + ZEN ATTACHMNETS
-
- 
-
-PLEASE NOTE: All the single fire guns such as secondary pistols and dmrs, have the muzzle break attachment on it! And every gun that has an ACOG, is used? 
-
- 
-
-CONTROLLER ROTATION CLASSIC!
-
-
-MAIN: 
-
- 
-
-Vertical - 40 
-
-
-Horizontal - 100
-
-
-Stick deadzones - 5 
-
-
-Trigger deadzones - 0 
-
- 
-
-ADS: 
-
- 
-
-1.0x - 24
-
-
-2.5x - 37
-
-
-3.5x - 48 
-
-
-5.0x - 50 
-
-
-12.0x - 50 
-
- 
-
-OPTICS: 
-
- 
-
-Red, opacity - 80 
-
- 
-
- 
-
-ATTACKERS: 
-
- 
-
-STRIKER:
-
-(primary) extended barrel, horizontal grip 
-
- 
-
-SLEDGE:
-
-(primary) compensator, vertical grip 
-
- 
-
-THATCHER:
-
-(primary) compensator, vertical grip 
-
- 
-
-ASH: 
-
-(primary) muzzle break, horizontal grip 
-
- 
-
-THERMITE: 
-
-(primary) compensator, vertical grip 
-
- 
-
-TWITCH: 
-
-(primary) extended barrel 
-
- 
-
-MONTAGNE:
-
-muzzle break 
-
- 
-
-GLAZ:
-
-(primary) suppressor, vertical grip  
-
-(secondary) compensator 
-
- 
-
-FUZE: 
-
-(primary) flash hider, vertical grip 
-
- 
-
-BLITZ: 
-
-muzzle break 
-
- 
-
-IQ: 
-
-(primary) extended barrel, horizontal grip 
-
- 
-
-BUCK: 
-
-(primary) extended barrel 
-
- 
-
-BLACKBEARD: 
-
-(primary) muzzle break, horizontal grip 
-
-(secondary) none 
-
- 
-
-CAPITAO: 
-
-(primary) extended barrel, horizontal grip  
-
- 
-
-HIBANA: 
-
-(primary) suppressor, vertical grip 
-
-(secondary) compensator 
-
- 
-
-JACKAL: 
-
-(primary) suppressor, vertical grip 
-
- 
-
-YING: 
-
-(primary) compensator, vertical grip 
-
- 
-
-ZOFIA:
-
-(primary) compensator, vertical grip 
-
- 
-
-DOKKAEBI: 
-
-(primary) muzzle break, horizontal grip 
-
-(secondary) vertical grip 
-
- 
-
-LION: 
-
-(primary) compensator, horizontal grip 
-
- 
-
-FINKA: 
-
-(primary) compensator, vertical grip 
-
- 
-
-MAVERICK: 
-
-(primary) extended barrel, horizontal grip 
-
- 
-
-NOMAD: 
-
-(primary) suppressor, vertical grip 
-
- 
-
-GRIDLOCK:
-
-(primary) flash hider, horizontal grip 
-
- 
-
-NOKK: 
-
-(primary) compensator 
-
-(secondary) muzzle break 
-
- 
-
-AMARU: 
-
-(primary) flash hider, vertical grip 
-
-(secondary) compensator, vertical grip 
-
- 
-
-KALI: 
-
-(secondary) compensator 
-
- 
-
-IANA:  
-
-(primary) compensator, vertical grip 
-
- 
-
-ACE: 
-
-(primary) flash hider, vertical grip 
-
- 
-
-ZERO: 
-
-(primary) extended barrel, vertical grip 
-
- 
-
-FLORES:  
-
-(primary) suppressor, vertical grip 
-
- 
-
-OSA: 
-
-(primary) compensator, vertical grip 
-
- 
-
-SENS: 
-
-(primary) muzzle break, horizontal grip 
-
- 
-
-GRIM:  
-
-(primary) extended barrel, horizontal grip 
-
- 
-
-BRAVA: 
-
-(primary) extended barrel, horizontal grip 
-
- 
-
-RAM: 
-
-(primary) muzzle break, horizontal grip 
-
- 
-
-DEIMOS: 
-
-(primary) compensator, horizontal grip 
-
-
-RAUORA: 417 - 30, -1 ?? REAPER MK2 - 50, -5 
-
-(primary) muzzle break, horizontal grip
-
-(secondary) compensator  
-
- 
-
- 
-
-DEFENDERS: 
-
- 
-
-SENTRY: 
-
-(primary) extended barrel, horizontal grip 
-
- 
-
-SMOKE:
-
-(secondary) compensator, vertical grip 
-
- 
-
-MUTE: 
-
-(secondary) compensator, vertical grip 
-
- 
-
-CASTLE:  
-
-(primary) compensator, horizontal grip 
-
- 
-
-PULSE: 
-
-(primary) compensator, horizontal grip 
-
- 
-
-DOC: 
-
-(primary) extended barrel, horizontal grip 
-
- 
-
-ROOK: 
-
-(primary) extended barrel, horizontal grip 
-
- 
-
-KAPKAN:
-
-(primary) extended barrel, horizontal grip 
-
- 
-
-TACHANKA: 
-
-(primary) extended barrel, horizontal grip 
-
-(secondary) compensator 
-
- 
-
-JAGER:  
-
-(primary) extended barrel, horizontal grip 
-
- 
-
-BANDIT:  
-
-(primary) suppresor 
-
- 
-
-FROST:
-
-(primary) extended barrel, horizontal grip 
-
- 
-
-VALKYRIE: 
-
-(primary) suppressor, horizontal grip 
-
-(secondary) muzzle break 
-
- 
-
-CAVEIRA: 
-
-(primary) suppresor 
-
- 
-
-ECHO: 
-
-(primary) horizontal grip 
-
-(secondary) compensator 
-
- 
-
-MIRA: 
-
-(primary) compensator, horizontal grip 
-
- 
-
-LESION: 
-
-(primary) suppresor, horizontal grip 
-
- 
-
-ELA: 
-
-(primary) compensator, horizontal grip 
-
- 
-
-VIGIL: 
-
-(primary) extended barrel, horizontal grip 
-
-(secondary) vertical grip 
-
- 
-
-MAESTRO: 
-
-(primary) compensator, horizontal grip 
-
- 
-
-ALIBI: 
-
-(primary) compensator, vertical grip 
-
- 
-
-CLASH: 
-
-(secondary) compensator 
-
- 
-
-KAID: 
-
-(primary) suppressor, horizontal grip 
-
- 
-
-MOZZIE: 
-
-(primary) extended barrel, horizontal grip 
-
- 
-
-WARDEN: 
-
-(secondary) vertical grip 
-
- 
-
-GOYO: 
-
-(primary) compensator, vertical grip 
-
- 
-
-WAMAI:  
-
-(primary) compensator 
-
- 
-
-ORYX: 
-
-(primary) suppressor, horizontal grip 
-
- 
-
-MELUSI: 
-
-(primary) extended barrel, horizontal grip 
-
- 
-
-ARUNI: 
-
-(primary) muzzle break, horizontal grip 
-
- 
-
-THUNDERBIRD: 
-
-(primary) suppressor, horizontal grip 
-
-(secondary) compensator 
-
- 
-
-THORN: 
-
-(primary) extended barrel, horizontal grip 
-
-(secondary) none 
-
- 
-
-AZAMI: 
-
-(primary) extended barrel, horizontal grip 
-
-(secondary) muzzle break 
-
- 
-
-SOLIS: 
-
-(primary) suppressor 
-
-(secondary) compensator, horizontal grip 
-
- 
-
-FENRIR: 
-
-(primary) compensator 
-
- 
-
-TUBARAO: 
-
-(primary) muzzle break, horizontal grip 
-
- 
-
-SKOPOS: 
-
-(primary) flash hider, horizontal grip
-
-
-
-DENARI: 
-
-(primary) compensator, horizontal grip
+Cntrl-x.com
 */
-
-/* =========================
-   Cntrl-x OLED (CX_) module
-   ========================= */
-define CX_JETS_COUNT = 8;
-define CX_LASERS_COUNT = 6;
-define CX_LOADING_TIMER = 3500;
-
-const string CX_splash_line1[] = { "Cntrl-x R6" };
-const string CX_splash_line2[] = { "By" };
-const string CX_splash_line3[] = { "CNTRL-X.COM" };
-const string CX_saver_line1[]  = { "CNTRL-X.COM" };
-const string CX_saver_line2[]  = { "L2+Options" };
-
-int CX_jet_x[CX_JETS_COUNT];
-int CX_jet_y[CX_JETS_COUNT];
-int CX_jet_speed[CX_JETS_COUNT];
-int CX_jet_i;
-
-int CX_laser_x[CX_LASERS_COUNT];
-int CX_laser_y[CX_LASERS_COUNT];
-int CX_laser_speed[CX_LASERS_COUNT];
-int CX_laser_i;
-
-int CX_sx = 2, CX_sy = 16;
-int CX_svx = 2, CX_svy = 2;
-int CX_msg_w, CX_line1_w, CX_line2_w;
-
-int CX_saver_timer = 0;
-int CX_initialized = 0;
-int CX_isLoadingScreen = 1;
-int CX_LoadingTimeToRun = 0;
-int CX_splash_progress = 0;
-int CX_splash_cx;
-
-int CX_stringLength;
-function CX_get_string_length(offset) {
-    CX_stringLength = 0;
-    while (duint8(offset++)) {
-        CX_stringLength++;
-    }
-    return CX_stringLength + 1;
-}
-
-function CX_center_x(f_chars, f_font) {
-    return (OLED_WIDTH / 2) - ((f_chars * f_font) / 2);
-}
-
-function CX_update_jets() {
-    for (CX_jet_i = 0; CX_jet_i < CX_JETS_COUNT; CX_jet_i++) {
-        CX_jet_y[CX_jet_i] -= CX_jet_speed[CX_jet_i];
-        if (CX_jet_y[CX_jet_i] < -10) {
-            CX_jet_x[CX_jet_i] = random(5, 122);
-            CX_jet_y[CX_jet_i] = random(64, 90);
-            CX_jet_speed[CX_jet_i] = random(1, 3);
-        }
-    }
-}
-
-function CX_draw_jets() {
-    for (CX_jet_i = 0; CX_jet_i < CX_JETS_COUNT; CX_jet_i++) {
-        if (CX_jet_y[CX_jet_i] >= 0 && CX_jet_y[CX_jet_i] < 63) {
-            if (CX_jet_x[CX_jet_i] >= 0 && CX_jet_x[CX_jet_i] < 127) {
-                pixel_oled(CX_jet_x[CX_jet_i], CX_jet_y[CX_jet_i], 1);
-            }
-            if (CX_jet_y[CX_jet_i] + 1 >= 0 && CX_jet_y[CX_jet_i] + 1 < 63) {
-                pixel_oled(CX_jet_x[CX_jet_i], CX_jet_y[CX_jet_i] + 1, 1);
-            }
-            if (CX_jet_y[CX_jet_i] + 2 >= 0 && CX_jet_y[CX_jet_i] + 2 < 63) {
-                pixel_oled(CX_jet_x[CX_jet_i], CX_jet_y[CX_jet_i] + 2, 1);
-            }
-            if (CX_jet_x[CX_jet_i] - 1 >= 0 && CX_jet_y[CX_jet_i] + 2 < 63) {
-                pixel_oled(CX_jet_x[CX_jet_i] - 1, CX_jet_y[CX_jet_i] + 2, 1);
-            }
-            if (CX_jet_x[CX_jet_i] + 1 < 127 && CX_jet_y[CX_jet_i] + 2 < 63) {
-                pixel_oled(CX_jet_x[CX_jet_i] + 1, CX_jet_y[CX_jet_i] + 2, 1);
-            }
-        }
-    }
-}
-
-function CX_update_lasers() {
-    for (CX_laser_i = 0; CX_laser_i < CX_LASERS_COUNT; CX_laser_i++) {
-        CX_laser_y[CX_laser_i] -= CX_laser_speed[CX_laser_i];
-        if (CX_laser_y[CX_laser_i] < -5) {
-            CX_laser_x[CX_laser_i] = random(5, 122);
-            CX_laser_y[CX_laser_i] = random(64, 100);
-            CX_laser_speed[CX_laser_i] = random(2, 4);
-        }
-    }
-}
-
-function CX_draw_lasers() {
-    for (CX_laser_i = 0; CX_laser_i < CX_LASERS_COUNT; CX_laser_i++) {
-        if (CX_laser_y[CX_laser_i] >= 0 && CX_laser_y[CX_laser_i] < 63) {
-            if (CX_laser_x[CX_laser_i] >= 0 && CX_laser_x[CX_laser_i] < 127) {
-                pixel_oled(CX_laser_x[CX_laser_i], CX_laser_y[CX_laser_i], 1);
-            }
-            if (CX_laser_y[CX_laser_i] + 1 >= 0 && CX_laser_y[CX_laser_i] + 1 < 63) {
-                pixel_oled(CX_laser_x[CX_laser_i], CX_laser_y[CX_laser_i] + 1, 1);
-            }
-            if (CX_laser_y[CX_laser_i] + 2 >= 0 && CX_laser_y[CX_laser_i] + 2 < 63) {
-                pixel_oled(CX_laser_x[CX_laser_i], CX_laser_y[CX_laser_i] + 2, 1);
-            }
-        }
-    }
-}
-
-function CX_draw_splash(load_pct) {
-    cls_oled(OLED_BLACK);
-    CX_draw_jets();
-    CX_draw_lasers();
-    line_oled(2, 2, 2, 10, 1, OLED_WHITE);
-    line_oled(2, 2, 10, 2, 1, OLED_WHITE);
-    line_oled(OLED_WIDTH - 3, 2, OLED_WIDTH - 3, 10, 1, OLED_WHITE);
-    line_oled(OLED_WIDTH - 11, 2, OLED_WIDTH - 3, 2, 1, OLED_WHITE);
-    line_oled(2, OLED_HEIGHT - 3, 2, OLED_HEIGHT - 11, 1, OLED_WHITE);
-    line_oled(2, OLED_HEIGHT - 3, 10, OLED_HEIGHT - 3, 1, OLED_WHITE);
-    line_oled(OLED_WIDTH - 3, OLED_HEIGHT - 3, OLED_WIDTH - 3, OLED_HEIGHT - 11, 1, OLED_WHITE);
-    line_oled(OLED_WIDTH - 11, OLED_HEIGHT - 3, OLED_WIDTH - 3, OLED_HEIGHT - 3, 1, OLED_WHITE);
-    line_oled(34, 16, 94, 16, 1, OLED_WHITE);
-    line_oled(34, 38, 94, 38, 1, OLED_WHITE);
-    line_oled(58, 27, 70, 27, 1, OLED_WHITE);
-    line_oled(64, 21, 64, 33, 1, OLED_WHITE);
-    CX_splash_cx = CX_center_x(CX_get_string_length(CX_splash_line1[0]), OLED_FONT_SMALL_WIDTH);
-    print(CX_splash_cx, 5, OLED_FONT_SMALL, OLED_WHITE, CX_splash_line1[0]);
-    CX_splash_cx = CX_center_x(CX_get_string_length(CX_splash_line2[0]), OLED_FONT_SMALL_WIDTH);
-    print(CX_splash_cx, 18, OLED_FONT_SMALL, OLED_WHITE, CX_splash_line2[0]);
-    CX_splash_cx = CX_center_x(CX_get_string_length(CX_splash_line3[0]), OLED_FONT_SMALL_WIDTH);
-    print(CX_splash_cx, 40, OLED_FONT_SMALL, OLED_WHITE, CX_splash_line3[0]);
-    line_oled(14, 55, OLED_WIDTH - 15, 55, 1, OLED_WHITE);
-    line_oled(14, 58, OLED_WIDTH - 15, 58, 1, OLED_WHITE);
-    if (load_pct > 0) {
-        rect_oled(16, 56, (96 * load_pct) / 100, 1, 1, OLED_WHITE);
-    }
-}
-
-function CX_saver_step() {
-    cls_oled(OLED_BLACK);
-    CX_draw_jets();
-    CX_draw_lasers();
-    CX_line1_w = (CX_get_string_length(CX_saver_line1[0]) - 1) * OLED_FONT_SMALL_WIDTH;
-    CX_line2_w = (CX_get_string_length(CX_saver_line2[0]) - 1) * OLED_FONT_SMALL_WIDTH;
-    if (CX_line1_w > CX_line2_w) { CX_msg_w = CX_line1_w; } else { CX_msg_w = CX_line2_w; }
-    print(CX_sx, CX_sy, OLED_FONT_SMALL, OLED_WHITE, CX_saver_line1[0]);
-    print(CX_sx + ((CX_msg_w - CX_line2_w) / 2), CX_sy + 14, OLED_FONT_SMALL, OLED_WHITE, CX_saver_line2[0]);
-    CX_saver_timer += get_rtime();
-    if (CX_saver_timer >= 80) {
-        CX_sx += CX_svx;
-        CX_sy += CX_svy;
-        if (CX_sx <= 1 || CX_sx >= (OLED_WIDTH - CX_msg_w - 1)) { CX_svx = -CX_svx; }
-        if (CX_sy <= 1 || CX_sy >= (OLED_HEIGHT - 38 - 1)) { CX_svy = -CX_svy; }
-        CX_saver_timer = 0;
-    }
-}
-
-function CX_Init() {
-    for (CX_jet_i = 0; CX_jet_i < CX_JETS_COUNT; CX_jet_i++) {
-        CX_jet_x[CX_jet_i] = random(5, 122);
-        CX_jet_y[CX_jet_i] = random(64, 128);
-        CX_jet_speed[CX_jet_i] = random(1, 3);
-    }
-    for (CX_laser_i = 0; CX_laser_i < CX_LASERS_COUNT; CX_laser_i++) {
-        CX_laser_x[CX_laser_i] = random(5, 122);
-        CX_laser_y[CX_laser_i] = random(64, 128);
-        CX_laser_speed[CX_laser_i] = random(2, 4);
-    }
-    CX_sx = 2; CX_sy = 16;
-    CX_svx = 2; CX_svy = 2;
-    CX_saver_timer = 0;
-    CX_isLoadingScreen = 1;
-    CX_LoadingTimeToRun = 0;
-    CX_splash_progress = 0;
-    CX_initialized = 1;
-    CX_draw_splash(0);
-}
-
-function CX_Tick(allow_idle) {
-    if (!CX_initialized) CX_Init();
-
-    if (CX_isLoadingScreen) {
-        CX_LoadingTimeToRun += get_rtime();
-        CX_update_jets();
-        CX_update_lasers();
-        CX_splash_progress = (CX_LoadingTimeToRun * 100) / CX_LOADING_TIMER;
-        if (CX_splash_progress > 100) CX_splash_progress = 100;
-        CX_draw_splash(CX_splash_progress);
-        if (CX_LoadingTimeToRun >= CX_LOADING_TIMER) {
-            cls_oled(OLED_BLACK);
-            CX_isLoadingScreen = 0;
-            CX_saver_timer = 80;
-        }
-    } else if (allow_idle) {
-        CX_update_jets();
-        CX_update_lasers();
-        CX_saver_step();
-    }
-}
-
 const string OperatorName[] 	= {
 	//	0			1			2			3			4			5			6			7			8			9
 	"SMOKE",	"MUTE",			"CASTLE",	"PULSE",	"DOC",		"ROOK", 	"KAPKAN",	"TACHANKA",	"JAGER",	"BANDIT",
 	"FROST",	"VALKYRIE",		"CAVEIRA",	"ECHO",		"MIRA",		"LESION",	"ELA",		"VIGIL",	"MAESTRO",	"ALIBI",
 	"CLASH",	"KAID",			"MOZZIE",	"WARDEN",	"GOYO",		"WAMAI",	"ORYX",		"MELUSI",	"ARUNI", 	"THUNDERBIRD", 	
-	"THORN",	"AZAMI", 		"SOLIS",	"FENRIR",	"TUBARAO",	"SENTRY",	"SKOPOS",   "DENARI",/*38 Defenders*/ ""};
+	"THORN",	"AZAMI", 		"SOLIS",	"FENRIR",	"TUBARAO",	"SENTRY",	"SKOPOS", /*37 Defenders*/ ""};
 const string GunName[]			= {
 //	0				1				2				3				4				5				6				7				8			9
 "L85A2",		"M590A1",		"P226 MK 25",	"SMG-11",		"USP40",		"ARX200",		"G36C",			"MK1 9MM",		"AUG A2",	"P12",			
@@ -792,8 +41,8 @@ const string GunName[]			= {
 "COMMANDO 9",	"P10 RONI",		"SDP 9mm",		"UMP45",		"P90",			"M870",			"416CCARBINE",	"9X19VSN",		"9MM C1",	"SUPER90",
 //	90				91				92				93				94				95				96				97				98			99
 "AUG A3",		"T-5 SMG",		"M12",			"SPAS-15",		"LUISON",		"MP5SD",		"SCORPION",		"FO-12",		"K1A",		"ALDA 5.56",	
-//	100				101				102				103				104				105             106             107             108
-"ACS12",		"KERATOS.357",	"Mx4 Storm",	"DP27",			"UZK50GI",		"POF-9",		".44VENDETTA",	"PCX-33",	    "GLAIVE-12",  ",""};
+//	100				101				102				103				104				105             106             107
+"ACS12",		"KERATOS.357",	"Mx4 Storm",	"DP27",			"UZK50GI",		"POF-9",		".44VENDETTA",	"PCX-33",	""};
 const int8 	 GunDetail[][]		= {
 //	0		1		2		3		4		5		6		7		8		9
 	{0,0},	{1,1},	{2,1},	{4,0},	{2,1},	{0,0},	{0,0},	{2,1},	{0,0},	{2,1},			
@@ -815,8 +64,8 @@ const int8 	 GunDetail[][]		= {
 	{0,0},	{3,0},	{2,1},	{3,0},	{3,0},	{1,1},	{0,0},	{3,0},	{3,0},	{1,1},
 //	90		91		92		93		94		95		96		97		98		99
 	{3,0},	{3,0},	{3,0},	{1,1},	{2,1},	{3,0},	{3,0},	{1,1},	{3,0},	{6,0},	
-//	100		101		102		103		104		105     106     107      108
-	{1,1},	{2,1},	{3,0},	{6,0},	{3,0},	{0,0},	{2,1},	{0,0},  {1,0}};
+//	100		101		102		103		104		105     106     107
+	{1,1},	{2,1},	{3,0},	{6,0},	{3,0},	{0,0},	{2,1},	{0,0}};
 const string GunTypeName[] 		= {
 //	0,  			1,  		2,  		3,			4,  	5,  		6,  	7,  		8
 	"ASSAULT RFL", "SHOTGUN", "HANDGUN", "SMG", "MACHINE PTL", "MARKSMAN", "LMG", "HANDGONNE", "HANDGUN", ""};
@@ -830,28 +79,28 @@ const int8	 GunAssigment[][] 	= {
 	{76, 77, -1, 14, -1, -1}, /* GOYO */	{8,  75, -1, 101, 9, -1}, /* WAMAI */		{91,  72, -1, 74,   4, -1}, /* ORYX */		{73,   89, -1, 47,  55, -1}, /* Melusi */	
 	{60, 81, -1, 38, -1, -1}, /* ARUNI */	{62, 93, -1, 53, 51, -1}, /* THUNDERBIRD */	{104, 85, -1, 11,  65, -1}, /* THORN */		{87,  100, -1, 18,  -1, -1}, /* AZAMI */
 	{84, 48, -1, 3,  -1, -1},  /* SOLIS */	{26, 71, -1, 74, 17, -1}, /* FENRIR */	    {63,  78, -1, 2,   -1, -1}, /* TUBARAO */	{80,   85, -1, 20,  11, -1}  /* SENTRY */
-    ,{107, -1, -1, 14,-1, -1},  /* SKOPOS */ {96, 15, -1, 108, 2, -1}  /* DENARI */
+    ,{107, -1, -1, 14,-1, -1}  /* SKOPOS */
 };
 const int8	 GunAntiRecoil[][]	= {
-	{0,0,95,		0,0,95,		0,0,95,		55,-1,95,	55,-1,95,	55,-1,95},	/* SMOKE */		{0,0,95,		0,0,95,		0,0,95,		55,-1,95,	55,-1,95,	55,-1,95}, /* MUTE */
-	{29,-1,95,		29,-1,95,	29,-1,95,	 0,0,95,	 0,0,95,	 0,0,95},	/* CASTLE */	{29,-1,95,		29,-1,95,	29,-1,95,	24,3,95,	24,3,95,	24,3,95}, /* PULSE */		
-	{35,-2,95,		35,-2,95,	35,-2,95,	 0,0,95,	 0,0,95,	 0,0,95},	/* DOC */		{35,-2,95,		35,-2,95,	35,-2,95,	22,4,95,	22,4,95,	22,4,95}, /* ROOK */		
-	{33,-4,95,		33,-4,95,	33,-4,95,	22,2,95,	22,2,95,	22,2,95},	/* KAPKAN */	{33,-4,95,		33,-4,95,	33,-4,95,	56,-1,95,	56,-1,95,	56,-1,95}, /* TACHANKA */	
-	{45,-3,95,		45,-3,95,	45,-3,95,	25,3,95,	25,3,95,	25,3,95},	/* JAGER */		{38,8,95,		38,8,95,	38,8,95,	25,4,95,	25,4,95,	25,4,95}, /* BANDIT */	
-	{29,5,95,		29,5,95,	29,5,95,	 0,0,95,	 0,0,95,	 0,0,95},	/* FROST */		{36,-1,95,		36,-1,95,	36,-1,95,	45,0,95,	45,0,95,	45,0,95}, /* VALKYRIE */
-	{29,-2,95,		29,-2,95,	29,-2,95,	37,8,95,	37,8,95,	37,8,95},	/* CAVEIRA */	{36,-3,95,		36,-3,95,	36,-3,95,	56,-1,95,	56,-1,95,	56,-1,95}, /* ECHO */		
-	{45,4,95,		45,4,95,	45,4,95,     0,0,95,	 0,0,95,	 0,0,95},	/* MIRA */		{35,-1,95,		35,-1,95,	35,-1,95,	 0,0,95,	 0,0,95,	 0,0,95}, /* LESION */	
-	{47,7,95,		47,7,95,	47,7,95,	26,3,85,	26,3,85,	26,3,85},	/* Ela */		{0,0,95,		 0,0,95,	 0,0,95,	57,8,95,	57,8,95,	57,8,95}, /* VIGIL */
-	{39,0,95,		39,0,95,	39,0,95,	 0,0,95,	 0,0,95,	 0,0,95},	/* MAESTRO */	{43,6,95,		43,6,95,	43,6,95,	 0,0,95,	 0,0,95,	 0,0,95}, /* ALIBI */		
-	{41,-1,95,		41,-1,95,	41,-1,95,	0,0,95,		0,0,95,		0,0,95},	/* CLASH */		{61,0,95,		61,0,95,	61,0,95,	60,1,95,	60,1,95,	60,1,95}, /* KAID */		
-	{33,-2,95,		33,-2,95,	33,-2,95,	31,-1,95,	31,-1,95,	31,-1,95},	/* MOZZIE */	{0,0,95,		 0,0,95,	 0,0,95,	57,8,95,	57,8,95,	57,8,95}, /* WARDEN */	
-	{41,3,95,		41,3,95,	41,3,95,	26,2,95,	26,2,95,	26,2,95},	/* GOYO */		{37,6,95,		37,6,95,	37,6,95,	38,0,95,	38,0,95,	38,0,95}, /* WAMAI */		
-	{35,-1,95,		35,-1,95,	35,-1,95,	 0,0,95,	 0,0,95,	 0,0,95},	/* ORYX */		{35,-3,95,		35,-3,95,	35,-3,95,	 0,0,95,	 0,0,95,	 0,0,95}, /* Melusi */	
-	{31,-3,95,		31,-3,95,	31,-3,95,	24,3,95,	24,3,95,	24,3,95},	/* ARUNI */		{43,-3,95,		43,-3,95,	43,-3,95,	56,-1,95,	56,-1,95,	56,-1,95}, /* THUNDERBIRD */
-	{36,1,95,		36,1,95,	36,1,95,	48,2,95,	48,2,95,	48,2,95},	/* THORN */		{33,-4,95,		33,-4,95,	33,-4,95,	45,0,95,	45,0,95,	45,0,95}, /* AZUMI */
-	{40,2,95,		40,2,95,	40,2,95,	55,-1,95,	55,-1,95,	55,-1,95},    /* SOLIS */	{38,6,95,		38,6,95,	38,6,95,	 0,0,95,	 0,0,95,	 0,0,95}, /* FENRIR */
-	{28,1,95,		28,1,95,	28,1,95,	26,1,95,	26,1,95,	26,1,95},     /* TUBARAO */	{33,-2,95,		33,-2,95,	33,-2,95,	 0,0,95,	 0,0,95,	0,0,95}  /* SENTRY */
-    ,{34,-3,95,		34,-3,95,	34,-3,95,	26,3,95,	26,3,95,	26,3,95}     /* SKOPOS  */  ,{47,7,95,		47,7,95,	47,7,95,	26,3,95,	26,3,95,	26,3,95} /* DENARI  */
+	{0,0,95,		0,0,95,		0,0,95,		64,3,95,	64,3,95,	64,3,95},	/* SMOKE */		{0,0,95,		0,0,95,		0,0,95,		64,3,95,	64,3,95,	64,3,95}, /* MUTE */
+	{37,-1,95,		37,-1,95,	37,-1,95,	 0,0,95,	 0,0,95,	 0,0,95},	/* CASTLE */	{32,-1,95,		32,-1,95,	32,-1,95,	24,3,95,	24,3,95,	24,3,95}, /* PULSE */		
+	{46,-2,95,		46,-2,95,	46,-2,95,	 0,0,95,	 0,0,95,	 0,0,95},	/* DOC */		{46,-2,95,		46,-2,95,	46,-2,95,	22,4,95,	22,4,95,	22,4,95}, /* ROOK */		
+	{36,-4,95,		36,-4,95,	36,-4,95,	22,2,95,	22,2,95,	22,2,95},	/* KAPKAN */	{42,-4,95,		42,-4,95,	42,-4,95,	65,-1,95,	65,-1,95,	65,-1,95}, /* TACHANKA */	
+	{51,-3,95,		51,-3,95,	51,-3,95,	25,3,95,	25,3,95,	25,3,95},	/* JAGER */		{43,6,95,		43,6,95,	43,6,95,	25,4,95,	25,4,95,	25,4,95}, /* BANDIT */	
+	{37,6,95,		37,6,95,	37,6,95,	 0,0,95,	 0,0,95,	 0,0,95},	/* FROST */		{41,-1,95,		41,-1,95,	41,-1,95,	45,0,95,	45,0,95,	45,0,95}, /* VALKYRIE */
+	{31,-2,95,		31,-2,95,	31,-2,95,	37,8,95,	37,8,95,	37,8,95},	/* CAVEIRA */	{46,-3,95,		46,-3,95,	46,-3,95,	65,-1,95,	65,-1,95,	65,-1,95}, /* ECHO */		
+	{51,4,95,		51,4,95,	51,4,95,     0,0,95,	 0,0,95,	 0,0,95},	/* MIRA */		{39,-1,95,		39,-1,95,	39,-1,95,	 0,0,95,	 0,0,95,	 0,0,95}, /* LESION */	
+	{54,7,95,		54,7,95,	54,7,95,	26,3,85,	26,3,85,	26,3,85},	/* Ela */		{0,0,95,		 0,0,95,	 0,0,95,	66,9,95,	66,9,95,	66,9,95}, /* VIGIL */
+	{44,0,95,		44,0,95,	44,0,95,	 0,0,95,	 0,0,95,	 0,0,95},	/* MAESTRO */	{49,6,95,		49,6,95,	49,6,95,	 0,0,95,	 0,0,95,	 0,0,95}, /* ALIBI */		
+	{41,-1,95,		41,-1,95,	41,-1,95,	0,0,95,		0,0,95,		0,0,95},	/* CLASH */		{66,0,95,		66,0,95,	66,0,95,	60,1,95,	60,1,95,	60,1,95}, /* KAID */		
+	{37,-3,95,		37,-3,95,	37,-3,95,	31,-1,95,	31,-1,95,	31,-1,95},	/* MOZZIE */	{0,0,95,		 0,0,95,	 0,0,95,	66,9,95,	66,9,95,	66,9,95}, /* WARDEN */	
+	{55,1,95,		55,1,95,	55,1,95,	26,2,95,	26,2,95,	26,2,95},	/* GOYO */		{42,6,95,		42,6,95,	42,6,95,	38,0,95,	38,0,95,	38,0,95}, /* WAMAI */		
+	{39,-1,95,		39,-1,95,	39,-1,95,	 0,0,95,	 0,0,95,	 0,0,95},	/* ORYX */		{39,-3,95,		39,-3,95,	39,-3,95,	 0,0,95,	 0,0,95,	 0,0,95}, /* Melusi */	
+	{33,-3,95,		33,-3,95,	33,-3,95,	24,3,95,	24,3,95,	24,3,95},	/* ARUNI */		{48,-4,95,		48,-4,95,	48,-4,95,	65,-1,95,	65,-1,95,	65,-1,95}, /* THUNDERBIRD */
+	{40,1,95,		40,1,95,	40,1,95,	48,2,95,	48,2,95,	48,2,95},	/* THORN */		{36,-4,95,		36,-4,95,	36,-4,95,	45,0,95,	45,0,95,	45,0,95}, /* AZUMI */
+	{45,2,95,		45,2,95,	45,2,95,	64,3,95,	64,3,95,	64,3,95},    /* SOLIS */	{43,6,95,		43,6,95,	43,6,95,	 0,0,95,	 0,0,95,	 0,0,95}, /* FENRIR */
+	{31,1,95,		31,1,95,	31,1,95,	26,1,95,	26,1,95,	26,1,95},     /* TUBARAO */	{37,-3,95,		37,-3,95,	37,-3,95,	 0,0,95,	 0,0,95,	0,0,95}  /* SENTRY */
+    ,{38,-4,95,		38,-4,95,	38,-4,95,	26,3,95,	26,3,95,	26,3,95}     /* SKOPOS  */
 };
 const int8   operatorsByYear[] 	= {SMOKE, FROST, MIRA, MAESTRO, MOZZIE, ORYX, THUNDERBIRD, AZUMI, FENRIR};
 const string onCamsCaption[]	= {
@@ -1018,8 +267,7 @@ enum{
 	FENRIR,
 	TUBARAO,
 	SENTRY,
-    SKOPOS,
-    DENARI
+    SKOPOS
 }
 enum{
 	PROFILE_CONTROLLER,
@@ -1051,7 +299,7 @@ const int16 quickToggleMinMaxDef[][]= {
 };	
 
 define MAX_QT_COUNT					= 16;
-define OPERATORS_COUNT 				= 38;
+define OPERATORS_COUNT 				= 37;
 define SEASON_YEARS					= 8;
 
 int	GunMovementAdjustment[OPERATORS_COUNT * 2];
@@ -1164,13 +412,13 @@ int key_array_ptime[6];
 // rainbow led
 int incled = 1, decled, colorledx[3];
 /*
-????????Rainbow Six Siege????????????
-?		Main block					?
-?????????????????????????????????????
+╔═══════Rainbow Six Siege═══════════╗
+║		Main block					║
+╚═══════════════════════════════════╝
 */	
 init{	
 	colorledx = 255;
-	CX_Init();
+	DrawLogo();
 	
 	ReadConfig();	
 	
@@ -1195,14 +443,12 @@ main {
 	
 	ScreenSaverTime = max(0, ScreenSaverTime - get_rtime());
 	if(ScreenSaverTime <= get_rtime() && serverLogo == 0) {
+		ClearInfo();
 		serverLogo = 1;
     }
-
-	if (CX_isLoadingScreen) {
-		CX_Tick(FALSE);
-	} else if (serverLogo == 1) {
-		CX_Tick(TRUE);
-	}
+    if(serverLogo == 1) {
+		hexDataInfo();
+    }
 	if(ActivityDetected()){
 		if(serverLogo) DisplayMod(currentMod);
 		serverLogo = 0;
@@ -1835,9 +1081,9 @@ function DisplayProfiles(){
 	LED(RED)
 }
 /*
-????????Rainbow Six Siege????????????
-?			Combos					?
-?????????????????????????????????????
+╔═══════Rainbow Six Siege═══════════╗
+║			Combos					║
+╚═══════════════════════════════════╝
 */
 
 combo rgb {
@@ -1982,9 +1228,9 @@ function Navigation(value, min, max){
 	return value;
 }
 /*
-????????Rainbow Six Siege????????????
-?		VeritasAR Functions			?
-?????????????????????????????????????
+╔═══════Rainbow Six Siege═══════════╗
+║		VeritasAR Functions			║
+╚═══════════════════════════════════╝
 */
 int useY, useX, NextSABRun;
 int CurrentX, CurrentY, MinARecoilFactor, MinARecoilToApply, MovementARecoilToApply;
@@ -2333,9 +1579,9 @@ function EditARValues(value, min, max){
 	return value = clamp(value, min, max);
 }	
 /*
-????????Rainbow Six Siege????????????
-?		Main Functions				?
-?????????????????????????????????????
+╔═══════Rainbow Six Siege═══════════╗
+║		Main Functions				║
+╚═══════════════════════════════════╝
 */
 function ActivityDetected(){
 	if(	ButtonPress(Vault) 			|| ButtonPress(Prone) 		||
@@ -3241,34 +2487,21 @@ function LED(Colour) {
 }
 int pictureOffset, pictureBit,pictureY,pictureX,pictureData,pictureX2,pictureY2;
 function DrawLogo() {
-	
-	pictureOffset = 2; // Reset the starting point
-	pictureBit = 16; // Reset bit flag
-
-	for (pictureY = 0; pictureY < logo[1]; pictureY++) { // Loop the Y axis
-		for (pictureX = 0; pictureX < logo[0]; pictureX++) { // Loop the X axis
-			pictureData = logo[pictureOffset]
-			pictureX2 = pictureX;
-			pictureY2 = pictureY;
-			if (pictureX2 < 0 || pictureX2 >= 128) {
-				pictureX2 -= 128;
-			}
-			if (pictureY2 < 0 || pictureY2 >= 64) {
-				pictureY2 -= 64;
-			}
-			if (test_bit(pictureData, pictureBit - 1)) {
-				pixel_oled(pictureX2, pictureY2, 1);
-			}
-			else {
-				pixel_oled(pictureX2, pictureY2, 0);
-			}
-			pictureBit--; // Decrement the bit flag, we're moving to the next bit
-			if (!pictureBit) { // Check if we've just handled the last bit
-				pictureBit = 16; // Reset the bit flag
-				pictureOffset++; // Move to the next value
-			}
-		}
-	}
+	cls_oled(OLED_BLACK);
+	line_oled(2, 2, 2, 10, 1, OLED_WHITE);
+	line_oled(2, 2, 10, 2, 1, OLED_WHITE);
+	line_oled(OLED_WIDTH - 3, 2, OLED_WIDTH - 3, 10, 1, OLED_WHITE);
+	line_oled(OLED_WIDTH - 11, 2, OLED_WIDTH - 3, 2, 1, OLED_WHITE);
+	line_oled(2, OLED_HEIGHT - 3, 2, OLED_HEIGHT - 11, 1, OLED_WHITE);
+	line_oled(2, OLED_HEIGHT - 3, 10, OLED_HEIGHT - 3, 1, OLED_WHITE);
+	line_oled(OLED_WIDTH - 3, OLED_HEIGHT - 3, OLED_WIDTH - 3, OLED_HEIGHT - 11, 1, OLED_WHITE);
+	line_oled(OLED_WIDTH - 11, OLED_HEIGHT - 3, OLED_WIDTH - 3, OLED_HEIGHT - 3, 1, OLED_WHITE);
+	print(24, 7, OLED_FONT_SMALL, OLED_WHITE, "Cntrl-x Siege");
+	print(40, 20, OLED_FONT_SMALL, OLED_WHITE, "Defenders");
+	print(26, 40, OLED_FONT_SMALL, OLED_WHITE, "CNTRL-X.COM");
+	line_oled(14, 55, OLED_WIDTH - 15, 55, 1, OLED_WHITE);
+	line_oled(14, 58, OLED_WIDTH - 15, 58, 1, OLED_WHITE);
+	rect_oled(16, 56, 96, 1, 1, OLED_WHITE);
 }
 const int16  logo[] = {125, 31, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 
@@ -3318,4 +2551,8 @@ function hexDataInfo(){
 		HexDataInfoCount = 127;
 		line = random(1, 50);
 	}
-} ???????????????? ???????????????? ????????????????
+} ���������������� ����������������
+
+// LEAKED IN COLDZ VIP!
+// discord.gg/coldz 
+// BEST ZEN SCRIPTS!

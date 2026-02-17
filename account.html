@@ -282,7 +282,7 @@
 						if (p.hasApex) links.push(dlBtn('Download Apex Script (.gpc)', 'script', 'apex'));
 						if (p.hasArc) links.push(dlBtn('Download ARC Script (.gpc)', 'script', 'arc'));
 						if (p.hasFortnite) links.push(dlBtn('Download Fortnite Script (.gpc)', 'script', 'fortnite'));
-						if (p.hasSiege) links.push(dlBtn('Download Siege Script (.gpc)', 'script', 'siege'));
+						if (p.hasSiege) links.push(dlBtn('Download Siege Script (.zip)', 'siege', ''));
 						if (p.hasRust) links.push(dlBtn('Download Rust Script (.gpc)', 'script', 'rust'));
 					}
 					const date = p.created_at ? new Date(p.created_at).toLocaleDateString() : '';
@@ -306,6 +306,7 @@
 						if (!session?.access_token) return;
 						let url = '/api/download?session_id=' + encodeURIComponent(sessionId) + '&type=';
 						if (type === 'vision-x') url += 'vision-x';
+						else if (type === 'siege') url += 'siege';
 						else if (type === 'all-scripts') url += 'all-scripts';
 						else url += 'script&script=' + (script || '');
 						const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + session.access_token } });
@@ -317,7 +318,7 @@
 						const blob = await res.blob();
 						const a = document.createElement('a');
 						a.href = URL.createObjectURL(blob);
-						a.download = type === 'vision-x' ? 'Vision-X-Tempo.zip' : type === 'all-scripts' ? 'Cntrl-X-All-Scripts.zip' : (script || 'script') + '.gpc';
+						a.download = type === 'vision-x' ? 'Vision-X-Tempo.zip' : type === 'siege' ? 'Cntrl-X-R6-Siege.zip' : type === 'all-scripts' ? 'Cntrl-X-All-Scripts.zip' : (script || 'script') + '.gpc';
 						a.click();
 						URL.revokeObjectURL(a.href);
 					});

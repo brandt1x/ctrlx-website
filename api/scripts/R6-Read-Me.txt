@@ -1,0 +1,538 @@
+JEFFSICKO SIEGE SETTINGS + ZEN ATTACHMNETS
+
+84 FOV
+
+PLEASE NOTE: All the single fire guns such as secondary pistols and dmrs, have the muzzle break attachment on it! And every gun that has an ACOG, is used… 
+
+ 
+CONTROLLER ROTATION CLASSIC!
+
+
+MAIN: 
+
+ 
+
+Vertical - 34 
+
+Horizontal - 90
+
+Stick deadzones - 5 
+
+Trigger deadzones - 0 
+
+ 
+
+ADS: 
+
+ 
+
+1.0x - 22
+
+2.5x - 38
+
+3.5x - 48 
+
+5.0x - 50 
+
+12.0x - 50 
+
+ 
+
+OPTICS: 
+
+ 
+
+Red, opacity - 80 
+
+ 
+
+ 
+
+ATTACKERS: 
+
+ 
+
+STRIKER:
+
+(primary) extended barrel, horizontal grip 
+
+ 
+
+SLEDGE:
+
+(primary) compensator, vertical grip 
+
+ 
+
+THATCHER:
+
+(primary) compensator, vertical grip 
+
+ 
+
+ASH: 
+
+(primary) muzzle break, horizontal grip 
+
+ 
+
+THERMITE: 
+
+(primary) compensator, vertical grip 
+
+ 
+
+TWITCH: 
+
+(primary) extended barrel 
+
+ 
+
+MONTAGNE:
+
+muzzle break 
+
+ 
+
+GLAZ:
+
+(primary) suppressor, vertical grip  
+
+(secondary) compensator 
+
+ 
+
+FUZE: 
+
+(primary) flash hider, vertical grip 
+
+ 
+
+BLITZ: 
+
+muzzle break 
+
+ 
+
+IQ: 
+
+(primary) extended barrel, horizontal grip 
+
+ 
+
+BUCK: 
+
+(primary) extended barrel 
+
+ 
+
+BLACKBEARD: 
+
+(primary) muzzle break, horizontal grip 
+
+(secondary) none 
+
+ 
+
+CAPITAO: 
+
+(primary) extended barrel, horizontal grip  
+
+ 
+
+HIBANA: 
+
+(primary) suppressor, vertical grip 
+
+(secondary) compensator 
+
+ 
+
+JACKAL: 
+
+(primary) suppressor, vertical grip 
+
+ 
+
+YING: 
+
+(primary) compensator, vertical grip 
+
+ 
+
+ZOFIA:
+
+(primary) compensator, vertical grip 
+
+ 
+
+DOKKAEBI: 
+
+(primary) muzzle break, horizontal grip 
+
+(secondary) vertical grip 
+
+ 
+
+LION: 
+
+(primary) compensator, horizontal grip 
+
+ 
+
+FINKA: 
+
+(primary) compensator, vertical grip 
+
+ 
+
+MAVERICK: 
+
+(primary) extended barrel, horizontal grip 
+
+ 
+
+NOMAD: 
+
+(primary) suppressor, vertical grip 
+
+ 
+
+GRIDLOCK:
+
+(primary) flash hider, horizontal grip 
+
+ 
+
+NOKK: 
+
+(primary) compensator 
+
+(secondary) muzzle break 
+
+ 
+
+AMARU: 
+
+(primary) flash hider, vertical grip 
+
+(secondary) compensator, vertical grip 
+
+ 
+
+KALI: 
+
+(secondary) compensator 
+
+ 
+
+IANA:  
+
+(primary) compensator, vertical grip 
+
+ 
+
+ACE: 
+
+(primary) flash hider, vertical grip 
+
+ 
+
+ZERO: 
+
+(primary) extended barrel, vertical grip 
+
+ 
+
+FLORES:  
+
+(primary) suppressor, vertical grip 
+
+ 
+
+OSA: 
+
+(primary) compensator, vertical grip 
+
+ 
+
+SENS: 
+
+(primary) muzzle break, horizontal grip 
+
+ 
+
+GRIM:  
+
+(primary) extended barrel, horizontal grip 
+
+ 
+
+BRAVA: 
+
+(primary) extended barrel, horizontal grip 
+
+ 
+
+RAM: 
+
+(primary) muzzle break, horizontal grip 
+
+ 
+
+DEIMOS: 
+
+(primary) compensator, horizontal grip 
+
+
+
+RAUORA: 417 - 31, 0 —— REAPER MK2 - 57, -6 
+
+(primary) muzzle break, horizontal grip
+
+(secondary) compensator  
+
+ 
+
+ 
+
+DEFENDERS: 
+
+ 
+
+SENTRY: 
+
+(primary) extended barrel, horizontal grip 
+
+ 
+
+SMOKE:
+
+(secondary) compensator, vertical grip 
+
+ 
+
+MUTE: 
+
+(secondary) compensator, vertical grip 
+
+ 
+
+CASTLE:  
+
+(primary) compensator, horizontal grip 
+
+ 
+
+PULSE: 
+
+(primary) compensator, horizontal grip 
+
+ 
+
+DOC: 
+
+(primary) extended barrel, horizontal grip 
+
+ 
+
+ROOK: 
+
+(primary) extended barrel, horizontal grip 
+
+ 
+
+KAPKAN:
+
+(primary) extended barrel, horizontal grip 
+
+ 
+
+TACHANKA: 
+
+(primary) extended barrel, horizontal grip 
+
+(secondary) compensator 
+
+ 
+
+JAGER:  
+
+(primary) extended barrel, horizontal grip 
+
+ 
+
+BANDIT:  
+
+(primary) suppresor 
+
+ 
+
+FROST:
+
+(primary) extended barrel, horizontal grip 
+
+ 
+
+VALKYRIE: 
+
+(primary) suppressor, horizontal grip 
+
+(secondary) muzzle break 
+
+ 
+
+CAVEIRA: 
+
+(primary) suppresor 
+
+ 
+
+ECHO: 
+
+(primary) horizontal grip 
+
+(secondary) compensator 
+
+ 
+
+MIRA: 
+
+(primary) compensator, horizontal grip 
+
+ 
+
+LESION: 
+
+(primary) suppresor, horizontal grip 
+
+ 
+
+ELA: 
+
+(primary) compensator, horizontal grip 
+
+ 
+
+VIGIL: 
+
+(primary) extended barrel, horizontal grip 
+
+(secondary) vertical grip 
+
+ 
+
+MAESTRO: 
+
+(primary) compensator, horizontal grip 
+
+ 
+
+ALIBI: 
+
+(primary) compensator, vertical grip 
+
+ 
+
+CLASH: 
+
+(secondary) compensator 
+
+ 
+
+KAID: 
+
+(primary) suppressor, horizontal grip 
+
+ 
+
+MOZZIE: 
+
+(primary) extended barrel, horizontal grip 
+
+ 
+
+WARDEN: 
+
+(secondary) vertical grip 
+
+ 
+
+GOYO: 
+
+(primary) compensator, vertical grip 
+
+ 
+
+WAMAI:  
+
+(primary) compensator 
+
+ 
+
+ORYX: 
+
+(primary) suppressor, horizontal grip 
+
+ 
+
+MELUSI: 
+
+(primary) extended barrel, horizontal grip 
+
+ 
+
+ARUNI: 
+
+(primary) muzzle break, horizontal grip 
+
+ 
+
+THUNDERBIRD: 
+
+(primary) suppressor, horizontal grip 
+
+(secondary) compensator 
+
+ 
+
+THORN: 
+
+(primary) extended barrel, horizontal grip 
+
+(secondary) none 
+
+ 
+
+AZAMI: 
+
+(primary) extended barrel, horizontal grip 
+
+(secondary) muzzle break 
+
+ 
+
+SOLIS: 
+
+(primary) suppressor 
+
+(secondary) compensator, horizontal grip 
+
+ 
+
+FENRIR: 
+
+(primary) compensator 
+
+ 
+
+TUBARAO: 
+
+(primary) muzzle break, horizontal grip 
+
+ 
+
+SKOPOS: 
+
+(primary) flash hider, horizontal grip
+ 

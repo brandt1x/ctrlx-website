@@ -1,11 +1,10 @@
-
-																									/*
+/*
 _________   ____________________________.____              ____  ___
 \_   ___ \  \      \__    ___/\______   \    |             \   \/  /
 /    \  \/  /   |   \|    |    |       _/    |      ______  \     / 
 \     \____/    |    \    |    |    |   \    |___  /_____/  /     \ 
  \______  /\____|__  /____|    |____|_  /_______ \         /___/\  \
-        \/         \/                 \/        \/               \_/																																	/*
+        \/         \/                 \/        \/               \_/
 
 Welcome to Cntrl-x Rust! This is the Premium model Rust Cronus Zen script.
 
@@ -13,205 +12,18 @@ To protect the quality of our scripts and community, all guides and settings are
 To unlock full access, open a ticket in our Discord and verify your order. Once verified, you'll unlock private guides, fast support and personalized help.
 
 Support:
-Cntrl-x.com																																													*/
+Cntrl-x.com
+*/
 
-/* =========================
-   Cntrl-x OLED (CX_) module
-   ========================= */
-define CX_JETS_COUNT = 8;
-define CX_LASERS_COUNT = 6;
-define CX_LOADING_TIMER = 3500;
 
-const string CX_splash_line1[] = { "Cntrl-x Rust" };
-const string CX_splash_line2[] = { "By" };
-const string CX_splash_line3[] = { "CNTRL-X.COM" };
-const string CX_saver_line1[]  = { "CNTRL-X.COM" };
-const string CX_saver_line2[]  = { "L2+Options" };
 
-int CX_jet_x[CX_JETS_COUNT];
-int CX_jet_y[CX_JETS_COUNT];
-int CX_jet_speed[CX_JETS_COUNT];
-int CX_jet_i;
 
-int CX_laser_x[CX_LASERS_COUNT];
-int CX_laser_y[CX_LASERS_COUNT];
-int CX_laser_speed[CX_LASERS_COUNT];
-int CX_laser_i;
 
-int CX_sx = 2, CX_sy = 16;
-int CX_svx = 2, CX_svy = 2;
-int CX_msg_w, CX_line1_w, CX_line2_w;
 
-int CX_saver_timer = 0;
-int CX_initialized = 0;
-int CX_isLoadingScreen = 1;
-int CX_LoadingTimeToRun = 0;
-int CX_splash_progress = 0;
-int CX_splash_cx;
 
-int CX_stringLength;
-function CX_get_string_length(offset) {
-    CX_stringLength = 0;
-    while (duint8(offset++)) {
-        CX_stringLength++;
-    }
-    return CX_stringLength + 1;
-}
 
-function CX_center_x(f_chars, f_font) {
-    return (OLED_WIDTH / 2) - ((f_chars * f_font) / 2);
-}
 
-function CX_update_jets() {
-    for (CX_jet_i = 0; CX_jet_i < CX_JETS_COUNT; CX_jet_i++) {
-        CX_jet_y[CX_jet_i] -= CX_jet_speed[CX_jet_i];
-        if (CX_jet_y[CX_jet_i] < -10) {
-            CX_jet_x[CX_jet_i] = random(5, 122);
-            CX_jet_y[CX_jet_i] = random(64, 90);
-            CX_jet_speed[CX_jet_i] = random(1, 3);
-        }
-    }
-}
 
-function CX_draw_jets() {
-    for (CX_jet_i = 0; CX_jet_i < CX_JETS_COUNT; CX_jet_i++) {
-        if (CX_jet_y[CX_jet_i] >= 0 && CX_jet_y[CX_jet_i] < 63) {
-            if (CX_jet_x[CX_jet_i] >= 0 && CX_jet_x[CX_jet_i] < 127) {
-                pixel_oled(CX_jet_x[CX_jet_i], CX_jet_y[CX_jet_i], 1);
-            }
-            if (CX_jet_y[CX_jet_i] + 1 >= 0 && CX_jet_y[CX_jet_i] + 1 < 63) {
-                pixel_oled(CX_jet_x[CX_jet_i], CX_jet_y[CX_jet_i] + 1, 1);
-            }
-            if (CX_jet_y[CX_jet_i] + 2 >= 0 && CX_jet_y[CX_jet_i] + 2 < 63) {
-                pixel_oled(CX_jet_x[CX_jet_i], CX_jet_y[CX_jet_i] + 2, 1);
-            }
-            if (CX_jet_x[CX_jet_i] - 1 >= 0 && CX_jet_y[CX_jet_i] + 2 < 63) {
-                pixel_oled(CX_jet_x[CX_jet_i] - 1, CX_jet_y[CX_jet_i] + 2, 1);
-            }
-            if (CX_jet_x[CX_jet_i] + 1 < 127 && CX_jet_y[CX_jet_i] + 2 < 63) {
-                pixel_oled(CX_jet_x[CX_jet_i] + 1, CX_jet_y[CX_jet_i] + 2, 1);
-            }
-        }
-    }
-}
-
-function CX_update_lasers() {
-    for (CX_laser_i = 0; CX_laser_i < CX_LASERS_COUNT; CX_laser_i++) {
-        CX_laser_y[CX_laser_i] -= CX_laser_speed[CX_laser_i];
-        if (CX_laser_y[CX_laser_i] < -5) {
-            CX_laser_x[CX_laser_i] = random(5, 122);
-            CX_laser_y[CX_laser_i] = random(64, 100);
-            CX_laser_speed[CX_laser_i] = random(2, 4);
-        }
-    }
-}
-
-function CX_draw_lasers() {
-    for (CX_laser_i = 0; CX_laser_i < CX_LASERS_COUNT; CX_laser_i++) {
-        if (CX_laser_y[CX_laser_i] >= 0 && CX_laser_y[CX_laser_i] < 63) {
-            if (CX_laser_x[CX_laser_i] >= 0 && CX_laser_x[CX_laser_i] < 127) {
-                pixel_oled(CX_laser_x[CX_laser_i], CX_laser_y[CX_laser_i], 1);
-            }
-            if (CX_laser_y[CX_laser_i] + 1 >= 0 && CX_laser_y[CX_laser_i] + 1 < 63) {
-                pixel_oled(CX_laser_x[CX_laser_i], CX_laser_y[CX_laser_i] + 1, 1);
-            }
-            if (CX_laser_y[CX_laser_i] + 2 >= 0 && CX_laser_y[CX_laser_i] + 2 < 63) {
-                pixel_oled(CX_laser_x[CX_laser_i], CX_laser_y[CX_laser_i] + 2, 1);
-            }
-        }
-    }
-}
-
-function CX_draw_splash(load_pct) {
-    cls_oled(OLED_BLACK);
-    CX_draw_jets();
-    CX_draw_lasers();
-    line_oled(2, 2, 2, 10, 1, OLED_WHITE);
-    line_oled(2, 2, 10, 2, 1, OLED_WHITE);
-    line_oled(OLED_WIDTH - 3, 2, OLED_WIDTH - 3, 10, 1, OLED_WHITE);
-    line_oled(OLED_WIDTH - 11, 2, OLED_WIDTH - 3, 2, 1, OLED_WHITE);
-    line_oled(2, OLED_HEIGHT - 3, 2, OLED_HEIGHT - 11, 1, OLED_WHITE);
-    line_oled(2, OLED_HEIGHT - 3, 10, OLED_HEIGHT - 3, 1, OLED_WHITE);
-    line_oled(OLED_WIDTH - 3, OLED_HEIGHT - 3, OLED_WIDTH - 3, OLED_HEIGHT - 11, 1, OLED_WHITE);
-    line_oled(OLED_WIDTH - 11, OLED_HEIGHT - 3, OLED_WIDTH - 3, OLED_HEIGHT - 3, 1, OLED_WHITE);
-    line_oled(34, 16, 94, 16, 1, OLED_WHITE);
-    line_oled(34, 38, 94, 38, 1, OLED_WHITE);
-    line_oled(58, 27, 70, 27, 1, OLED_WHITE);
-    line_oled(64, 21, 64, 33, 1, OLED_WHITE);
-    CX_splash_cx = CX_center_x(CX_get_string_length(CX_splash_line1[0]), OLED_FONT_SMALL_WIDTH);
-    print(CX_splash_cx, 5, OLED_FONT_SMALL, OLED_WHITE, CX_splash_line1[0]);
-    CX_splash_cx = CX_center_x(CX_get_string_length(CX_splash_line2[0]), OLED_FONT_SMALL_WIDTH);
-    print(CX_splash_cx, 18, OLED_FONT_SMALL, OLED_WHITE, CX_splash_line2[0]);
-    CX_splash_cx = CX_center_x(CX_get_string_length(CX_splash_line3[0]), OLED_FONT_SMALL_WIDTH);
-    print(CX_splash_cx, 40, OLED_FONT_SMALL, OLED_WHITE, CX_splash_line3[0]);
-    line_oled(14, 55, OLED_WIDTH - 15, 55, 1, OLED_WHITE);
-    line_oled(14, 58, OLED_WIDTH - 15, 58, 1, OLED_WHITE);
-    if (load_pct > 0) {
-        rect_oled(16, 56, (96 * load_pct) / 100, 1, 1, OLED_WHITE);
-    }
-}
-
-function CX_saver_step() {
-    cls_oled(OLED_BLACK);
-    CX_draw_jets();
-    CX_draw_lasers();
-    CX_line1_w = (CX_get_string_length(CX_saver_line1[0]) - 1) * OLED_FONT_SMALL_WIDTH;
-    CX_line2_w = (CX_get_string_length(CX_saver_line2[0]) - 1) * OLED_FONT_SMALL_WIDTH;
-    if (CX_line1_w > CX_line2_w) { CX_msg_w = CX_line1_w; } else { CX_msg_w = CX_line2_w; }
-    print(CX_sx, CX_sy, OLED_FONT_SMALL, OLED_WHITE, CX_saver_line1[0]);
-    print(CX_sx + ((CX_msg_w - CX_line2_w) / 2), CX_sy + 14, OLED_FONT_SMALL, OLED_WHITE, CX_saver_line2[0]);
-    CX_saver_timer += get_rtime();
-    if (CX_saver_timer >= 80) {
-        CX_sx += CX_svx;
-        CX_sy += CX_svy;
-        if (CX_sx <= 1 || CX_sx >= (OLED_WIDTH - CX_msg_w - 1)) { CX_svx = -CX_svx; }
-        if (CX_sy <= 1 || CX_sy >= (OLED_HEIGHT - 38 - 1)) { CX_svy = -CX_svy; }
-        CX_saver_timer = 0;
-    }
-}
-
-function CX_Init() {
-    for (CX_jet_i = 0; CX_jet_i < CX_JETS_COUNT; CX_jet_i++) {
-        CX_jet_x[CX_jet_i] = random(5, 122);
-        CX_jet_y[CX_jet_i] = random(64, 128);
-        CX_jet_speed[CX_jet_i] = random(1, 3);
-    }
-    for (CX_laser_i = 0; CX_laser_i < CX_LASERS_COUNT; CX_laser_i++) {
-        CX_laser_x[CX_laser_i] = random(5, 122);
-        CX_laser_y[CX_laser_i] = random(64, 128);
-        CX_laser_speed[CX_laser_i] = random(2, 4);
-    }
-    CX_sx = 2; CX_sy = 16;
-    CX_svx = 2; CX_svy = 2;
-    CX_saver_timer = 0;
-    CX_isLoadingScreen = 1;
-    CX_LoadingTimeToRun = 0;
-    CX_splash_progress = 0;
-    CX_initialized = 1;
-    CX_draw_splash(0);
-}
-
-function CX_Tick(allow_idle) {
-    if (!CX_initialized) CX_Init();
-
-    if (CX_isLoadingScreen) {
-        CX_LoadingTimeToRun += get_rtime();
-        CX_update_jets();
-        CX_update_lasers();
-        CX_splash_progress = (CX_LoadingTimeToRun * 100) / CX_LOADING_TIMER;
-        if (CX_splash_progress > 100) CX_splash_progress = 100;
-        CX_draw_splash(CX_splash_progress);
-        if (CX_LoadingTimeToRun >= CX_LOADING_TIMER) {
-            cls_oled(OLED_BLACK);
-            CX_isLoadingScreen = 0;
-            CX_saver_timer = 80;
-        }
-    } else if (allow_idle) {
-        CX_update_jets();
-        CX_update_lasers();
-        CX_saver_step();
-    }
-}
 
 
 
@@ -294,10 +106,21 @@ const string NumberSet[] = {
 };
 
 
-const string Menu[] = {"Cntrl-x Rust"}
+const string Menu[] = {"L4 V6.1"}
 init 
 {
-	CX_Init();
+	cls_oled(OLED_BLACK);
+	line_oled(2, 2, 2, 10, 1, OLED_WHITE);
+	line_oled(2, 2, 10, 2, 1, OLED_WHITE);
+	line_oled(OLED_WIDTH - 3, 2, OLED_WIDTH - 3, 10, 1, OLED_WHITE);
+	line_oled(OLED_WIDTH - 11, 2, OLED_WIDTH - 3, 2, 1, OLED_WHITE);
+	line_oled(2, OLED_HEIGHT - 3, 2, OLED_HEIGHT - 11, 1, OLED_WHITE);
+	line_oled(2, OLED_HEIGHT - 3, 10, OLED_HEIGHT - 3, 1, OLED_WHITE);
+	line_oled(OLED_WIDTH - 3, OLED_HEIGHT - 3, OLED_WIDTH - 3, OLED_HEIGHT - 11, 1, OLED_WHITE);
+	line_oled(OLED_WIDTH - 11, OLED_HEIGHT - 3, OLED_WIDTH - 3, OLED_HEIGHT - 3, 1, OLED_WHITE);
+	print(36, 10, OLED_FONT_SMALL, OLED_WHITE, "Cntrl-x Rust");
+	print(42, 24, OLED_FONT_SMALL, OLED_WHITE, "V6.1");
+	print(26, 40, OLED_FONT_SMALL, OLED_WHITE, "CNTRL-X.COM");
 	CurrentDeadzoneX= get_pvar(SPVAR_1, 0, 50, 5);
 	CurrentDeadzoneY= get_pvar(SPVAR_2, 0, 50, 5);
 	CurrentWeapon = get_pvar(SPVAR_3, 0, 6, 0);
@@ -351,12 +174,6 @@ main {
 	
 
 
-
-	if (CX_isLoadingScreen) {
-		CX_Tick(FALSE);
-	} else if (!isScriptOn) {
-		CX_Tick(TRUE);
-	}
 
 	if (onOffCombo() == TRUE) // turn on the script
 	{
@@ -1652,7 +1469,7 @@ set_val(XB1_RT, 100); // Fire
 set_val(XB1_RY, 52 + AddToCombosRY()); // Dynamic Recoil
 set_val(XB1_RX, 0 + AddToCombosRX());  // Dynamic Recoil
 wait(80);
-set_val(XB1_RT, 0);? ?// Release
+set_val(XB1_RT, 0);¬† ¬†// Release
 set_val(XB1_RY, 52 + AddToCombosRY());
 set_val(XB1_RX, 0 + AddToCombosRX());
 wait(80);
@@ -3311,81 +3128,81 @@ combo M2_Crouched {
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -8 + AddToCombosRX());
-	set_val(RY,? 40 + AddToCombosRY());
+	set_val(RY,¬† 40 + AddToCombosRY());
 	wait(70);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -8 + AddToCombosRX());
-	set_val(RY,? 40 + AddToCombosRY());
+	set_val(RY,¬† 40 + AddToCombosRY());
 	wait(80);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -8 + AddToCombosRX());
-	set_val(RY,? 40 + AddToCombosRY());
+	set_val(RY,¬† 40 + AddToCombosRY());
 	wait(20);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -8 + AddToCombosRX());
-	set_val(RY,? 40 + AddToCombosRY());
+	set_val(RY,¬† 40 + AddToCombosRY());
 	wait(20);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -8 + AddToCombosRX());
-	set_val(RY,? 40 + AddToCombosRY());
+	set_val(RY,¬† 40 + AddToCombosRY());
 	wait(280);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -10 + AddToCombosRX());
-	set_val(RY,? 41 + AddToCombosRY());
+	set_val(RY,¬† 41 + AddToCombosRY());
 	wait(140);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -9 + AddToCombosRX());
-	set_val(RY,? 41 + AddToCombosRY());
+	set_val(RY,¬† 41 + AddToCombosRY());
 	wait(110);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -10 + AddToCombosRX());
-	set_val(RY,? 40 + AddToCombosRY());
+	set_val(RY,¬† 40 + AddToCombosRY());
 	wait(1990);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -9 + AddToCombosRX());
-	set_val(RY,? 40 + AddToCombosRY());
+	set_val(RY,¬† 40 + AddToCombosRY());
 	wait(360);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -9 + AddToCombosRX());
-	set_val(RY,? 40 + AddToCombosRY());
+	set_val(RY,¬† 40 + AddToCombosRY());
 	//Straight Down
 	wait(820);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -9 + AddToCombosRX());
-	set_val(RY,? 40 + AddToCombosRY());
+	set_val(RY,¬† 40 + AddToCombosRY());
 	
 	wait(1870);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -2 + AddToCombosRX());
-	set_val(RY,? 40 + AddToCombosRY());
+	set_val(RY,¬† 40 + AddToCombosRY());
 	wait(2000);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -3 + AddToCombosRX());
-	set_val(RY,? 39 + AddToCombosRY());
+	set_val(RY,¬† 39 + AddToCombosRY());
 	wait(2600);
 	set_val(RT, 100);
 	set_val(LT, 100);
 
     set_val(RX, 0 + AddToCombosRX());
-	set_val(RY,? 39 + AddToCombosRY());
+	set_val(RY,¬† 39 + AddToCombosRY());
 	
 	wait(1130);
 	
 	set_val(RT, 100);
 	set_val(LT, 100);
-	set_val(RY,? 40 + AddToCombosRY());
+	set_val(RY,¬† 40 + AddToCombosRY());
 	set_val(RX, -10 + AddToCombosRX());
 	wait(10);
 	set_val(RT, 100);
@@ -4362,4 +4179,4 @@ combo AK_Stand_HIP {
 	set_val(XB1_RY, 12 + AddToCombosRY());
 	wait(10);
 	
-} ????????????????
+} ˙ºç¥Ö∂á∑áµÜ«Ò«˜¬
