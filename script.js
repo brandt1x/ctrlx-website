@@ -640,10 +640,10 @@ document.addEventListener('DOMContentLoaded', function () {
 			} catch (e) { }
 		}
 
-		function addItem(name, price) {
+		function addItem(productId, name, price) {
 			const value = typeof price === 'number' && !Number.isNaN(price) ? price : 0;
 			const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-			items.push({ id, name, price: value });
+			items.push({ id, productId, name, price: value });
 			save();
 		}
 
@@ -802,8 +802,9 @@ document.addEventListener('DOMContentLoaded', function () {
 		if (checkoutBtn) {
 			checkoutBtn.addEventListener('click', async () => {
 				const items = Cart.getItems();
-				if (!items.length) {
-					alert('Your cart is empty.');
+				const productIds = items.map(i => i.productId).filter(Boolean);
+				if (!productIds.length) {
+					alert('Your cart is empty or contains invalid items. Please add products from the catalog.');
 					return;
 				}
 				checkoutBtn.disabled = true;
@@ -824,7 +825,9 @@ document.addEventListener('DOMContentLoaded', function () {
 							'Content-Type': 'application/json',
 							'Authorization': 'Bearer ' + token,
 						},
-						body: JSON.stringify({ items }),
+						body: JSON.stringify({
+						productIds: items.map(i => i.productId).filter(Boolean),
+					}),
 					});
 					const data = await res.json();
 					if (data.url) {
@@ -844,8 +847,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 		render();
 
-		// Expose helper used by other setup blocks
-		window.__addToSiteCart = function (name, rawPrice) {
+		// Expose helper used by other setup blocks. Requires productId for checkout.
+		window.__addToSiteCart = function (productId, name, rawPrice) {
 			let priceNum = 0;
 			if (typeof rawPrice === 'number') {
 				priceNum = rawPrice;
@@ -853,7 +856,7 @@ document.addEventListener('DOMContentLoaded', function () {
 				const match = rawPrice.replace(/[^0-9.]/g, '');
 				priceNum = parseFloat(match || '0') || 0;
 			}
-			Cart.addItem(name || 'Item', priceNum);
+			Cart.addItem(productId || '', name || 'Item', priceNum);
 			render();
 		};
 	})();
@@ -1160,9 +1163,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 		selectButtons.forEach(btn => {
 			btn.addEventListener('click', () => {
+				const productId = btn.getAttribute('data-product-id') || '';
 				const service = btn.getAttribute('data-service') || 'Service';
 				const price = btn.getAttribute('data-price') || '0';
-				window.__addToSiteCart(service, price);
+				window.__addToSiteCart(productId, service, price);
 				const cartToggle = document.getElementById('site-cart-toggle');
 				if (cartToggle) {
 					cartToggle.classList.add('cart-toggle-pulse');
@@ -1181,9 +1185,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 		buttons.forEach(btn => {
 			btn.addEventListener('click', () => {
+				const productId = btn.getAttribute('data-product-id') || '';
 				const name = btn.getAttribute('data-name') || 'Zen Script';
 				const price = btn.getAttribute('data-price') || '0';
-				window.__addToSiteCart(name, price);
+				window.__addToSiteCart(productId, name, price);
 			});
 		});
 	})();
@@ -1194,9 +1199,10 @@ document.addEventListener('DOMContentLoaded', function () {
 		const btn = document.querySelector('.hero-add-btn');
 		if (!btn) return;
 		btn.addEventListener('click', () => {
+			const productId = btn.getAttribute('data-product-id') || '';
 			const name = btn.getAttribute('data-name') || 'CTRL-X Vision Setup';
 			const price = btn.getAttribute('data-price') || '0';
-			window.__addToSiteCart(name, price);
+			window.__addToSiteCart(productId, name, price);
 			const cartToggle = document.getElementById('site-cart-toggle');
 			if (cartToggle) {
 				cartToggle.click();

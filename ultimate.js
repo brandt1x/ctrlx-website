@@ -299,9 +299,10 @@
 
 		buttons.forEach(btn => {
 			btn.addEventListener('click', () => {
+				const productId = btn.getAttribute('data-product-id') || '';
 				const name = btn.getAttribute('data-name') || 'Product';
 				const price = btn.getAttribute('data-price') || '0';
-				window.__addToSiteCart(name, price);
+				window.__addToSiteCart(productId, name, price);
 				const cartToggle = document.getElementById('site-cart-toggle');
 				if (cartToggle) {
 					cartToggle.classList.add('cart-toggle-pulse');

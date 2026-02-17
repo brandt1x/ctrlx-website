@@ -3,6 +3,7 @@ const fs = require('fs');
 const archiver = require('archiver');
 const { getUserFromRequest, getOwnedPurchase } = require('./_auth-helpers');
 const { getPurchaseFlags } = require('./_items-utils');
+const { checkRateLimit } = require('./_rate-limit');
 
 const SCRIPT_MAP = {
 	'control-x': { file: 'CONTROL+X.gpc', filename: 'CONTROL+X.gpc', price: 75, nameMatch: 'control+x' },
@@ -32,6 +33,11 @@ function hasPurchased(items, script) {
 module.exports = async (req, res) => {
 	if (req.method !== 'GET') {
 		return res.status(405).json({ error: 'Method not allowed' });
+	}
+
+	const allowed = await checkRateLimit(req, 'download');
+	if (!allowed) {
+		return res.status(429).json({ error: 'Too many download requests. Please try again later.' });
 	}
 
 	const user = await getUserFromRequest(req);

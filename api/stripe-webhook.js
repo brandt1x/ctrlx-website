@@ -40,19 +40,29 @@ module.exports = async (req, res) => {
 		return res.json({ received: true });
 	}
 
-	let items = [];
-	if (session.metadata?.items) {
+	// Always derive entitlements from Stripe's line_items (source of truth), never from client metadata
+	let sessionWithLineItems = session;
+	if (!session.line_items?.data) {
 		try {
-			items = JSON.parse(session.metadata.items);
-		} catch (_) {}
-	}
-	if (items.length === 0 && session.line_items?.data) {
-		for (const li of session.line_items.data) {
-			items.push({
-				name: li.description || li.price?.product?.name || '',
-				price: (li.amount_total || 0) / 100,
+			sessionWithLineItems = await stripe.checkout.sessions.retrieve(session.id, {
+				expand: ['line_items', 'line_items.data.price.product'],
 			});
+		} catch (err) {
+			console.error('Failed to retrieve session line_items:', err);
+			return res.status(500).json({ error: 'Failed to retrieve purchase details' });
 		}
+	}
+
+	const items = [];
+	const lineData = sessionWithLineItems.line_items?.data || [];
+	for (const li of lineData) {
+		const product = li.price?.product;
+		const productId = typeof product === 'object' && product?.metadata?.product_id
+			? product.metadata.product_id
+			: null;
+		const name = li.description || (typeof product === 'object' ? product?.name : '') || '';
+		const price = (li.amount_total || 0) / 100;
+		items.push(productId ? { product_id: productId, name, price } : { name, price });
 	}
 
 	const supabaseUrl = process.env.SUPABASE_URL;
