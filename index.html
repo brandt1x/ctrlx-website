@@ -8,6 +8,8 @@
 	<title>Control-X</title>
 	<meta name="description" content="Control-X delivers premium Zen scripts, Vision-X setup, and high-performance automation services built for speed, precision, and consistent results." />
 	<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link rel="stylesheet" href="style.css">
 	<link rel="icon" type="image/png" href="images/logo.png">
 </head>
@@ -18,8 +20,8 @@
 
 	<header class="site-header">
 		<div class="container header-inner">
-			<a href="index.html"><img src="images/logo.png" alt="CTRLX Logo" class="logo-image logo-dark" /></a>
-			<a href="index.html"><img src="images/whitelogo.png" alt="CTRLX Logo" class="logo-image logo-light" /></a>
+			<a href="index.html"><img src="images/logo.png" alt="CTRLX Logo" class="logo-image logo-dark" fetchpriority="high" decoding="async" /></a>
+			<a href="index.html"><img src="images/whitelogo.png" alt="CTRLX Logo" class="logo-image logo-light" loading="lazy" decoding="async" /></a>
 			<div class="header-right">
 				<nav class="nav-left">
 					<a href="services.html">Services</a>
@@ -177,8 +179,8 @@
 		</div>
 	</footer>
 
-	<script src="script.js"></script>
-	<script src="cinematic.js"></script>
+	<script src="script.js" defer></script>
+	<script src="cinematic.js" defer></script>
 </body>
 
 </html>

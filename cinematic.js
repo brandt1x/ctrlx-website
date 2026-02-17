@@ -95,7 +95,7 @@
 	function resize() {
 		width = window.innerWidth;
 		height = window.innerHeight;
-		dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+		dpr = tier === 'low' ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
 		var densityFactor = width < 900 ? 0.7 : 1;
 		var motionFactor = prefersReduced ? 0.4 : 1;
 		particleCount = Math.max(15, Math.round(cfg.base * densityFactor * motionFactor));
@@ -134,9 +134,16 @@
 		ctx.fill();
 	}
 
+	let lastFrame = 0;
 	function animate(now) {
 		if (!running) return;
-		checkFPS(now || performance.now());
+		now = now || performance.now();
+		if (tier === 'low' && now - lastFrame < 33) {
+			rafId = requestAnimationFrame(animate);
+			return;
+		}
+		lastFrame = now;
+		checkFPS(now);
 
 		var isLight = document.body.classList.contains('theme-light');
 		ctx.fillStyle = isLight ? 'rgba(249, 250, 251, 0.16)' : 'rgba(2, 1, 6, 0.2)';
@@ -239,9 +246,10 @@
 	});
 
 	var resizeTimer;
+	var resizeDebounce = tier === 'low' ? 200 : 120;
 	window.addEventListener('resize', function () {
 		clearTimeout(resizeTimer);
-		resizeTimer = setTimeout(resize, 120);
+		resizeTimer = setTimeout(resize, resizeDebounce);
 	});
 	resize();
 	animate();

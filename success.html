@@ -6,6 +6,8 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1" />
 	<script>document.documentElement.classList.add('site-preload');window.addEventListener('load',()=>document.documentElement.classList.remove('site-preload'),{once:true});setTimeout(()=>document.documentElement.classList.remove('site-preload'),4000);</script>
 	<title>Thank You — Control-X</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link rel="stylesheet" href="style.css">
 	<link rel="stylesheet" href="ultimate.css">
 	<link rel="icon" type="image/png" href="images/logo.png">
@@ -17,8 +19,8 @@
 
 	<header class="site-header">
 		<div class="container header-inner">
-			<a href="index.html"><img src="images/logo.png" alt="CTRLX Logo" class="logo-image logo-dark" /></a>
-			<a href="index.html"><img src="images/whitelogo.png" alt="CTRLX Logo" class="logo-image logo-light" /></a>
+			<a href="index.html"><img src="images/logo.png" alt="CTRLX Logo" class="logo-image logo-dark" fetchpriority="high" decoding="async" /></a>
+			<a href="index.html"><img src="images/whitelogo.png" alt="CTRLX Logo" class="logo-image logo-light" loading="lazy" decoding="async" /></a>
 			<div class="header-right">
 				<nav class="nav-left">
 					<a href="index.html">Home</a>
@@ -64,8 +66,8 @@
 		</div>
 	</footer>
 
-	<script src="script.js"></script>
-	<script src="cinematic.js"></script>
+	<script src="script.js" defer></script>
+	<script src="cinematic.js" defer></script>
 	<script>
 		// All checkouts redirect to account.html. Redirect legacy success URLs.
 		window.location.replace('/account.html');

@@ -458,7 +458,7 @@ body.theme-light .interactive-spot.is-hot {
 	--mag-x: 0px;
 	--mag-y: 0px;
 	translate: var(--mag-x) var(--mag-y);
-	transition: translate .18s cubic-bezier(.2, .9, .2, 1), box-shadow .22s ease, border-color .22s ease;
+	transition: translate .05s cubic-bezier(.2, .9, .2, 1), box-shadow .06s ease, border-color .06s ease;
 }
 
 .glow-letter {
@@ -471,7 +471,7 @@ body.theme-light .interactive-spot.is-hot {
 	text-shadow:
 		0 0 calc(var(--g) * 14px) rgba(248, 113, 113, calc(0.18 + (var(--g) * 0.52))),
 		0 0 calc(var(--g) * 28px) rgba(239, 68, 68, calc(0.04 + (var(--g) * 0.2)));
-	transition: transform .07s linear, opacity .08s linear, text-shadow .1s linear, color .1s linear;
+	transition: transform .02s linear, opacity .02s linear, text-shadow .025s linear, color .025s linear;
 	will-change: transform, opacity, color;
 }
 
@@ -523,15 +523,28 @@ body.theme-light .glow-letter {
 }
 
 .text-hover-fade {
-	transition: color .25s ease, text-shadow .25s ease;
+	transition: color .04s ease, text-shadow .04s ease;
+}
+.text-fade-word {
+	display: inline;
+	white-space: nowrap;
+}
+.text-hover-fade .text-fade-letter {
+	display: inline-block;
+	transition: color .04s ease, text-shadow .04s ease;
+	transition-delay: calc(var(--letter-index, 0) * 0.004s);
 }
 
-.text-hover-fade:hover {
+.text-hover-fade:hover,
+.text-hover-fade:hover .text-fade-letter,
+.text-hover-fade:hover .glow-letter {
 	color: #f87171;
 	text-shadow: 0 0 12px rgba(248, 113, 113, 0.28);
 }
 
-body.theme-light .text-hover-fade:hover {
+body.theme-light .text-hover-fade:hover,
+body.theme-light .text-hover-fade:hover .text-fade-letter,
+body.theme-light .text-hover-fade:hover .glow-letter {
 	color: #b91c1c;
 	text-shadow: 0 0 10px rgba(185, 28, 28, 0.18);
 }
@@ -540,7 +553,7 @@ body.theme-light .text-hover-fade:hover {
 	opacity: .32;
 	transform: translateY(14px);
 	filter: blur(7px);
-	transition: opacity var(--motion-slow) var(--ease-spring), transform var(--motion-slow) var(--ease-spring), filter var(--motion-slow) var(--ease-spring), text-shadow var(--motion-slow) ease;
+	transition: opacity 0.05s var(--ease-spring), transform 0.05s var(--ease-spring), filter 0.05s var(--ease-spring), text-shadow 0.05s ease;
 }
 
 .headline-reveal.headline-live {
@@ -838,7 +851,7 @@ a.nav-ultimate::after,
 	transform: translateY(calc(var(--glow) * -2px));
 	color: color-mix(in srgb, var(--accent) calc(90% - (var(--glow) * 10%)), var(--accent-2) calc(var(--glow) * 70%));
 	text-shadow: 0 0 calc(var(--glow) * 12px) rgba(239, 68, 68, calc(0.15 + (var(--glow) * 0.4)));
-	transition: transform .08s linear, opacity .1s linear, color .12s linear, text-shadow .12s linear;
+	transition: transform .02s linear, opacity .02s linear, color .025s linear, text-shadow .025s linear;
 }
 
 .nav-ultimate-letter-space {
@@ -2056,11 +2069,17 @@ body.theme-light .hero {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 	gap: 18px;
+	content-visibility: auto;
+	contain-intrinsic-size: auto 500px;
+	contain: layout paint;
 }
 
 .zen-grid {
 	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 	gap: 20px;
+	content-visibility: auto;
+	contain-intrinsic-size: auto 500px;
+	contain: layout paint;
 }
 
 .card {
@@ -2506,6 +2525,9 @@ body.theme-light .how-chip:hover {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
 	gap: 14px;
+	content-visibility: auto;
+	contain-intrinsic-size: auto 500px;
+	contain: layout paint;
 }
 
 .how-step {
@@ -2597,6 +2619,9 @@ body.theme-light .how-chip:hover {
 	width: 100%;
 	margin: 0 auto;
 	padding-bottom: 60px;
+	content-visibility: auto;
+	contain-intrinsic-size: auto 500px;
+	contain: layout paint;
 }
 
 .faq details {
@@ -2673,14 +2698,14 @@ body.theme-light .how-chip:hover {
 .js-reveal.js-reveal-visible {
 	opacity: 1;
 	transform: none;
-	transition: opacity .6s cubic-bezier(.2, .9, .3, 1), transform .6s cubic-bezier(.2, .9, .3, 1);
+	transition: opacity .06s cubic-bezier(.2, .9, .3, 1), transform .06s cubic-bezier(.2, .9, .3, 1);
 }
 
 /* Scroll reveal animations */
 [data-scroll-section] {
 	opacity: 0;
 	transform: translateY(40px);
-	transition: opacity var(--motion-xslow) var(--ease-spring), transform var(--motion-xslow) var(--ease-spring);
+	transition: opacity 0.06s var(--ease-spring), transform 0.06s var(--ease-spring);
 }
 
 [data-scroll-section].scroll-visible {
@@ -2691,7 +2716,7 @@ body.theme-light .how-chip:hover {
 [data-scroll-item] {
 	opacity: 0;
 	transform: translateY(30px);
-	transition: opacity var(--motion-slow) var(--ease-spring), transform var(--motion-slow) var(--ease-spring);
+	transition: opacity 0.05s var(--ease-spring), transform 0.05s var(--ease-spring);
 }
 
 [data-scroll-item].scroll-visible {
@@ -2753,7 +2778,7 @@ body.theme-light .motion-card:hover {
 		radial-gradient(ellipse 50% 60% at 80% 70%, rgba(239, 68, 68, 0.12), transparent 50%),
 		radial-gradient(ellipse 40% 40% at 50% 50%, rgba(185, 28, 28, 0.08), transparent 60%);
 	filter: blur(50px);
-	transition: transform 0.08s linear;
+	transition: transform 0.04s linear;
 }
 
 .hero-aurora {
@@ -3427,7 +3452,7 @@ body.theme-light .success-slide-box {
 		radial-gradient(ellipse 55% 45% at 25% 35%, rgba(248, 113, 113, 0.12), transparent 50%),
 		radial-gradient(ellipse 45% 55% at 75% 65%, rgba(239, 68, 68, 0.08), transparent 50%);
 	filter: blur(40px);
-	transition: transform 0.08s linear;
+	transition: transform 0.04s linear;
 }
 
 body.theme-light .page-hero-parallax {
@@ -3755,7 +3780,7 @@ body.theme-light .site-footer {
 body.is-loaded .card {
 	transform: translateY(0);
 	opacity: 1;
-	transition-delay: calc(var(--i) * 70ms);
+	transition-delay: calc(var(--i) * 12ms);
 }
 
 body.is-loaded .hero h2,
@@ -3763,7 +3788,7 @@ body.is-loaded .hero p,
 body.is-loaded .hero-cta {
 	opacity: 1;
 	transform: none;
-	transition: all .6s cubic-bezier(.2, .9, .3, 1);
+	transition: all .06s cubic-bezier(.2, .9, .3, 1);
 }
 
 .hero h2,
@@ -3775,7 +3800,7 @@ nav a {
 }
 
 nav a {
-	transition: transform .32s ease, opacity .32s ease;
+	transition: transform .06s ease, opacity .06s ease;
 }
 
 body.is-loaded nav a {
@@ -3877,6 +3902,10 @@ html.site-preload body > * {
 }
 html.site-preload .site-load-overlay,
 html.site-preload .site-load-overlay * {
+	visibility: visible;
+}
+html.site-preload .ultimate-loading-overlay,
+html.site-preload .ultimate-loading-overlay * {
 	visibility: visible;
 }
 

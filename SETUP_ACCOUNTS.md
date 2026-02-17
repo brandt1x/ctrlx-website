@@ -22,9 +22,13 @@ Add these in your Vercel project settings:
 | `SUPABASE_ANON_KEY` | Your Supabase anon/public key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Your Supabase service_role key |
 
-### Local development
+### Local development (required for account/checkout)
 
-If you run locally, use `vercel dev` (not a static server) and create `.env.local` from `.env.local.example`.
+1. **Copy env file:** `cp .env.local.example .env.local` (or copy manually)
+2. **Edit `.env.local`** and set at minimum:
+   - `SUPABASE_URL` – from Supabase Dashboard → Settings → API → Project URL
+   - `SUPABASE_ANON_KEY` – from Supabase Dashboard → Settings → API → anon public key
+3. **Run:** `vercel dev` or `npm run dev` (do NOT use a static server like `npx serve` – API routes need `vercel dev`)
 
 ## 3. Stripe Webhook
 

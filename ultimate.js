@@ -10,28 +10,31 @@
 
 		const ctx = canvas.getContext('2d');
 		if (!ctx) return;
+		const tier = (window.__Motion && window.__Motion.tier) || document.body.dataset.motionTier || 'balanced';
 		let particles = [];
 		const mouse = { x: -9999, y: -9999, active: false };
 		const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 		const cores = navigator.hardwareConcurrency || 4;
 		let particleCount = 90;
-		const connectionDistance = 150;
+		const connectionDistance = tier === 'low' ? 100 : 150;
 		const connectionDistanceSq = connectionDistance * connectionDistance;
-		const particleSpeed = 0.42;
+		const particleSpeed = tier === 'low' ? 0.22 : 0.42;
 		let width = 0;
 		let height = 0;
 		let rafId = 0;
 		let running = true;
 		let dpr = 1;
+		let lastFrame = 0;
 
 		function resize() {
 			width = window.innerWidth;
 			height = window.innerHeight;
-			dpr = Math.min(window.devicePixelRatio || 1, 1.6);
+			dpr = tier === 'low' ? 1 : Math.min(window.devicePixelRatio || 1, 1.6);
 			const densityFactor = width < 900 ? 0.85 : 1;
 			const coreFactor = cores <= 4 ? 0.82 : 1;
 			const motionFactor = prefersReduced ? 0.58 : 1;
-			particleCount = Math.max(42, Math.round(92 * densityFactor * coreFactor * motionFactor));
+			const base = tier === 'low' ? 42 : tier === 'balanced' ? 70 : 92;
+			particleCount = Math.max(28, Math.round(base * densityFactor * coreFactor * motionFactor));
 			canvas.width = Math.floor(width * dpr);
 			canvas.height = Math.floor(height * dpr);
 			canvas.style.width = `${width}px`;
@@ -66,8 +69,14 @@
 			ctx.fill();
 		}
 
-		function animate() {
+		function animate(now) {
 			if (!running) return;
+			now = now || performance.now();
+			if (tier === 'low' && now - lastFrame < 33) {
+				rafId = requestAnimationFrame(animate);
+				return;
+			}
+			lastFrame = now;
 			ctx.fillStyle = document.body.classList.contains('theme-light')
 				? 'rgba(249, 250, 251, 0.18)'
 				: 'rgba(2, 1, 6, 0.22)';
@@ -107,20 +116,22 @@
 				ctx.fill();
 			}
 
-			for (let i = 0; i < particles.length; i++) {
-				for (let j = i + 1; j < particles.length; j++) {
-					const dx = particles[i].x - particles[j].x;
-					const dy = particles[i].y - particles[j].y;
-					const distSq = dx * dx + dy * dy;
-					if (distSq < connectionDistanceSq) {
-						ctx.beginPath();
-						ctx.moveTo(particles[i].x, particles[i].y);
-						ctx.lineTo(particles[j].x, particles[j].y);
-						ctx.strokeStyle = lineColor;
-						ctx.lineWidth = 0.65;
-						ctx.globalAlpha = 1 - (distSq / connectionDistanceSq);
-						ctx.stroke();
-						ctx.globalAlpha = 1;
+			if (tier !== 'low') {
+				for (let i = 0; i < particles.length; i++) {
+					for (let j = i + 1; j < particles.length; j++) {
+						const dx = particles[i].x - particles[j].x;
+						const dy = particles[i].y - particles[j].y;
+						const distSq = dx * dx + dy * dy;
+						if (distSq < connectionDistanceSq) {
+							ctx.beginPath();
+							ctx.moveTo(particles[i].x, particles[i].y);
+							ctx.lineTo(particles[j].x, particles[j].y);
+							ctx.strokeStyle = lineColor;
+							ctx.lineWidth = 0.65;
+							ctx.globalAlpha = 1 - (distSq / connectionDistanceSq);
+							ctx.stroke();
+							ctx.globalAlpha = 1;
+						}
 					}
 				}
 			}
@@ -146,9 +157,10 @@
 			}
 		});
 		let resizeTimer;
+		const resizeDebounce = tier === 'low' ? 200 : 120;
 		window.addEventListener('resize', () => {
 			clearTimeout(resizeTimer);
-			resizeTimer = setTimeout(resize, 120);
+			resizeTimer = setTimeout(resize, resizeDebounce);
 		});
 		resize();
 		animate();
@@ -198,6 +210,14 @@
 		const reactiveNodes = document.querySelectorAll('.ultimate-reactive');
 		if (!reactiveNodes.length) return;
 
+		const runWhenIdle = (fn) => {
+			if (typeof requestIdleCallback !== 'undefined') {
+				requestIdleCallback(fn, { timeout: 500 });
+			} else {
+				setTimeout(fn, 0);
+			}
+		};
+
 		function splitLetters(node) {
 			if (node.dataset.lettersReady === '1') return;
 			const text = node.textContent || '';
@@ -217,6 +237,7 @@
 			node.dataset.lettersReady = '1';
 		}
 
+		runWhenIdle(() => {
 		reactiveNodes.forEach((node) => {
 			const wantsLetterFlow = node.classList.contains('ultimate-letterflow');
 			if (wantsLetterFlow) splitLetters(node);
@@ -256,6 +277,7 @@
 				my = e.clientY;
 				if (!raf) raf = requestAnimationFrame(paint);
 			}, { passive: true });
+		});
 		});
 	}
 

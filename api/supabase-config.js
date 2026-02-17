@@ -5,7 +5,9 @@ module.exports = async (req, res) => {
 	const url = process.env.SUPABASE_URL;
 	const anonKey = process.env.SUPABASE_ANON_KEY;
 	if (!url || !anonKey) {
-		return res.status(500).json({ error: 'Supabase not configured' });
+		return res.status(500).json({
+			error: 'Supabase not configured. Set SUPABASE_URL and SUPABASE_ANON_KEY in .env.local (local) or Vercel env vars (production). Run with: vercel dev'
+		});
 	}
 	// Use production URL for OAuth redirect (avoids localhost after Google sign-in)
 	const siteUrl = process.env.SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null);

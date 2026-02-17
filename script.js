@@ -23,8 +23,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
 		function detectTier() {
 			if (reduced) return 'low';
+			const conn = navigator.connection;
+			if (conn?.saveData) return 'low';
+			const effType = conn?.effectiveType;
+			if (effType === 'slow-2g' || effType === '2g') return 'low';
+			const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+			if (isMobile) return 'low';
 			const cores = navigator.hardwareConcurrency || 2;
-			const mem = navigator.deviceMemory || 4;
+			const mem = navigator.deviceMemory ?? 4;
 			if (cores <= 2 || mem <= 2) return 'low';
 			if (cores <= 4 || mem <= 4) return 'balanced';
 			return 'immersive';
@@ -36,7 +42,13 @@ document.addEventListener('DOMContentLoaded', function () {
 		const _cbs = new Map();
 		let _id = 0;
 		let _on = false;
+		let _lastTick = 0;
 		function _tick(t) {
+			if (tier === 'low' && t - _lastTick < 33) {
+				if (_cbs.size) { _id = requestAnimationFrame(_tick); } else { _on = false; }
+				return;
+			}
+			_lastTick = t;
 			for (const [, fn] of _cbs) fn(t);
 			if (_cbs.size) { _id = requestAnimationFrame(_tick); } else { _on = false; }
 		}
@@ -57,6 +69,8 @@ document.addEventListener('DOMContentLoaded', function () {
 				els.forEach(function (el) { cb(el, true); });
 				return null;
 			}
+			let thresh = opts.threshold || 0.15;
+			if (tier === 'low' && thresh < 0.2) thresh = 0.2;
 			const io = new IntersectionObserver(function (entries) {
 				entries.forEach(function (e) {
 					if (e.isIntersecting) {
@@ -66,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
 						cb(e.target, false);
 					}
 				});
-			}, { threshold: opts.threshold || 0.15, rootMargin: opts.rootMargin || '0px 0px -50px 0px' });
+			}, { threshold: thresh, rootMargin: opts.rootMargin || '0px 0px -50px 0px' });
 			els.forEach(function (el) { io.observe(el); });
 			return io;
 		}
@@ -83,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			section.classList.add('scroll-visible');
 			const children = section.querySelectorAll('[data-scroll-item]');
 			children.forEach(function (child, i) {
-				setTimeout(function () { child.classList.add('scroll-visible'); }, i * 100);
+				setTimeout(function () { child.classList.add('scroll-visible'); }, i * 12);
 			});
 		}, { threshold: 0.12 });
 
@@ -253,16 +267,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	(function setupSiteLoadAnimation() {
 		const root = document.documentElement;
 		const releasePreloadGate = () => root.classList.remove('site-preload');
-		if (document.body.classList.contains('ultimate-page')) {
-			releasePreloadGate();
-			return;
-		}
 		const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		if (prefersReduced) {
-			releasePreloadGate();
-			return;
-		}
-
 		const nav = performance.getEntriesByType?.('navigation')?.[0];
 		const navType = nav?.type || (performance.navigation?.type === 1 ? 'reload' : 'navigate');
 		const referrer = document.referrer || '';
@@ -273,6 +278,74 @@ document.addEventListener('DOMContentLoaded', function () {
 			} catch {
 				sameOrigin = referrer.startsWith(window.location.origin || '');
 			}
+		}
+
+		if (document.body.classList.contains('ultimate-page')) {
+			if (prefersReduced) {
+				releasePreloadGate();
+				return;
+			}
+			if (navType === 'navigate' && sameOrigin) {
+				releasePreloadGate();
+				return;
+			}
+			const isLight = document.body.classList.contains('theme-light');
+			const mode = isLight ? 'light' : (sessionStorage.getItem('ultimateTransitionMode') || 'dark');
+			const logoSrc = mode === 'light' ? 'images/whitelogo.png' : 'images/logo.png';
+			const overlay = document.createElement('div');
+			overlay.className = 'ultimate-loading-overlay ultimate-mode-' + mode;
+			overlay.setAttribute('aria-hidden', 'true');
+			const sparks = Array.from({ length: 24 }, (_, i) =>
+				`<span class="ultimate-loading-spark" style="--spark-delay:${(i * 0.06).toFixed(2)}s;--spark-x:${(Math.random() * 100).toFixed(1)}%;--spark-size:${(2 + Math.random() * 5).toFixed(1)}px;"></span>`
+			).join('');
+			overlay.innerHTML = `
+				<div class="ultimate-loading-layers">
+					<div class="ultimate-loading-beam"></div>
+					<div class="ultimate-loading-grid"></div>
+					<div class="ultimate-loading-nebula"></div>
+					<div class="ultimate-loading-sparks">${sparks}</div>
+				</div>
+				<div class="ultimate-loading-center">
+					<div class="ultimate-loading-brand-wrap">
+						<img src="${logoSrc}" alt="Control-X" class="ultimate-loading-brand-img" />
+					</div>
+					<div class="ultimate-loading-logo">
+						<span class="ultimate-logo-layer base">CTRLX</span>
+						<span class="ultimate-logo-layer glitch g1">CTRLX</span>
+						<span class="ultimate-logo-layer glitch g2">CTRLX</span>
+						<span class="ultimate-logo-morph">ULTIMATE</span>
+					</div>
+					<div class="ultimate-loading-rings">
+						<div class="ultimate-loading-ring"></div>
+						<div class="ultimate-loading-ring"></div>
+						<div class="ultimate-loading-ring"></div>
+					</div>
+					<div class="ultimate-loading-title">ULTIMATE</div>
+					<div class="ultimate-loading-subtitle">${mode === 'light' ? 'Luminous Sequence • CONTROL+X' : mode === 'cosmic' ? 'Cosmic Surge • CONTROL+X' : 'Neural Sequence • VISION-X'}</div>
+				</div>
+			`;
+			document.body.insertBefore(overlay, document.body.firstChild);
+			requestAnimationFrame(() => overlay.classList.add('active'));
+			let loadFired = document.readyState === 'complete';
+			let minTimePassed = false;
+			const minDisplayMs = 800;
+			const fadeMs = 400;
+			const finish = () => {
+				if (!loadFired || !minTimePassed) return;
+				overlay.classList.remove('active');
+				setTimeout(() => {
+					overlay.remove();
+					releasePreloadGate();
+				}, fadeMs);
+			};
+			window.addEventListener('load', () => { loadFired = true; finish(); }, { once: true });
+			setTimeout(() => { minTimePassed = true; finish(); }, minDisplayMs);
+			return;
+		}
+
+		if (prefersReduced) {
+			releasePreloadGate();
+			return;
 		}
 		if (navType === 'navigate' && sameOrigin) {
 			releasePreloadGate();
@@ -315,7 +388,16 @@ document.addEventListener('DOMContentLoaded', function () {
 		document.body.insertBefore(overlay, document.body.firstChild);
 		releasePreloadGate();
 
-		// After initial animation: rapid line generation + zoom
+		// After initial animation: rapid line generation + zoom. Wait for window.load before finishing.
+		let loadFired = document.readyState === 'complete';
+		let hyperspaceStarted = false;
+		const finishOverlay = () => {
+			if (!loadFired || !hyperspaceStarted) return;
+			overlay.classList.add('site-load-done');
+			setTimeout(() => overlay.remove(), 650);
+		};
+		window.addEventListener('load', () => { loadFired = true; finishOverlay(); }, { once: true });
+
 		setTimeout(() => {
 			overlay.classList.add('site-load-hyperspace-active');
 			overlay.querySelector('.site-load-center')?.classList.add('site-load-center-out');
@@ -347,11 +429,10 @@ document.addEventListener('DOMContentLoaded', function () {
 			spawn();
 			const interval = setInterval(spawn, 18);
 			setTimeout(() => clearInterval(interval), 480);
+			hyperspaceStarted = true;
+			// Require at least 450ms of hyperspace before finishing
+			setTimeout(finishOverlay, 450);
 		}, 1200);
-		setTimeout(() => {
-			overlay.classList.add('site-load-done');
-			setTimeout(() => overlay.remove(), 650);
-		}, 1650);
 	})();
 
 	// Toggle loaded state to trigger CSS entrance animations
@@ -474,6 +555,14 @@ document.addEventListener('DOMContentLoaded', function () {
 		const targets = document.querySelectorAll(selectors);
 		if (!targets.length) return;
 
+		const runWhenIdle = (fn) => {
+			if (typeof requestIdleCallback !== 'undefined') {
+				requestIdleCallback(fn, { timeout: 500 });
+			} else {
+				setTimeout(fn, 0);
+			}
+		};
+
 		function splitLetters(node) {
 			if (node.dataset.glowReady === '1') return;
 			const text = node.textContent || '';
@@ -519,6 +608,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			node.dataset.glowReady = '1';
 		}
 
+		runWhenIdle(() => {
 		targets.forEach((node) => {
 			splitLetters(node);
 			const letters = Array.from(node.querySelectorAll('.glow-letter'));
@@ -556,19 +646,54 @@ document.addEventListener('DOMContentLoaded', function () {
 				if (!raf) raf = requestAnimationFrame(paint);
 			}, { passive: true });
 		});
+		});
 	})();
 
-	// Whole-element hover color fade for body text (no letter split to preserve word wrap)
+	// Letter-by-letter hover color fade for body text
 	(function setupTextHoverFade() {
 		if (prefersReducedMotion || !hasFinePointer) return;
 		if (document.body.classList.contains('ultimate-page')) return;
 
-		const selectors = '.hero p, .hero-sequence p, .page-lead, .card p, .card li, .how-step p, .how-intro p, .faq details summary, .faq details p, .contact-info p, .contact-link span, .zen-product p, .zen-product .price, .price, .services > .muted';
+		const selectors = '.hero p, .hero-sequence p, .page-lead, .card p, .card li, .how-step p, .how-intro p, .contact-info p, .contact-link span, .zen-product p, .zen-product .price, .price, .services > .muted';
 		const targets = document.querySelectorAll(selectors);
 		if (!targets.length) return;
 
+		const faqSelectors = '.faq details summary, .faq details p';
+		const faqTargets = document.querySelectorAll(faqSelectors);
+		faqTargets.forEach((el) => el.classList.add('text-hover-fade'));
+
+		function splitIntoLetters(node) {
+			if (node.dataset.fadeLettersReady === '1') return;
+			const text = node.textContent || '';
+			if (!text.trim()) return;
+			const frag = document.createDocumentFragment();
+			const words = text.split(/(\s+)/);
+			for (let i = 0; i < words.length; i++) {
+				const word = words[i];
+				if (/^\s+$/.test(word)) {
+					frag.appendChild(document.createTextNode(word));
+				} else {
+					const wordSpan = document.createElement('span');
+					wordSpan.className = 'text-fade-word';
+					const prevLen = (frag.textContent || '').length;
+					for (let j = 0; j < word.length; j++) {
+						const span = document.createElement('span');
+						span.className = 'text-fade-letter';
+						span.textContent = word[j];
+						span.style.setProperty('--letter-index', String(prevLen + j));
+						wordSpan.appendChild(span);
+					}
+					frag.appendChild(wordSpan);
+				}
+			}
+			node.textContent = '';
+			node.appendChild(frag);
+			node.dataset.fadeLettersReady = '1';
+		}
+
 		targets.forEach((el) => {
 			el.classList.add('text-hover-fade');
+			splitIntoLetters(el);
 		});
 	})();
 
@@ -1259,6 +1384,15 @@ document.addEventListener('DOMContentLoaded', function () {
 		const links = document.querySelectorAll('.nav-ultimate');
 		if (!links.length) return;
 
+		const runWhenIdle = (fn) => {
+			if (typeof requestIdleCallback !== 'undefined') {
+				requestIdleCallback(fn, { timeout: 500 });
+			} else {
+				setTimeout(fn, 0);
+			}
+		};
+
+		runWhenIdle(() => {
 		links.forEach((link) => {
 			if (link.dataset.lettersReady === '1') return;
 			const text = link.textContent || '';
@@ -1303,6 +1437,7 @@ document.addEventListener('DOMContentLoaded', function () {
 					letters[i].style.setProperty('--glow', '0');
 				}
 			});
+		});
 		});
 	})();
 

@@ -118,7 +118,7 @@
 	text-shadow:
 		0 0 calc(var(--glow) * 18px) rgba(248, 113, 113, calc(0.2 + (var(--glow) * 0.65))),
 		0 0 calc(var(--glow) * 32px) rgba(239, 68, 68, calc(0.05 + (var(--glow) * 0.25)));
-	transition: transform .08s linear, opacity .09s linear, text-shadow .11s linear, color .12s linear;
+	transition: transform .02s linear, opacity .02s linear, text-shadow .025s linear, color .025s linear;
 	will-change: transform, opacity, color;
 }
 
