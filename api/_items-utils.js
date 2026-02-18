@@ -42,7 +42,7 @@ function getPurchaseFlags(items) {
 		}
 		const name = (i.name || '').toLowerCase();
 		const price = Number(i.price);
-		if (name.includes('control+x') || (name.includes('control') && (price === 75 || price === 50))) flags.hasControlX = true;
+		if (name.includes('control+x') || (name.includes('control') && price === 75)) flags.hasControlX = true;
 		if (name.includes('2k') || price === 35) flags.has2K = true;
 		if (name.includes('cod zen') || (name.includes('cod') && price === 20)) flags.hasCOD = true;
 		if (name.includes('apex') || price === 15) flags.hasApex = true;

@@ -6,7 +6,7 @@ const { getPurchaseFlags } = require('./_items-utils');
 const { checkRateLimit } = require('./_rate-limit');
 
 const SCRIPT_MAP = {
-	'control-x': { file: 'CONTROL+X.gpc', filename: 'CONTROL+X.gpc', price: 50, nameMatch: 'control+x' },
+	'control-x': { file: 'CONTROL+X.gpc', filename: 'CONTROL+X.gpc', price: 75, nameMatch: 'control+x' },
 	'2k': { file: 'Cntrl-X-2K.gpc', filename: 'Cntrl-X-2K.gpc', price: 35, nameMatch: '2k' },
 	'cod': { file: 'Cntrl-X-COD.gpc', filename: 'Cntrl-X-COD.gpc', price: 20, nameMatch: 'cod' },
 	'apex': { file: 'Cntrl-X-Apex.gpc', filename: 'Cntrl-X-Apex.gpc', price: 15, nameMatch: 'apex' },
