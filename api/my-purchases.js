@@ -29,7 +29,12 @@ module.exports = async (req, res) => {
 
 		if (error) {
 			console.error('my-purchases: Supabase error', error.code, error.message);
-			return res.status(500).json({ error: 'Failed to load purchases' });
+			return res.status(500).json({
+				error: 'Failed to load purchases',
+				reason: 'SUPABASE_QUERY',
+				code: error.code || null,
+				detail: error.message || null,
+			});
 		}
 
 		const EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -53,6 +58,10 @@ module.exports = async (req, res) => {
 		res.json({ purchases });
 	} catch (err) {
 		console.error('my-purchases: Unexpected error', err);
-		return res.status(500).json({ error: 'Failed to load purchases' });
+		return res.status(500).json({
+			error: 'Failed to load purchases',
+			reason: 'UNEXPECTED',
+			detail: err?.message || null,
+		});
 	}
 };
