@@ -150,15 +150,21 @@
 				const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
 				const baseUrl = cfg.siteUrl || (isLocalhost ? 'https://www.cntrl-x.com' : origin);
 				oauthRedirectUrl = baseUrl.replace(/\/$/, '') + '/account.html';
-				let createClient;
-				for (let i = 0; i < 100; i++) {
-					const lib = window.supabase || window.supabaseJs;
-					createClient = lib?.createClient || lib?.default?.createClient;
-					if (createClient) break;
-					await new Promise(r => setTimeout(r, 50));
+				// Reuse shared client from script.js to avoid multiple GoTrueClient instances
+				if (window.__supabaseClient) {
+					supabase = window.__supabaseClient;
+				} else {
+					let createClient;
+					for (let i = 0; i < 100; i++) {
+						const lib = window.supabase || window.supabaseJs;
+						createClient = lib?.createClient || lib?.default?.createClient;
+						if (createClient) break;
+						await new Promise(r => setTimeout(r, 50));
+					}
+					if (!createClient) throw new Error('Supabase script not loaded');
+					supabase = createClient(cfg.url, cfg.anonKey);
+					window.__supabaseClient = supabase;
 				}
-				if (!createClient) throw new Error('Supabase script not loaded');
-				supabase = createClient(cfg.url, cfg.anonKey);
 			} catch (e) {
 				const localHint = /^localhost$|^127\.0\.0\.1$/.test(window.location.hostname)
 					? ' Run with "vercel dev" and set SUPABASE_URL and SUPABASE_ANON_KEY in .env.local.'

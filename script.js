@@ -1172,9 +1172,12 @@ document.addEventListener('DOMContentLoaded', function () {
 					document.head.appendChild(s);
 				});
 			}
+			// Re-check in case account.html or another script created it during await
+			if (window.__supabaseClient) return window.__supabaseClient;
 			const cfgRes = await fetch('/api/supabase-config');
 			const cfg = await cfgRes.json();
 			if (!cfg?.url || !cfg?.anonKey) return null;
+			if (window.__supabaseClient) return window.__supabaseClient;
 			const lib = window.supabase || window.supabaseJs;
 			const createClient = lib?.createClient || lib?.default?.createClient;
 			if (!createClient) return null;
