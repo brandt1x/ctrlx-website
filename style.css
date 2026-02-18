@@ -1395,6 +1395,7 @@ body.theme-light .nav-ultimate-letter {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	pointer-events: none;
 	background:
 		radial-gradient(circle at 20% 20%, rgba(239, 68, 68, 0.24), transparent 40%),
 		radial-gradient(circle at 80% 80%, rgba(239, 68, 68, 0.2), transparent 36%),

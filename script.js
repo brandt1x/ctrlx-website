@@ -1318,23 +1318,20 @@ document.addEventListener('DOMContentLoaded', function () {
 		});
 	})();
 
-	// Ultimate page add-to-cart (ultimate.html)
+	// Ultimate page add-to-cart (ultimate.html) — event delegation so it works regardless of overlays/timing
 	(function setupUltimateAddToCart() {
-		if (!window.__addToSiteCart) return;
-		const buttons = document.querySelectorAll('.ultimate-add-btn');
-		if (!buttons.length) return;
-		buttons.forEach(btn => {
-			btn.addEventListener('click', () => {
-				const productId = btn.getAttribute('data-product-id') || '';
-				const name = btn.getAttribute('data-name') || 'Product';
-				const price = btn.getAttribute('data-price') || '0';
-				window.__addToSiteCart(productId, name, price);
-				const cartToggle = document.getElementById('site-cart-toggle');
-				if (cartToggle) {
-					cartToggle.classList.add('cart-toggle-pulse');
-					setTimeout(() => cartToggle.classList.remove('cart-toggle-pulse'), 320);
-				}
-			});
+		document.body.addEventListener('click', (e) => {
+			const btn = e.target?.closest?.('.ultimate-add-btn');
+			if (!btn || !window.__addToSiteCart) return;
+			const productId = btn.getAttribute('data-product-id') || '';
+			const name = btn.getAttribute('data-name') || 'Product';
+			const price = btn.getAttribute('data-price') || '0';
+			window.__addToSiteCart(productId, name, price);
+			const cartToggle = document.getElementById('site-cart-toggle');
+			if (cartToggle) {
+				cartToggle.classList.add('cart-toggle-pulse');
+				setTimeout(() => cartToggle.classList.remove('cart-toggle-pulse'), 320);
+			}
 		});
 	})();
 
