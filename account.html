@@ -514,6 +514,9 @@
 				const params = new URLSearchParams(location.search);
 				const fromCheckout = params.get('success') === '1' && params.get('session_id');
 				const startOnPurchases = location.hash === '#purchases' || fromCheckout;
+				// #region agent log
+				fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:init',message:'init session and return params',data:{hasSession:!!session,fromCheckout:!!fromCheckout,hasSessionIdParam:!!params.get('session_id')},timestamp:Date.now(),hypothesisId:'A,C,E'})}).catch(()=>{});
+				// #endregion
 				if (session) {
 					authEl.hidden = true;
 					dashboardEl.hidden = false;
@@ -534,6 +537,9 @@
 							const dr = await fetch(debugUrl, { headers: { 'Authorization': 'Bearer ' + session.access_token } });
 							const d = await dr.json().catch(() => ({}));
 							console.warn('[Purchase debug]', d);
+							// #region agent log
+							fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:purchase-debug',message:'purchase-debug response',data:{ok:!!d.ok,authenticated:!!d.authenticated,purchaseCount:d.purchaseCount||0,sessionFound:typeof d.sessionFound==='boolean'?d.sessionFound:null},timestamp:Date.now(),hypothesisId:'B,C,D'})}).catch(()=>{});
+							// #endregion
 							if (d.sessionFound === false) {
 								console.warn('Your session_id was not found in purchases. The Stripe webhook may not have run. Check Stripe Dashboard → Webhooks → Recent deliveries.');
 							}
