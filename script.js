@@ -1318,6 +1318,26 @@ document.addEventListener('DOMContentLoaded', function () {
 		});
 	})();
 
+	// Ultimate page add-to-cart (ultimate.html)
+	(function setupUltimateAddToCart() {
+		if (!window.__addToSiteCart) return;
+		const buttons = document.querySelectorAll('.ultimate-add-btn');
+		if (!buttons.length) return;
+		buttons.forEach(btn => {
+			btn.addEventListener('click', () => {
+				const productId = btn.getAttribute('data-product-id') || '';
+				const name = btn.getAttribute('data-name') || 'Product';
+				const price = btn.getAttribute('data-price') || '0';
+				window.__addToSiteCart(productId, name, price);
+				const cartToggle = document.getElementById('site-cart-toggle');
+				if (cartToggle) {
+					cartToggle.classList.add('cart-toggle-pulse');
+					setTimeout(() => cartToggle.classList.remove('cart-toggle-pulse'), 320);
+				}
+			});
+		});
+	})();
+
 	// Hero "CTRL-X Vision Setup" add-to-cart (index.html)
 	; (function setupHeroAdd() {
 		if (!window.__addToSiteCart) return;
