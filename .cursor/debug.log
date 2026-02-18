@@ -64,3 +64,9 @@
 {"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771398779278,"hypothesisId":"A,B,C,E"}
 {"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771398782282,"hypothesisId":"A,B,C,E"}
 {"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771398785304,"hypothesisId":"A,B,C,E"}
+{"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771399111781,"hypothesisId":"A,B,C,E"}
+{"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771399112107,"hypothesisId":"A,B,C,E"}
+{"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771399114542,"hypothesisId":"A,B,C,E"}
+{"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771399116861,"hypothesisId":"A,B,C,E"}
+{"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771399119160,"hypothesisId":"A,B,C,E"}
+{"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771399124854,"hypothesisId":"A,B,C,E"}
