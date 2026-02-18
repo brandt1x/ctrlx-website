@@ -3080,6 +3080,9 @@ body.success-page .success-card .ultimate-product-content {
 	flex-direction: column;
 	gap: 0.35rem;
 }
+.account-field[hidden] {
+	display: none !important;
+}
 .account-field label {
 	font-size: 0.8125rem;
 	color: var(--muted);
@@ -3099,26 +3102,40 @@ body.success-page .success-card .ultimate-product-content {
 .account-password-wrap {
 	position: relative;
 	display: flex;
-	align-items: center;
+	flex-direction: row;
+	align-items: stretch;
+	background: var(--panel);
+	border: 1px solid var(--glass);
+	border-radius: 8px;
 }
 .account-password-wrap input {
 	flex: 1;
-	padding-right: 44px;
+	min-width: 0;
+	padding: 10px 44px 10px 14px;
+	border: none;
+	background: transparent;
+	border-radius: 8px;
+}
+.account-password-wrap input:focus {
+	box-shadow: none;
+}
+.account-password-wrap:focus-within {
+	border-color: var(--accent);
 }
 .account-password-toggle {
 	position: absolute;
-	right: 8px;
-	top: 50%;
-	transform: translateY(-50%);
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: 44px;
 	background: none;
 	border: none;
 	color: var(--muted);
 	cursor: pointer;
-	padding: 6px;
-	border-radius: 4px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	border-radius: 0 8px 8px 0;
 }
 .account-password-toggle .icon-eye,
 .account-password-toggle .icon-eye-slash {
