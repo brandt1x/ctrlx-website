@@ -1,2 +1,13 @@
 {"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771396041673,"hypothesisId":"A,B,C,E"}
 {"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771396051645,"hypothesisId":"A,B,C,E"}
+{"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771397481278,"hypothesisId":"A,B,C,E"}
+{"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771397481774,"hypothesisId":"A,B,C,E"}
+{"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771397484110,"hypothesisId":"A,B,C,E"}
+{"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771397486439,"hypothesisId":"A,B,C,E"}
+{"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771397488746,"hypothesisId":"A,B,C,E"}
+{"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771397491107,"hypothesisId":"A,B,C,E"}
+{"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771397493410,"hypothesisId":"A,B,C,E"}
+{"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771397495705,"hypothesisId":"A,B,C,E"}
+{"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771397498041,"hypothesisId":"A,B,C,E"}
+{"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771397500412,"hypothesisId":"A,B,C,E"}
+{"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":500,"ok":false,"purchasesLength":0},"timestamp":1771397503344,"hypothesisId":"A,B,C,E"}
