@@ -421,6 +421,9 @@
 				const res = await fetch('/api/my-purchases', {
 					headers: { 'Authorization': 'Bearer ' + session.access_token } });
 				const data = await res.json();
+				// #region agent log
+				fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:loadPurchases',message:'my-purchases response',data:{status:res.status,ok:res.ok,purchasesLength:(data.purchases||[]).length},timestamp:Date.now(),hypothesisId:'A,B,C,E'})}).catch(()=>{});
+				// #endregion
 				if (!res.ok) {
 					renderEmptyPurchases('You have no purchases available to show right now.');
 					return false;
