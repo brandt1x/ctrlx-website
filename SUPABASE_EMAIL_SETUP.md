@@ -87,6 +87,53 @@ The account page shows a "Verify your email" step after signup. Users enter the 
 
 ---
 
+## Troubleshooting: "Nothing in Resend logs"
+
+If the app says it sent a code but **Resend has no logs**, the email never reached Resend. Supabase is still using its built-in provider or SMTP is misconfigured.
+
+### 1. Confirm Custom SMTP is enabled
+
+1. Supabase Dashboard → **Project Settings** (gear icon) → **Auth**
+2. Scroll to **SMTP Settings**
+3. Ensure **Enable Custom SMTP** is **ON**
+4. Verify every field is filled and saved
+
+### 2. Check Supabase Auth logs
+
+1. Supabase Dashboard → **Logs** → **Auth**
+2. Trigger a signup and watch for errors
+3. Look for: `handover`, `smtp`, `email`, `failed`, `error`
+
+If you see SMTP/auth errors, the credentials or sender are wrong.
+
+### 3. Resend sender email rules
+
+- **Sandbox (`onboarding@resend.dev`):** Can only send **to** the Resend account email (e.g. `cntrlx4@gmail.com`). Other addresses will fail.
+- **Verified domain:** Use `noreply@cntrl-x.com` (or similar) **only after** `cntrl-x.com` is verified in Resend → Domains.
+
+### 4. SMTP credentials checklist
+
+| Field | Must be |
+|-------|---------|
+| Host | `smtp.resend.com` |
+| Port | `465` |
+| Username | `resend` (literal) |
+| Password | Your Resend API key (starts with `re_`) |
+| Sender email | From a verified domain, or `onboarding@resend.dev` for sandbox |
+| Sender name | Any (e.g. `Control-X`) |
+
+### 5. Quick test with sandbox
+
+To confirm Resend works at all:
+
+1. In Supabase SMTP, set **Sender email** to `onboarding@resend.dev`
+2. Sign up with the **same email** as your Resend account (e.g. `cntrlx4@gmail.com`)
+3. Check Resend logs – you should see the request
+
+If it works for that address but not others, you need to verify `cntrl-x.com` in Resend and switch the sender to `noreply@cntrl-x.com`.
+
+---
+
 ## Other providers
 
 - **SendGrid:** [sendgrid.com](https://sendgrid.com) – free tier 100/day

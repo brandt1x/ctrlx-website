@@ -7,7 +7,7 @@ const PRODUCT_CATALOG = {
 	'2k': { name: '2K Zen Script', price: 35 },
 	'cod': { name: 'COD Zen Script', price: 20 },
 	'apex': { name: 'Apex Zen Script', price: 15 },
-	'arc': { name: 'ARC Zen Script', price: 15 },
+	'arc': { name: 'ARC Zen Script', price: 25 },
 	'fortnite': { name: 'Fortnite Zen Script', price: 20 },
 	'siege': { name: 'Siege Zen Script', price: 20 },
 	'rust': { name: 'Rust Zen Script', price: 20 },

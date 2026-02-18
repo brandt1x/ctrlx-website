@@ -46,7 +46,7 @@ function getPurchaseFlags(items) {
 		if (name.includes('2k') || price === 35) flags.has2K = true;
 		if (name.includes('cod zen') || (name.includes('cod') && price === 20)) flags.hasCOD = true;
 		if (name.includes('apex') || price === 15) flags.hasApex = true;
-		if (name.includes('arc zen') || (name.includes('arc') && price === 15)) flags.hasArc = true;
+		if (name.includes('arc zen') || (name.includes('arc') && (price === 15 || price === 25))) flags.hasArc = true;
 		if (name.includes('fortnite') || price === 20) flags.hasFortnite = true;
 		if (name.includes('siege') || price === 20) flags.hasSiege = true;
 		if (name.includes('rust') || price === 20) flags.hasRust = true;
