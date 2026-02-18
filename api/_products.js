@@ -3,7 +3,7 @@
  * Never trust client-supplied prices.
  */
 const PRODUCT_CATALOG = {
-	'control-x': { name: 'CONTROL+X Zen Script', price: 75 },
+	'control-x': { name: 'CONTROL+X Zen Script', price: 50 },
 	'2k': { name: '2K Zen Script', price: 35 },
 	'cod': { name: 'COD Zen Script', price: 20 },
 	'apex': { name: 'Apex Zen Script', price: 15 },
