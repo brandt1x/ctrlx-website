@@ -3096,6 +3096,31 @@ body.success-page .success-card .ultimate-product-content {
 	outline: none;
 	border-color: var(--accent);
 }
+.account-password-wrap {
+	position: relative;
+	display: flex;
+	align-items: center;
+}
+.account-password-wrap input {
+	flex: 1;
+	padding-right: 52px;
+}
+.account-password-toggle {
+	position: absolute;
+	right: 10px;
+	top: 50%;
+	transform: translateY(-50%);
+	background: none;
+	border: none;
+	color: var(--muted);
+	font-size: 0.75rem;
+	cursor: pointer;
+	padding: 4px 6px;
+	border-radius: 4px;
+}
+.account-password-toggle:hover {
+	color: var(--accent);
+}
 .account-error {
 	color: #f87171;
 	font-size: 0.875rem;

@@ -15,6 +15,7 @@ const SCRIPT_MAP = {
 	'rust': { file: 'Cntrl-X-Rust.gpc', filename: 'Cntrl-X-Rust.gpc', price: 20, nameMatch: 'rust' },
 };
 
+// Zen scripts only – excludes CONTROL+X and VISION-X (ultimate products)
 const BUNDLE_FILES = [
 	'Cntrl-X-Apex.gpc', 'Cntrl-X-Arc.gpc', 'Cntrl-X-COD.gpc',
 	'Cntrl-X-Fortnite.gpc', 'Cntrl-X-Rust.gpc',

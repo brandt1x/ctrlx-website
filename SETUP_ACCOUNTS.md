@@ -12,6 +12,21 @@ This guide covers the manual steps to enable user accounts:
    - anon/public key
    - service_role key (keep secret)
 
+### Supabase email setup (signup confirmation)
+
+If users are not receiving signup confirmation emails:
+
+| Cause | Solution |
+|-------|----------|
+| **Built-in provider limit** | Supabase's default email is for demo only (~2/hour). Use custom SMTP for production. |
+| **Spam folder** | Ask users to check spam/junk. |
+| **Domain blocking** | Emails from `supabase.io` can be blocked. Use custom SMTP with your domain. |
+
+**Options:**
+
+- **Disable confirmation (dev):** In **Authentication > Providers > Email**, turn off "Confirm email". Users can sign in immediately without confirming.
+- **Custom SMTP (production):** In **Project Settings > Auth > SMTP**, configure SendGrid, Mailgun, Resend, or another provider. See [Supabase SMTP docs](https://supabase.com/docs/guides/auth/auth-smtp).
+
 ## 2. Vercel Environment Variables
 
 Add these in your Vercel project settings:
@@ -49,11 +64,27 @@ Redeploy your site after adding all environment variables.
 
 ---
 
+## How account and purchase tracking works
+
+Accounts and purchases are already tracked. No extra setup is required.
+
+**Data flow:**
+
+1. **Sign up** – Supabase Auth creates a row in `auth.users`. Each user gets a unique `id` (UUID).
+2. **Checkout** – `create-checkout-session` passes `user_id: user.id` in Stripe session metadata.
+3. **Webhook** – When Stripe sends `checkout.session.completed`, the webhook reads `user_id` from metadata and inserts into the `purchases` table with `user_id`, `session_id`, and `items`.
+4. **Storage** – The `purchases` table (`supabase/schema.sql`) has `user_id` referencing `auth.users(id)`. Row Level Security (RLS) ensures users only see their own purchases.
+5. **Retrieval** – The `my-purchases` API fetches `purchases` where `user_id = auth.uid()`.
+
+Each purchase is tied to the signed-in user. Users see only their own purchases and downloads.
+
+---
+
 ## Flow Summary
 
 - Users add items to cart (no login)
 - Clicking **Checkout** requires sign-in; if not logged in, redirects to `/account.html`
 - After sign-in, user returns and can checkout
 - Stripe redirects to `/account.html` after payment
-- Webhook stores the purchase in Supabase
+- Webhook stores the purchase in Supabase with `user_id`
 - User sees purchases and downloads in their account

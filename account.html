@@ -63,7 +63,17 @@
 						</div>
 						<div id="auth-password" class="account-field">
 							<label for="auth-password-input">Password</label>
-							<input type="password" id="auth-password-input" required placeholder="••••••••" autocomplete="current-password" />
+							<div class="account-password-wrap">
+								<input type="password" id="auth-password-input" required placeholder="••••••••" autocomplete="current-password" />
+								<button type="button" class="account-password-toggle" aria-label="Show password" data-target="auth-password-input">Show</button>
+							</div>
+						</div>
+						<div id="auth-confirm-password" class="account-field" hidden>
+							<label for="auth-confirm-input">Confirm password</label>
+							<div class="account-password-wrap">
+								<input type="password" id="auth-confirm-input" placeholder="••••••••" autocomplete="new-password" />
+								<button type="button" class="account-password-toggle" aria-label="Show confirm password" data-target="auth-confirm-input">Show</button>
+							</div>
 						</div>
 						<div id="auth-error" class="account-error" hidden></div>
 						<button type="submit" class="btn" id="auth-submit">Sign in</button>
@@ -148,16 +158,34 @@
 			const overviewView = document.getElementById('account-overview');
 			const signoutBtn = document.getElementById('account-signout');
 			const authPasswordInput = document.getElementById('auth-password-input');
+			const authConfirmInput = document.getElementById('auth-confirm-input');
+			const authConfirmField = document.getElementById('auth-confirm-password');
 			const authGoogleBtn = document.getElementById('auth-google');
 			const tabs = authForm ? authForm.querySelectorAll('.account-tab') : [];
 			const dashboardTabs = document.querySelectorAll('.account-tab-btn');
 			let mode = 'signin';
 			let purchasesLoaded = false;
 
+			document.querySelectorAll('.account-password-toggle').forEach(btn => {
+				btn.addEventListener('click', () => {
+					const input = document.getElementById(btn.dataset.target);
+					if (!input) return;
+					const isPass = input.type === 'password';
+					input.type = isPass ? 'text' : 'password';
+					btn.textContent = isPass ? 'Hide' : 'Show';
+					btn.setAttribute('aria-label', isPass ? 'Hide password' : 'Show password');
+				});
+			});
+
 			function updateAuthMode(newMode) {
 				mode = newMode;
 				authSubmit.textContent = mode === 'signin' ? 'Sign in' : 'Sign up';
 				authPasswordInput.setAttribute('autocomplete', mode === 'signin' ? 'current-password' : 'new-password');
+				if (authConfirmField) {
+					authConfirmField.hidden = mode === 'signin';
+					authConfirmInput.required = mode === 'signup';
+					if (mode === 'signin') authConfirmInput.value = '';
+				}
 			}
 
 			tabs.forEach(t => {
@@ -175,6 +203,14 @@
 				const email = document.getElementById('auth-email-input').value.trim();
 				const password = authPasswordInput.value;
 				if (!email || !password) return;
+				if (mode === 'signup') {
+					const confirmPassword = authConfirmInput ? authConfirmInput.value : '';
+					if (password !== confirmPassword) {
+						authError.textContent = 'Passwords do not match.';
+						authError.hidden = false;
+						return;
+					}
+				}
 				authSubmit.disabled = true;
 				try {
 					if (mode === 'signin') {
