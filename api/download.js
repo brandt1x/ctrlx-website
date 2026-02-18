@@ -10,7 +10,7 @@ const SCRIPT_MAP = {
 	'2k': { file: 'Cntrl-X-2K.gpc', filename: 'Cntrl-X-2K.gpc', price: 35, nameMatch: '2k' },
 	'cod': { file: 'Cntrl-X-COD.gpc', filename: 'Cntrl-X-COD.gpc', price: 20, nameMatch: 'cod' },
 	'apex': { file: 'Cntrl-X-Apex.gpc', filename: 'Cntrl-X-Apex.gpc', price: 15, nameMatch: 'apex' },
-	'arc': { file: 'Cntrl-X-Arc.gpc', filename: 'Cntrl-X-Arc.gpc', price: 25, nameMatch: 'arc' },
+	'arc': { file: 'Cntrl-X-Arc.gpc', filename: 'Cntrl-X-Arc.gpc', price: 15, nameMatch: 'arc' },
 	'fortnite': { file: 'Cntrl-X-Fortnite.gpc', filename: 'Cntrl-X-Fortnite.gpc', price: 20, nameMatch: 'fortnite' },
 	'rust': { file: 'Cntrl-X-Rust.gpc', filename: 'Cntrl-X-Rust.gpc', price: 20, nameMatch: 'rust' },
 };

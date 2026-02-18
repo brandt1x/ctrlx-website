@@ -3167,6 +3167,29 @@ body.success-page .success-card .ultimate-product-content {
 	max-width: 360px;
 	margin: 0 auto;
 }
+.account-check-email {
+	text-align: center;
+}
+.account-check-email-icon {
+	font-size: 2.5rem;
+	margin-bottom: 0.75rem;
+	opacity: 0.9;
+}
+.account-check-email-title {
+	font-size: 1.25rem;
+	font-weight: 700;
+	margin-bottom: 0.5rem;
+	color: var(--text);
+}
+.account-check-email-lead {
+	color: var(--muted);
+	font-size: 0.9rem;
+	line-height: 1.5;
+	margin-bottom: 1.25rem;
+}
+.account-check-email-lead strong {
+	color: var(--text);
+}
 .account-verify-lead {
 	color: var(--muted);
 	font-size: 0.9rem;
@@ -3179,6 +3202,9 @@ body.success-page .success-card .ultimate-product-content {
 	display: flex;
 	gap: 0.5rem;
 	flex-wrap: wrap;
+}
+.account-check-email .account-divider {
+	margin: 1rem 0 0.5rem;
 }
 .account-verify-back {
 	margin-top: 0.5rem;

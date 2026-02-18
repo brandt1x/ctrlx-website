@@ -87,19 +87,18 @@
 						<button type="button" class="btn ghost" id="auth-google">Sign in with Google</button>
 					</form>
 					<div id="account-verify-step" class="account-verify-step" hidden>
-						<p class="account-verify-lead">We sent a 6-digit code to <strong id="verify-email-display"></strong>. Enter it below.</p>
-						<form id="verify-form" class="account-auth-form">
-							<div class="account-field">
-								<label for="verify-code-input">Verification code</label>
-								<input type="text" id="verify-code-input" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="000000" autocomplete="one-time-code" />
-							</div>
+						<div class="account-check-email">
+							<p class="account-check-email-icon" aria-hidden="true">✉</p>
+							<h3 class="account-check-email-title">Check your email</h3>
+							<p class="account-check-email-lead">We sent a confirmation link to <strong id="verify-email-display"></strong>. Click the link in that email to confirm your account, then come back here to sign in.</p>
 							<div id="verify-error" class="account-error" hidden></div>
 							<div class="account-verify-actions">
-								<button type="submit" class="btn" id="verify-submit">Verify</button>
-								<button type="button" class="btn ghost" id="verify-resend">Resend code</button>
+								<button type="button" class="btn ghost" id="verify-resend">Resend confirmation email</button>
 							</div>
+							<div class="account-divider">or</div>
+							<button type="button" class="btn ghost" id="verify-google">Sign up with Google instead</button>
 							<button type="button" class="btn ghost account-verify-back" id="verify-back">Use different email</button>
-						</form>
+						</div>
 					</div>
 				</div>
 
@@ -174,9 +173,6 @@
 			const authSubmit = document.getElementById('auth-submit');
 			const authError = document.getElementById('auth-error');
 			const verifyStep = document.getElementById('account-verify-step');
-			const verifyForm = document.getElementById('verify-form');
-			const verifyCodeInput = document.getElementById('verify-code-input');
-			const verifySubmit = document.getElementById('verify-submit');
 			const verifyResend = document.getElementById('verify-resend');
 			const verifyError = document.getElementById('verify-error');
 			const verifyEmailDisplay = document.getElementById('verify-email-display');
@@ -274,47 +270,42 @@
 					} else {
 						const { data, error } = await supabase.auth.signUp({ email, password });
 						if (error) throw error;
-						if (data?.user && (!data.user.identities || data.user.identities.length === 0)) {
+						const identities = data?.user?.identities;
+						const hasIdentity = identities && identities.length > 0;
+						if (data?.user && !hasIdentity) {
+							// Repeated signup (existing account) – try sign-in first
+							const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+							if (!signInErr) {
+								location.reload();
+								return;
+							}
+							// Sign-in failed: account exists but wrong auth (e.g. Google) or wrong password
+							authError.textContent = 'An account with this email already exists. Sign in with your password, or use Sign in with Google if you signed up that way.';
+							authError.hidden = false;
+							tabs.forEach(x => x.classList.remove('active'));
+							const signInTab = authForm.querySelector('.account-tab[data-tab="signin"]');
+							if (signInTab) {
+								signInTab.classList.add('active');
+								updateAuthMode('signin');
+							}
+						} else if (data?.user && !data?.session && hasIdentity) {
+							// New user, needs email verification – show "check your email" (no reload)
 							authForm.hidden = true;
 							verifyStep.hidden = false;
 							verifyEmailDisplay.textContent = email;
-							verifyCodeInput.value = '';
 							verifyError.hidden = true;
 						} else {
 							location.reload();
 						}
 					}
 				} catch (err) {
-					authError.textContent = err.message || 'Something went wrong';
+					const msg = err.message || 'Something went wrong';
+					authError.textContent = mode === 'signup'
+						? msg + ' Or try Sign in with Google below.'
+						: msg;
 					authError.hidden = false;
 				} finally {
 					authSubmit.disabled = false;
-				}
-			});
-
-			verifyForm.addEventListener('submit', async (e) => {
-				e.preventDefault();
-				verifyError.hidden = true;
-				const code = verifyCodeInput.value.trim().replace(/\D/g, '').slice(0, 6);
-				if (code.length !== 6) {
-					verifyError.textContent = 'Enter the 6-digit code from your email.';
-					verifyError.className = 'account-error';
-					verifyError.hidden = false;
-					return;
-				}
-				const email = verifyEmailDisplay.textContent;
-				if (!email) return;
-				verifySubmit.disabled = true;
-				try {
-					const { data, error } = await supabase.auth.verifyOtp({ email, token: code, type: 'email' });
-					if (error) throw error;
-					if (data?.session) location.reload();
-				} catch (err) {
-					verifyError.textContent = err.message || 'Invalid or expired code. Try resending.';
-					verifyError.className = 'account-error';
-					verifyError.hidden = false;
-				} finally {
-					verifySubmit.disabled = false;
 				}
 			});
 
@@ -326,11 +317,11 @@
 				try {
 					const { error } = await supabase.auth.resend({ type: 'signup', email });
 					if (error) throw error;
-					verifyError.textContent = 'Code sent. Check your email.';
+					verifyError.textContent = 'Confirmation email sent. Check your inbox.';
 					verifyError.className = 'account-error account-success';
 					verifyError.hidden = false;
 				} catch (err) {
-					verifyError.textContent = err.message || 'Could not resend. Try again later.';
+					verifyError.textContent = (err.message || 'Could not resend.') + ' Try Sign up with Google instead below.';
 					verifyError.className = 'account-error';
 					verifyError.hidden = false;
 				} finally {
@@ -342,11 +333,21 @@
 				verifyStep.hidden = true;
 				authForm.hidden = false;
 				verifyError.hidden = true;
-				verifyCodeInput.value = '';
 			});
 
-			verifyCodeInput.addEventListener('input', () => {
-				verifyCodeInput.value = verifyCodeInput.value.replace(/\D/g, '').slice(0, 6);
+			document.getElementById('verify-google').addEventListener('click', async () => {
+				verifyError.hidden = true;
+				try {
+					const { error } = await supabase.auth.signInWithOAuth({
+						provider: 'google',
+						options: { redirectTo: oauthRedirectUrl }
+					});
+					if (error) throw error;
+				} catch (err) {
+					verifyError.textContent = err.message || 'Google sign-in failed. Try again.';
+					verifyError.className = 'account-error';
+					verifyError.hidden = false;
+				}
 			});
 
 			authGoogleBtn.addEventListener('click', async () => {
