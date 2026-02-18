@@ -422,7 +422,7 @@
 					headers: { 'Authorization': 'Bearer ' + session.access_token } });
 				const data = await res.json();
 				// #region agent log
-				fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:loadPurchases',message:'my-purchases response',data:{status:res.status,ok:res.ok,purchasesLength:(data.purchases||[]).length},timestamp:Date.now(),hypothesisId:'A,B,C,E'})}).catch(()=>{});
+				fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:loadPurchases',message:'my-purchases response',data:{status:res.status,ok:res.ok,purchasesLength:(data.purchases||[]).length,error:data?.error||null},timestamp:Date.now(),hypothesisId:'A,B,C,E'})}).catch(()=>{});
 				// #endregion
 				if (!res.ok) {
 					renderEmptyPurchases('You have no purchases available to show right now.');
@@ -532,6 +532,9 @@
 							if (found) break;
 							await new Promise(r => setTimeout(r, 2000));
 						}
+						// #region agent log
+						fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:post-poll',message:'polling finished',data:{found:!!found,hadToken:!!session?.access_token},timestamp:Date.now(),hypothesisId:'B,C,D'})}).catch(()=>{});
+						// #endregion
 						if (!found && session?.access_token) {
 							const debugUrl = '/api/purchase-debug' + (sessionId ? '?session_id=' + encodeURIComponent(sessionId) : '');
 							const dr = await fetch(debugUrl, { headers: { 'Authorization': 'Bearer ' + session.access_token } });
