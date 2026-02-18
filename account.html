@@ -12,7 +12,7 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link rel="stylesheet" href="style.css">
 	<link rel="stylesheet" href="ultimate.css">
-	<link rel="icon" type="image/png" href="images/logo.png">
+	<link rel="icon" type="image/svg+xml" href="images/logo.svg">
 </head>
 
 <body class="success-page">
@@ -21,8 +21,8 @@
 
 	<header class="site-header">
 		<div class="container header-inner">
-			<a href="index.html"><img src="images/logo.png" alt="CTRLX Logo" class="logo-image logo-dark" fetchpriority="high" decoding="async" /></a>
-			<a href="index.html"><img src="images/whitelogo.png" alt="CTRLX Logo" class="logo-image logo-light" loading="lazy" decoding="async" /></a>
+			<a href="index.html"><img src="images/logo.svg" alt="CTRLX Logo" class="logo-image logo-dark" fetchpriority="high" decoding="async" /></a>
+			<a href="index.html"><img src="images/logo.svg" alt="CTRLX Logo" class="logo-image logo-light" loading="lazy" decoding="async" /></a>
 			<div class="header-right">
 				<nav class="nav-left">
 					<a href="index.html">Home</a>
@@ -35,8 +35,8 @@
 					<a href="contact.html" class="btn">Contact</a>
 					<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light mode">
 						<span class="theme-toggle-switch">
-							<span class="theme-icon theme-icon-dark">☾</span>
-							<span class="theme-icon theme-icon-light">☀</span>
+							<span class="theme-icon theme-icon-dark">&#9789;</span>
+							<span class="theme-icon theme-icon-light">&#9728;</span>
 						</span>
 					</button>
 				</div>
@@ -88,7 +88,7 @@
 					</form>
 					<div id="account-verify-step" class="account-verify-step" hidden>
 						<div class="account-check-email">
-							<p class="account-check-email-icon" aria-hidden="true">✉</p>
+							<p class="account-check-email-icon" aria-hidden="true">&#9993;</p>
 							<h3 class="account-check-email-title">Check your email</h3>
 							<p class="account-check-email-lead">We sent a confirmation link to <strong id="verify-email-display"></strong>. Click the link in that email to confirm your account, then come back here to sign in.</p>
 							<div id="verify-error" class="account-error" hidden></div>
@@ -421,9 +421,6 @@
 				const res = await fetch('/api/my-purchases', {
 					headers: { 'Authorization': 'Bearer ' + session.access_token } });
 				const data = await res.json();
-				// #region agent log
-				fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:loadPurchases',message:'my-purchases response',data:{status:res.status,ok:res.ok,purchasesLength:(data.purchases||[]).length,error:data?.error||null,reason:data?.reason||null,code:data?.code||null,detail:data?.detail||null,requiredSessionId:requiredSessionId||null},timestamp:Date.now(),hypothesisId:'A,B,C,E'})}).catch(()=>{});
-				// #endregion
 				if (!res.ok) {
 					renderEmptyPurchases('You have no purchases available to show right now.');
 					return false;
@@ -436,9 +433,6 @@
 				const hasRequiredSession = requiredSessionId
 					? purchases.some((p) => p.session_id === requiredSessionId)
 					: true;
-				// #region agent log
-				fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:loadPurchases:session-check',message:'required session presence',data:{requiredSessionId:requiredSessionId||null,hasRequiredSession:!!hasRequiredSession,totalPurchases:purchases.length},timestamp:Date.now(),hypothesisId:'D'})}).catch(()=>{});
-				// #endregion
 				const html = purchases.map(p => {
 					const expired = p.isExpired;
 					const remaining = !expired && p.expiresAt ? timeRemaining(p.expiresAt) : null;
@@ -520,9 +514,6 @@
 				const params = new URLSearchParams(location.search);
 				const fromCheckout = params.get('success') === '1' && params.get('session_id');
 				const startOnPurchases = location.hash === '#purchases' || fromCheckout;
-				// #region agent log
-				fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:init',message:'init session and return params',data:{hasSession:!!session,fromCheckout:!!fromCheckout,hasSessionIdParam:!!params.get('session_id')},timestamp:Date.now(),hypothesisId:'A,C,E'})}).catch(()=>{});
-				// #endregion
 				if (session) {
 					authEl.hidden = true;
 					dashboardEl.hidden = false;
@@ -538,9 +529,6 @@
 							if (found) break;
 							await new Promise(r => setTimeout(r, 2000));
 						}
-						// #region agent log
-						fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:post-poll',message:'polling finished',data:{found:!!found,hadToken:!!session?.access_token},timestamp:Date.now(),hypothesisId:'B,C,D'})}).catch(()=>{});
-						// #endregion
 						if (!found && session?.access_token) {
 							if (sessionId) {
 								const rr = await fetch('/api/recover-purchase', {
@@ -552,9 +540,6 @@
 									body: JSON.stringify({ session_id: sessionId }),
 								});
 								const rd = await rr.json().catch(() => ({}));
-								// #region agent log
-								fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:recover-call',message:'recover purchase response',data:{status:rr.status,recovered:!!rd.recovered,reason:rd.reason||null,error:rd.error||null},timestamp:Date.now(),hypothesisId:'D'})}).catch(()=>{});
-								// #endregion
 								if (rr.ok && rd.recovered) {
 									found = await loadPurchases(true, sessionId);
 								}
@@ -563,9 +548,6 @@
 							const dr = await fetch(debugUrl, { headers: { 'Authorization': 'Bearer ' + session.access_token } });
 							const d = await dr.json().catch(() => ({}));
 							console.warn('[Purchase debug]', d);
-							// #region agent log
-							fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:purchase-debug',message:'purchase-debug response',data:{ok:!!d.ok,authenticated:!!d.authenticated,purchaseCount:d.purchaseCount||0,sessionFound:typeof d.sessionFound==='boolean'?d.sessionFound:null},timestamp:Date.now(),hypothesisId:'B,C,D'})}).catch(()=>{});
-							// #endregion
 							if (d.sessionFound === false) {
 								console.warn('Your session_id was not found in purchases. The Stripe webhook may not have run. Check Stripe Dashboard → Webhooks → Recent deliveries.');
 							}

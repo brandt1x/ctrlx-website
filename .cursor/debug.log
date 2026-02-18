@@ -1,0 +1,4 @@
+{"location":"account.html:init","message":"init session and return params","data":{"hasSession":true,"fromCheckout":false,"hasSessionIdParam":false},"timestamp":1771440457300,"hypothesisId":"A,C,E"}
+{"location":"account.html:loadPurchases:session-check","message":"required session presence","data":{"requiredSessionId":null,"hasRequiredSession":true,"totalPurchases":3},"timestamp":1771440458006,"hypothesisId":"D"}
+{"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":200,"ok":true,"purchasesLength":3,"error":null,"reason":null,"code":null,"detail":null,"requiredSessionId":null},"timestamp":1771440458005,"hypothesisId":"A,B,C,E"}
+{"location":"account.html:loadPurchases","message":"my-purchases response","data":{"status":200,"ok":true,"purchasesLength":0,"error":null,"reason":null,"code":null,"detail":null,"requiredSessionId":null},"timestamp":1771440537963,"hypothesisId":"A,B,C,E"}

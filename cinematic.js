@@ -12,13 +12,14 @@
 
 	const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 	const hasFine = window.matchMedia && window.matchMedia('(pointer:fine)').matches;
+	const lowPower = (navigator.hardwareConcurrency || 4) <= 4 || (navigator.deviceMemory || 4) <= 4;
 
 	// ─── Tier configuration ───
 	const tier = (window.__Motion && window.__Motion.tier) || document.body.dataset.motionTier || 'balanced';
 	const TIER_CONFIG = {
-		low:       { base: 28,  connDist: 100, speed: 0.22, mouseRadius: 120, auraRadius: 100 },
-		balanced:  { base: 55,  connDist: 130, speed: 0.32, mouseRadius: 160, auraRadius: 150 },
-		immersive: { base: 90,  connDist: 150, speed: 0.36, mouseRadius: 200, auraRadius: 200 },
+		low:       { base: 22,  connDist: 96,  speed: 0.2,  mouseRadius: 110, auraRadius: 90 },
+		balanced:  { base: 38,  connDist: 122, speed: 0.28, mouseRadius: 145, auraRadius: 135 },
+		immersive: { base: 70,  connDist: 146, speed: 0.34, mouseRadius: 190, auraRadius: 185 },
 	};
 	const cfg = TIER_CONFIG[tier] || TIER_CONFIG.balanced;
 
@@ -98,7 +99,8 @@
 		dpr = tier === 'low' ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
 		var densityFactor = width < 900 ? 0.7 : 1;
 		var motionFactor = prefersReduced ? 0.4 : 1;
-		particleCount = Math.max(15, Math.round(cfg.base * densityFactor * motionFactor));
+		const powerFactor = lowPower ? 0.72 : 1;
+		particleCount = Math.max(15, Math.round(cfg.base * densityFactor * motionFactor * powerFactor));
 		canvas.width = Math.floor(width * dpr);
 		canvas.height = Math.floor(height * dpr);
 		canvas.style.width = width + 'px';
@@ -199,7 +201,7 @@
 		}
 
 		// Draw connections (skip for low tier to save budget)
-		if (tier !== 'low') {
+		if (tier === 'immersive' && !lowPower) {
 			for (i = 0; i < particles.length; i++) {
 				for (var j = i + 1; j < particles.length; j++) {
 					var dx2 = particles[i].x - particles[j].x;

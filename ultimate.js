@@ -15,8 +15,10 @@
 		const mouse = { x: -9999, y: -9999, active: false };
 		const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 		const cores = navigator.hardwareConcurrency || 4;
+		const mem = navigator.deviceMemory || 4;
+		const lowPower = cores <= 4 || mem <= 4;
 		let particleCount = 90;
-		const connectionDistance = tier === 'low' ? 100 : 150;
+		const connectionDistance = tier === 'low' || lowPower ? 96 : 150;
 		const connectionDistanceSq = connectionDistance * connectionDistance;
 		const particleSpeed = tier === 'low' ? 0.22 : 0.42;
 		let width = 0;
@@ -32,9 +34,10 @@
 			dpr = tier === 'low' ? 1 : Math.min(window.devicePixelRatio || 1, 1.6);
 			const densityFactor = width < 900 ? 0.85 : 1;
 			const coreFactor = cores <= 4 ? 0.82 : 1;
+			const powerFactor = lowPower ? 0.72 : 1;
 			const motionFactor = prefersReduced ? 0.58 : 1;
-			const base = tier === 'low' ? 42 : tier === 'balanced' ? 70 : 92;
-			particleCount = Math.max(28, Math.round(base * densityFactor * coreFactor * motionFactor));
+			const base = tier === 'low' ? 34 : tier === 'balanced' ? 56 : 82;
+			particleCount = Math.max(24, Math.round(base * densityFactor * coreFactor * powerFactor * motionFactor));
 			canvas.width = Math.floor(width * dpr);
 			canvas.height = Math.floor(height * dpr);
 			canvas.style.width = `${width}px`;
@@ -116,7 +119,7 @@
 				ctx.fill();
 			}
 
-			if (tier !== 'low') {
+			if (tier === 'immersive' && !lowPower) {
 				for (let i = 0; i < particles.length; i++) {
 					for (let j = i + 1; j < particles.length; j++) {
 						const dx = particles[i].x - particles[j].x;
@@ -170,6 +173,9 @@
 	function initCardTilt() {
 		const cards = document.querySelectorAll('.ultimate-tilt');
 		if (!cards.length) return;
+		const tier = (window.__Motion && window.__Motion.tier) || document.body.dataset.motionTier || 'balanced';
+		const hasFine = window.matchMedia && window.matchMedia('(pointer:fine)').matches;
+		if (tier !== 'immersive' || !hasFine) return;
 
 		cards.forEach((card) => {
 			card.addEventListener('mousemove', (e) => {
@@ -190,6 +196,9 @@
 	function initMicroTilt() {
 		const chips = document.querySelectorAll('.ultimate-tilt-chip');
 		if (!chips.length) return;
+		const tier = (window.__Motion && window.__Motion.tier) || document.body.dataset.motionTier || 'balanced';
+		const hasFine = window.matchMedia && window.matchMedia('(pointer:fine)').matches;
+		if (tier !== 'immersive' || !hasFine) return;
 
 		chips.forEach((chip) => {
 			chip.addEventListener('mousemove', (e) => {
@@ -209,6 +218,9 @@
 	function initReactiveHover() {
 		const reactiveNodes = document.querySelectorAll('.ultimate-reactive');
 		if (!reactiveNodes.length) return;
+		const tier = (window.__Motion && window.__Motion.tier) || document.body.dataset.motionTier || 'balanced';
+		const hasFine = window.matchMedia && window.matchMedia('(pointer:fine)').matches;
+		if (tier !== 'immersive' || !hasFine) return;
 
 		const runWhenIdle = (fn) => {
 			if (typeof requestIdleCallback !== 'undefined') {

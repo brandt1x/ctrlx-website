@@ -2,7 +2,7 @@
 
 :root {
 	/* Typography */
-	--font-sans: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+	--font-sans: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;
 
 	/* Dark (default) theme – red & black */
 	--bg: #050509;
@@ -2345,6 +2345,7 @@ body.theme-light .card ul {
 	min-height: 0;
 	overflow: auto;
 	padding-right: 4px;
+	-webkit-overflow-scrolling: touch;
 }
 
 #site-cart-summary {
@@ -2394,6 +2395,7 @@ body.theme-light .card ul {
 .site-cart-item-name {
 	font-weight: 600;
 	color: var(--text);
+	word-break: break-word;
 }
 
 .site-cart-item-price {
@@ -3507,6 +3509,65 @@ body.theme-light .success-slide-box {
 	border-color: rgba(185, 28, 28, 0.2);
 }
 
+body.theme-light .profile-dropdown {
+	background: var(--panel);
+	border-color: rgba(185, 28, 28, 0.15);
+	box-shadow: 0 8px 32px rgba(15, 23, 42, 0.14);
+}
+
+body.theme-light .profile-dropdown-divider,
+body.theme-light .profile-signout-btn {
+	border-color: rgba(185, 28, 28, 0.12);
+}
+
+body.theme-light .account-hub-backdrop {
+	background: rgba(15, 23, 42, 0.5);
+}
+
+body.theme-light .account-hub-panel {
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(254, 242, 242, 0.96));
+	border-color: rgba(185, 28, 28, 0.2);
+	box-shadow: 0 24px 64px rgba(15, 23, 42, 0.16);
+}
+
+body.theme-light .account-hub-close {
+	border-color: rgba(185, 28, 28, 0.15);
+	color: #4b5563;
+}
+
+body.theme-light .account-hub-close:hover {
+	border-color: rgba(185, 28, 28, 0.3);
+	color: #111827;
+}
+
+body.theme-light .account-tab,
+body.theme-light .account-tab-btn,
+body.theme-light .account-hub-tab {
+	border-color: rgba(185, 28, 28, 0.15);
+	color: #6b7280;
+}
+
+body.theme-light .account-tab:hover,
+body.theme-light .account-tab.active,
+body.theme-light .account-tab-btn.active,
+body.theme-light .account-tab-btn:hover,
+body.theme-light .account-hub-tab.active,
+body.theme-light .account-hub-tab:hover {
+	background: rgba(185, 28, 28, 0.1);
+	border-color: rgba(185, 28, 28, 0.25);
+	color: #111827;
+}
+
+body.theme-light .account-overview {
+	background: rgba(255, 255, 255, 0.65);
+	border-color: rgba(185, 28, 28, 0.15);
+}
+
+body.theme-light .account-hub-purchase-item {
+	background: rgba(255, 255, 255, 0.72);
+	border-color: rgba(185, 28, 28, 0.15);
+}
+
 .success-support-text {
 	margin: 0 0 1rem;
 	font-size: 0.9375rem;
@@ -3869,6 +3930,16 @@ body.theme-light .contact-link:hover {
 .contact-icon {
 	font-size: 1.1rem;
 	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 1;
+}
+
+.contact-icon svg {
+	width: 1.05em;
+	height: 1.05em;
+	display: block;
 }
 
 .site-footer {
@@ -4428,8 +4499,8 @@ html.site-preload .ultimate-loading-overlay * {
 	}
 
 	.site-cart-item-remove {
-		min-width: 40px;
-		min-height: 40px;
+		min-width: 44px;
+		min-height: 44px;
 		touch-action: manipulation;
 	}
 
@@ -4518,8 +4589,8 @@ html.site-preload .ultimate-loading-overlay * {
 	.profile-trigger,
 	.cart-toggle,
 	.theme-toggle {
-		min-width: 46px;
-		min-height: 46px;
+		min-width: 48px;
+		min-height: 48px;
 	}
 
 	.profile-dropdown {
@@ -4530,8 +4601,9 @@ html.site-preload .ultimate-loading-overlay * {
 	}
 
 	.profile-dropdown-item {
-		padding: 12px 16px;
+		padding: 14px 16px;
 		font-size: 0.94rem;
+		min-height: 48px;
 	}
 
 	.account-auth {
@@ -4539,7 +4611,13 @@ html.site-preload .ultimate-loading-overlay * {
 	}
 
 	.account-tab {
-		min-height: 46px;
+		min-height: 48px;
+		padding: 12px 16px;
+	}
+
+	.account-tab-btn {
+		min-height: 48px;
+		padding: 12px 16px;
 	}
 
 	.account-dashboard-tabs {
@@ -4551,5 +4629,25 @@ html.site-preload .ultimate-loading-overlay * {
 	.success-support-text {
 		font-size: 0.9rem;
 		line-height: 1.6;
+	}
+}
+
+@media (max-width: 768px) {
+	.account-purchase-block {
+		word-break: break-word;
+	}
+
+	.site-cart-item-name {
+		max-width: clamp(120px, 44vw, 300px);
+	}
+}
+
+@media (max-width: 480px) {
+	textarea {
+		min-height: 140px;
+	}
+
+	.account-password-toggle {
+		min-height: 44px;
 	}
 }

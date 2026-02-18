@@ -92,9 +92,5 @@ module.exports = async (req, res) => {
 		return res.status(500).json({ error: 'Failed to recover purchase', code: insertError.code || null });
 	}
 
-	// #region agent log
-	fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api/recover-purchase.js:inserted',message:'recovered purchase from stripe session',data:{sessionIdPrefix:session.id?.slice(0,20),itemCount:items.length},timestamp:Date.now(),hypothesisId:'D'})}).catch(()=>{});
-	// #endregion
-
 	return res.json({ recovered: true, itemCount: items.length });
 };

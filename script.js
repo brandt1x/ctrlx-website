@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			}
 			const isLight = document.body.classList.contains('theme-light');
 			const mode = isLight ? 'light' : (sessionStorage.getItem('ultimateTransitionMode') || 'dark');
-			const logoSrc = mode === 'light' ? 'images/whitelogo.png' : 'images/logo.png';
+			const logoSrc = 'images/logo.svg';
 			const overlay = document.createElement('div');
 			overlay.className = 'ultimate-loading-overlay ultimate-mode-' + mode;
 			overlay.setAttribute('aria-hidden', 'true');
@@ -353,7 +353,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 
 		const isLight = document.body.classList.contains('theme-light');
-		const logoSrc = isLight ? 'images/whitelogo.png' : 'images/logo.png';
+		const logoSrc = 'images/logo.svg';
 		const streaks = Array.from({ length: 12 }, (_, i) =>
 			`<div class="site-load-streak" style="--delay:${(i * 0.08).toFixed(2)}s;--y:${(Math.random() * 100).toFixed(1)}%;--angle:${-15 + Math.random() * 30}deg;"></div>`
 		).join('');
@@ -448,7 +448,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	// Cursor halo for premium desktop feel
 	(function setupCursorHalo() {
-		if (prefersReducedMotion || !hasFinePointer || document.body.classList.contains('ultimate-page')) return;
+		if (prefersReducedMotion || !hasFinePointer || Motion.tier === 'low' || document.body.classList.contains('ultimate-page')) return;
 		const halo = document.createElement('div');
 		halo.className = 'cursor-halo';
 		document.body.appendChild(halo);
@@ -479,7 +479,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	// Spotlight feedback on interactive elements
 	(function setupInteractiveSpotlight() {
-		if (prefersReducedMotion || !hasFinePointer) return;
+		if (prefersReducedMotion || !hasFinePointer || Motion.tier !== 'immersive') return;
 		const targets = document.querySelectorAll('nav a, .btn, .select-btn, .contact-link');
 		if (!targets.length) return;
 		targets.forEach((el) => {
@@ -502,7 +502,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	// Premium magnetic feel on key controls
 	(function setupMagneticControls() {
-		if (prefersReducedMotion || !hasFinePointer) return;
+		if (prefersReducedMotion || !hasFinePointer || Motion.tier !== 'immersive') return;
 		const targets = document.querySelectorAll('nav a, .btn, .select-btn, .cart-toggle, .theme-toggle, .site-cart-close, .site-cart-item-remove, .contact-link');
 		if (!targets.length) return;
 		targets.forEach((el) => {
@@ -548,7 +548,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	// Per-letter cursor glow on key text (like ULTIMATE mode)
 	(function setupGlobalLetterGlow() {
-		if (prefersReducedMotion || !hasFinePointer) return;
+		if (prefersReducedMotion || !hasFinePointer || Motion.tier !== 'immersive') return;
 		if (document.body.classList.contains('ultimate-page')) return;
 
 		const selectors = 'main h2, main h3, .card h4, .how-step h4, .hero h2, .page-title, .page-kicker, .page-lead, .section-accent, .price strong, nav a, .btn:not(.card-action-btn), .contact-info h4, .how-intro h4, .how-intro-label, .how-chip, .site-footer small';
@@ -651,7 +651,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	// Letter-by-letter hover color fade for body text
 	(function setupTextHoverFade() {
-		if (prefersReducedMotion || !hasFinePointer) return;
+		if (prefersReducedMotion || !hasFinePointer || Motion.tier !== 'immersive') return;
 		if (document.body.classList.contains('ultimate-page')) return;
 
 		const selectors = '.hero p, .hero-sequence p, .page-lead, .card p, .card li, .how-step p, .how-intro p, .contact-info p, .contact-link span, .zen-product p, .zen-product .price, .price, .services > .muted';
@@ -1403,6 +1403,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	; (function setupUltimateNavLetters() {
 		const links = document.querySelectorAll('.nav-ultimate');
 		if (!links.length) return;
+		if (Motion.tier !== 'immersive' || prefersReducedMotion || !hasFinePointer) return;
 
 		const runWhenIdle = (fn) => {
 			if (typeof requestIdleCallback !== 'undefined') {
@@ -1481,7 +1482,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			navigating = true;
 			const isLight = document.body.classList.contains('theme-light');
 			const mode = isLight ? 'light' : nextMode();
-			const logoSrc = mode === 'light' ? 'images/whitelogo.png' : 'images/logo.png';
+			const logoSrc = 'images/logo.svg';
 			const overlay = document.createElement('div');
 			overlay.className = 'ultimate-loading-overlay';
 			overlay.classList.add(`ultimate-mode-${mode}`);
