@@ -3103,20 +3103,29 @@ body.success-page .success-card .ultimate-product-content {
 }
 .account-password-wrap input {
 	flex: 1;
-	padding-right: 52px;
+	padding-right: 44px;
 }
 .account-password-toggle {
 	position: absolute;
-	right: 10px;
+	right: 8px;
 	top: 50%;
 	transform: translateY(-50%);
 	background: none;
 	border: none;
 	color: var(--muted);
-	font-size: 0.75rem;
 	cursor: pointer;
-	padding: 4px 6px;
+	padding: 6px;
 	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.account-password-toggle .icon-eye,
+.account-password-toggle .icon-eye-slash {
+	display: block;
+}
+.account-password-toggle [hidden] {
+	display: none !important;
 }
 .account-password-toggle:hover {
 	color: var(--accent);
