@@ -236,12 +236,14 @@ document.addEventListener('DOMContentLoaded', function () {
 	(function setupThemeToggle() {
 		const STORAGE_KEY = 'theme';
 		const body = document.body;
+		const root = document.documentElement;
 		const toggle = document.getElementById('theme-toggle');
 
-		// Apply stored preference if present
+		// Apply stored preference if present (html class set in head for early logo; sync body + root)
 		const stored = window.localStorage ? localStorage.getItem(STORAGE_KEY) : null;
 		if (stored === 'light') {
 			body.classList.add('theme-light');
+			root.classList.add('theme-light');
 		}
 
 		function syncToggleIcon() {
@@ -255,6 +257,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		if (toggle) {
 			toggle.addEventListener('click', () => {
 				const isLight = body.classList.toggle('theme-light');
+				root.classList.toggle('theme-light', isLight);
 				if (window.localStorage) {
 					localStorage.setItem(STORAGE_KEY, isLight ? 'light' : 'dark');
 				}
@@ -291,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			}
 			const isLight = document.body.classList.contains('theme-light');
 			const mode = isLight ? 'light' : (sessionStorage.getItem('ultimateTransitionMode') || 'dark');
-			const logoSrc = 'images/logo.svg';
+			const logoSrc = mode === 'light' ? 'images/whitelogo.svg' : 'images/logo.svg';
 			const overlay = document.createElement('div');
 			overlay.className = 'ultimate-loading-overlay ultimate-mode-' + mode;
 			overlay.setAttribute('aria-hidden', 'true');
@@ -353,7 +356,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 
 		const isLight = document.body.classList.contains('theme-light');
-		const logoSrc = 'images/logo.svg';
+		const logoSrc = isLight ? 'images/whitelogo.svg' : 'images/logo.svg';
 		const streaks = Array.from({ length: 12 }, (_, i) =>
 			`<div class="site-load-streak" style="--delay:${(i * 0.08).toFixed(2)}s;--y:${(Math.random() * 100).toFixed(1)}%;--angle:${-15 + Math.random() * 30}deg;"></div>`
 		).join('');
@@ -1482,7 +1485,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			navigating = true;
 			const isLight = document.body.classList.contains('theme-light');
 			const mode = isLight ? 'light' : nextMode();
-			const logoSrc = 'images/logo.svg';
+			const logoSrc = mode === 'light' ? 'images/whitelogo.svg' : 'images/logo.svg';
 			const overlay = document.createElement('div');
 			overlay.className = 'ultimate-loading-overlay';
 			overlay.classList.add(`ultimate-mode-${mode}`);

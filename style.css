@@ -179,6 +179,7 @@ body.theme-light .site-header {
 	display: block;
 }
 
+html.theme-light .logo-dark,
 body.theme-light .logo-dark {
 	display: none;
 }
@@ -188,6 +189,7 @@ body.theme-light .logo-dark {
 	display: none;
 }
 
+html.theme-light .logo-light,
 body.theme-light .logo-light {
 	display: block;
 }
