@@ -3137,12 +3137,20 @@ body.success-page .success-card .ultimate-product-content {
 	justify-content: center;
 	border-radius: 0 8px 8px 0;
 }
-.account-password-toggle .icon-eye,
-.account-password-toggle .icon-eye-slash {
-	display: block;
+.account-password-toggle .icon-password-visibility {
+	position: absolute;
+	inset: 0;
+	margin: auto;
+	width: 20px;
+	height: 20px;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.15s ease;
 }
-.account-password-toggle [hidden] {
-	display: none !important;
+.account-password-toggle .icon-password-visibility.active {
+	opacity: 1;
+	pointer-events: auto;
+	z-index: 1;
 }
 .account-password-toggle:hover {
 	color: var(--accent);
