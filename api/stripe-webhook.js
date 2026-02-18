@@ -40,29 +40,43 @@ module.exports = async (req, res) => {
 		return res.json({ received: true });
 	}
 
-	// Always derive entitlements from Stripe's line_items (source of truth), never from client metadata
-	let sessionWithLineItems = session;
-	if (!session.line_items?.data) {
+	let items = [];
+	const metadataItems = session.metadata?.items;
+	if (metadataItems) {
 		try {
-			sessionWithLineItems = await stripe.checkout.sessions.retrieve(session.id, {
-				expand: ['line_items', 'line_items.data.price.product'],
-			});
-		} catch (err) {
-			console.error('Failed to retrieve session line_items:', err);
-			return res.status(500).json({ error: 'Failed to retrieve purchase details' });
-		}
+			const parsed = JSON.parse(metadataItems);
+			if (Array.isArray(parsed) && parsed.length > 0) {
+				items = parsed.map((i) => ({
+					product_id: i.product_id || null,
+					name: i.name || '',
+					price: typeof i.price === 'number' ? i.price : 0,
+				}));
+			}
+		} catch (_) {}
 	}
 
-	const items = [];
-	const lineData = sessionWithLineItems.line_items?.data || [];
-	for (const li of lineData) {
-		const product = li.price?.product;
-		const productId = typeof product === 'object' && product?.metadata?.product_id
-			? product.metadata.product_id
-			: null;
-		const name = li.description || (typeof product === 'object' ? product?.name : '') || '';
-		const price = (li.amount_total || 0) / 100;
-		items.push(productId ? { product_id: productId, name, price } : { name, price });
+	if (items.length === 0) {
+		let sessionWithLineItems = session;
+		if (!session.line_items?.data) {
+			try {
+				sessionWithLineItems = await stripe.checkout.sessions.retrieve(session.id, {
+					expand: ['line_items', 'line_items.data.price.product'],
+				});
+			} catch (err) {
+				console.error('Failed to retrieve session line_items:', err);
+				return res.status(500).json({ error: 'Failed to retrieve purchase details' });
+			}
+		}
+		const lineData = sessionWithLineItems.line_items?.data || [];
+		for (const li of lineData) {
+			const product = li.price?.product;
+			const productId = typeof product === 'object' && product?.metadata?.product_id
+				? product.metadata.product_id
+				: null;
+			const name = li.description || (typeof product === 'object' ? product?.name : '') || '';
+			const price = (li.amount_total || 0) / 100;
+			items.push(productId ? { product_id: productId, name, price } : { name, price });
+		}
 	}
 
 	const supabaseUrl = process.env.SUPABASE_URL;

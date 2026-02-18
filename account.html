@@ -512,11 +512,22 @@
 					purchasesLoaded = false;
 					setDashboardView(startOnPurchases ? 'purchases' : 'account');
 					if (fromCheckout) {
+						const sessionId = params.get('session_id');
 						history.replaceState({}, '', location.pathname);
+						let found = false;
 						for (let i = 0; i < 10; i++) {
-							const found = await loadPurchases(i > 0);
+							found = await loadPurchases(i > 0);
 							if (found) break;
 							await new Promise(r => setTimeout(r, 2000));
+						}
+						if (!found && session?.access_token) {
+							const debugUrl = '/api/purchase-debug' + (sessionId ? '?session_id=' + encodeURIComponent(sessionId) : '');
+							const dr = await fetch(debugUrl, { headers: { 'Authorization': 'Bearer ' + session.access_token } });
+							const d = await dr.json().catch(() => ({}));
+							console.warn('[Purchase debug]', d);
+							if (d.sessionFound === false) {
+								console.warn('Your session_id was not found in purchases. The Stripe webhook may not have run. Check Stripe Dashboard → Webhooks → Recent deliveries.');
+							}
 						}
 					}
 				} else {
