@@ -403,7 +403,7 @@
 				return m + 'm remaining';
 			}
 
-			async function loadPurchases(showProcessing) {
+			async function loadPurchases(showProcessing, requiredSessionId) {
 				const renderEmptyPurchases = (leadText) => {
 					purchasesEl.innerHTML =
 						'<p class="muted">' + leadText + '</p>' +
@@ -422,7 +422,7 @@
 					headers: { 'Authorization': 'Bearer ' + session.access_token } });
 				const data = await res.json();
 				// #region agent log
-				fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:loadPurchases',message:'my-purchases response',data:{status:res.status,ok:res.ok,purchasesLength:(data.purchases||[]).length,error:data?.error||null,reason:data?.reason||null,code:data?.code||null,detail:data?.detail||null},timestamp:Date.now(),hypothesisId:'A,B,C,E'})}).catch(()=>{});
+				fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:loadPurchases',message:'my-purchases response',data:{status:res.status,ok:res.ok,purchasesLength:(data.purchases||[]).length,error:data?.error||null,reason:data?.reason||null,code:data?.code||null,detail:data?.detail||null,requiredSessionId:requiredSessionId||null},timestamp:Date.now(),hypothesisId:'A,B,C,E'})}).catch(()=>{});
 				// #endregion
 				if (!res.ok) {
 					renderEmptyPurchases('You have no purchases available to show right now.');
@@ -433,6 +433,12 @@
 					renderEmptyPurchases('You have no purchases yet. Start with one of our top products below.');
 					return false;
 				}
+				const hasRequiredSession = requiredSessionId
+					? purchases.some((p) => p.session_id === requiredSessionId)
+					: true;
+				// #region agent log
+				fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:loadPurchases:session-check',message:'required session presence',data:{requiredSessionId:requiredSessionId||null,hasRequiredSession:!!hasRequiredSession,totalPurchases:purchases.length},timestamp:Date.now(),hypothesisId:'D'})}).catch(()=>{});
+				// #endregion
 				const html = purchases.map(p => {
 					const expired = p.isExpired;
 					const remaining = !expired && p.expiresAt ? timeRemaining(p.expiresAt) : null;
@@ -493,7 +499,7 @@
 						URL.revokeObjectURL(a.href);
 					});
 				});
-				return true;
+				return hasRequiredSession;
 			}
 
 			supabase.auth.onAuthStateChange((event, session) => {
@@ -528,7 +534,7 @@
 						history.replaceState({}, '', location.pathname);
 						let found = false;
 						for (let i = 0; i < 10; i++) {
-							found = await loadPurchases(i > 0);
+							found = await loadPurchases(i > 0, sessionId);
 							if (found) break;
 							await new Promise(r => setTimeout(r, 2000));
 						}
@@ -550,7 +556,7 @@
 								fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:recover-call',message:'recover purchase response',data:{status:rr.status,recovered:!!rd.recovered,reason:rd.reason||null,error:rd.error||null},timestamp:Date.now(),hypothesisId:'D'})}).catch(()=>{});
 								// #endregion
 								if (rr.ok && rd.recovered) {
-									found = await loadPurchases(true);
+									found = await loadPurchases(true, sessionId);
 								}
 							}
 							const debugUrl = '/api/purchase-debug' + (sessionId ? '?session_id=' + encodeURIComponent(sessionId) : '');
