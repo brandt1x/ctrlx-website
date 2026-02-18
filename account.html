@@ -397,7 +397,7 @@
 				return m + 'm remaining';
 			}
 
-			async function loadPurchases() {
+			async function loadPurchases(showProcessing) {
 				const renderEmptyPurchases = (leadText) => {
 					purchasesEl.innerHTML =
 						'<p class="muted">' + leadText + '</p>' +
@@ -408,18 +408,21 @@
 						'</div>';
 				};
 				const { data: { session } } = await supabase.auth.getSession();
-				if (!session?.access_token) return;
+				if (!session?.access_token) return false;
+				if (showProcessing) {
+					purchasesEl.innerHTML = '<p class="muted">Processing your purchase...</p>';
+				}
 				const res = await fetch('/api/my-purchases', {
 					headers: { 'Authorization': 'Bearer ' + session.access_token } });
 				const data = await res.json();
 				if (!res.ok) {
 					renderEmptyPurchases('You have no purchases available to show right now.');
-					return;
+					return false;
 				}
 				const purchases = data.purchases || [];
 				if (purchases.length === 0) {
 					renderEmptyPurchases('You have no purchases yet. Start with one of our top products below.');
-					return;
+					return false;
 				}
 				const html = purchases.map(p => {
 					const expired = p.isExpired;
@@ -481,6 +484,7 @@
 						URL.revokeObjectURL(a.href);
 					});
 				});
+				return true;
 			}
 
 			supabase.auth.onAuthStateChange((event, session) => {
@@ -498,13 +502,23 @@
 
 			async function init() {
 				const { data: { session } } = await supabase.auth.getSession();
-				const startOnPurchases = location.hash === '#purchases';
+				const params = new URLSearchParams(location.search);
+				const fromCheckout = params.get('success') === '1' && params.get('session_id');
+				const startOnPurchases = location.hash === '#purchases' || fromCheckout;
 				if (session) {
 					authEl.hidden = true;
 					dashboardEl.hidden = false;
 					accountEmail.textContent = session.user?.email || '';
 					purchasesLoaded = false;
 					setDashboardView(startOnPurchases ? 'purchases' : 'account');
+					if (fromCheckout) {
+						history.replaceState({}, '', location.pathname);
+						for (let i = 0; i < 10; i++) {
+							const found = await loadPurchases(i > 0);
+							if (found) break;
+							await new Promise(r => setTimeout(r, 2000));
+						}
+					}
 				} else {
 					authEl.hidden = false;
 					dashboardEl.hidden = true;

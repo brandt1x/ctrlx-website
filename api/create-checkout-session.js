@@ -43,7 +43,7 @@ module.exports = async (req, res) => {
 		const session = await stripe.checkout.sessions.create({
 			line_items: lineItems,
 			mode: 'payment',
-			success_url: `${baseUrl}/account.html`,
+			success_url: `${baseUrl}/account.html?session_id={CHECKOUT_SESSION_ID}&success=1`,
 			cancel_url: `${baseUrl}/`,
 			metadata: {
 				items: JSON.stringify(items),

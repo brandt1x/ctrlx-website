@@ -88,3 +88,20 @@ Each purchase is tied to the signed-in user. Users see only their own purchases 
 - Stripe redirects to `/account.html` after payment
 - Webhook stores the purchase in Supabase with `user_id`
 - User sees purchases and downloads in their account
+
+---
+
+## Troubleshooting: Purchases not showing after payment
+
+If users pay but don't see purchases or download links:
+
+| Check | Action |
+|-------|--------|
+| **Webhook configured** | Stripe Dashboard → Webhooks → ensure endpoint URL is `https://www.cntrl-x.com/api/stripe-webhook` (or your domain) |
+| **Webhook secret** | `STRIPE_WEBHOOK_SECRET` in Vercel must match the webhook's signing secret |
+| **Webhook events** | Endpoint must listen for `checkout.session.completed` |
+| **Webhook logs** | Stripe Dashboard → Webhooks → your endpoint → Recent deliveries. Check for 4xx/5xx responses |
+| **Supabase schema** | Run `supabase/schema.sql` in Supabase SQL Editor to create the `purchases` table |
+| **Env vars** | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` must be set in Vercel |
+
+The account page now polls for purchases when returning from checkout (webhook can take a few seconds). If purchases still don't appear after ~20 seconds, the webhook is likely failing.
