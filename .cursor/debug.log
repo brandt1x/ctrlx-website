@@ -1,2 +1,0 @@
-{"location":"account.html:post-poll","message":"polling finished","data":{"found":false,"hadToken":true},"timestamp":1771425523272,"hypothesisId":"B,C,D"}
-{"location":"account.html:purchase-debug","message":"purchase-debug response","data":{"ok":false,"authenticated":true,"purchaseCount":0,"sessionFound":null},"timestamp":1771425524329,"hypothesisId":"B,C,D"}

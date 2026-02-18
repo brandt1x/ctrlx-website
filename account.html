@@ -536,6 +536,23 @@
 						fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:post-poll',message:'polling finished',data:{found:!!found,hadToken:!!session?.access_token},timestamp:Date.now(),hypothesisId:'B,C,D'})}).catch(()=>{});
 						// #endregion
 						if (!found && session?.access_token) {
+							if (sessionId) {
+								const rr = await fetch('/api/recover-purchase', {
+									method: 'POST',
+									headers: {
+										'Content-Type': 'application/json',
+										'Authorization': 'Bearer ' + session.access_token,
+									},
+									body: JSON.stringify({ session_id: sessionId }),
+								});
+								const rd = await rr.json().catch(() => ({}));
+								// #region agent log
+								fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'account.html:recover-call',message:'recover purchase response',data:{status:rr.status,recovered:!!rd.recovered,reason:rd.reason||null,error:rd.error||null},timestamp:Date.now(),hypothesisId:'D'})}).catch(()=>{});
+								// #endregion
+								if (rr.ok && rd.recovered) {
+									found = await loadPurchases(true);
+								}
+							}
 							const debugUrl = '/api/purchase-debug' + (sessionId ? '?session_id=' + encodeURIComponent(sessionId) : '');
 							const dr = await fetch(debugUrl, { headers: { 'Authorization': 'Bearer ' + session.access_token } });
 							const d = await dr.json().catch(() => ({}));
