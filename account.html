@@ -172,19 +172,38 @@
 			let mode = 'signin';
 			let purchasesLoaded = false;
 
+			function syncPasswordVisibility(visible) {
+				const type = visible ? 'text' : 'password';
+				authPasswordInput.type = type;
+				if (authConfirmField && !authConfirmField.hidden) authConfirmInput.type = type;
+				document.querySelectorAll('.account-password-toggle').forEach(btn => {
+					const eye = btn.querySelector('.icon-eye');
+					const slash = btn.querySelector('.icon-eye-slash');
+					if (eye && slash) {
+						eye.classList.toggle('active', visible);
+						slash.classList.toggle('active', !visible);
+					}
+					btn.setAttribute('aria-label', visible ? 'Hide password' : 'Show password');
+				});
+			}
+
 			document.querySelectorAll('.account-password-toggle').forEach(btn => {
 				btn.addEventListener('click', () => {
 					const input = document.getElementById(btn.dataset.target);
 					if (!input) return;
-					const isPass = input.type === 'password';
-					input.type = isPass ? 'text' : 'password';
-					const eye = btn.querySelector('.icon-eye');
-					const slash = btn.querySelector('.icon-eye-slash');
-					if (eye && slash) {
-						eye.classList.toggle('active', !isPass);
-						slash.classList.toggle('active', isPass);
+					const willBeVisible = input.type === 'password';
+					if (mode === 'signup' && authConfirmField && !authConfirmField.hidden) {
+						syncPasswordVisibility(willBeVisible);
+					} else {
+						input.type = willBeVisible ? 'text' : 'password';
+						const eye = btn.querySelector('.icon-eye');
+						const slash = btn.querySelector('.icon-eye-slash');
+						if (eye && slash) {
+							eye.classList.toggle('active', willBeVisible);
+							slash.classList.toggle('active', !willBeVisible);
+						}
+						btn.setAttribute('aria-label', willBeVisible ? 'Hide password' : 'Show password');
 					}
-					btn.setAttribute('aria-label', isPass ? 'Hide password' : 'Show password');
 				});
 			});
 
@@ -196,6 +215,7 @@
 					authConfirmField.hidden = mode === 'signin';
 					authConfirmInput.required = mode === 'signup';
 					if (mode === 'signin') authConfirmInput.value = '';
+					else syncPasswordVisibility(authPasswordInput.type === 'text');
 				}
 			}
 
