@@ -18,7 +18,7 @@
 		const mem = navigator.deviceMemory || 4;
 		const lowPower = cores <= 4 || mem <= 4;
 		let particleCount = 90;
-		const connectionDistance = tier === 'low' || lowPower ? 96 : 150;
+		const connectionDistance = tier === 'low' ? 120 : (lowPower ? 148 : 176);
 		const connectionDistanceSq = connectionDistance * connectionDistance;
 		const particleSpeed = tier === 'low' ? 0.22 : 0.42;
 		let width = 0;
@@ -33,10 +33,10 @@
 			height = window.innerHeight;
 			dpr = tier === 'low' ? 1 : Math.min(window.devicePixelRatio || 1, 1.6);
 			const densityFactor = width < 900 ? 0.85 : 1;
-			const coreFactor = cores <= 4 ? 0.82 : 1;
-			const powerFactor = lowPower ? 0.72 : 1;
+			const coreFactor = cores <= 4 ? 0.9 : 1;
+			const powerFactor = lowPower ? 0.9 : 1;
 			const motionFactor = prefersReduced ? 0.58 : 1;
-			const base = tier === 'low' ? 34 : tier === 'balanced' ? 56 : 82;
+			const base = tier === 'low' ? 44 : tier === 'balanced' ? 72 : 96;
 			particleCount = Math.max(24, Math.round(base * densityFactor * coreFactor * powerFactor * motionFactor));
 			canvas.width = Math.floor(width * dpr);
 			canvas.height = Math.floor(height * dpr);
@@ -119,21 +119,48 @@
 				ctx.fill();
 			}
 
-			if (tier === 'immersive' && !lowPower) {
+			if (!prefersReduced) {
+				const stride = tier === 'low' ? 2 : 1;
+				const cellSize = connectionDistance + 2;
+				const grid = Object.create(null);
 				for (let i = 0; i < particles.length; i++) {
-					for (let j = i + 1; j < particles.length; j++) {
-						const dx = particles[i].x - particles[j].x;
-						const dy = particles[i].y - particles[j].y;
-						const distSq = dx * dx + dy * dy;
-						if (distSq < connectionDistanceSq) {
-							ctx.beginPath();
-							ctx.moveTo(particles[i].x, particles[i].y);
-							ctx.lineTo(particles[j].x, particles[j].y);
-							ctx.strokeStyle = lineColor;
-							ctx.lineWidth = 0.65;
-							ctx.globalAlpha = 1 - (distSq / connectionDistanceSq);
-							ctx.stroke();
-							ctx.globalAlpha = 1;
+					const p = particles[i];
+					const cx = Math.floor(p.x / cellSize);
+					const cy = Math.floor(p.y / cellSize);
+					const key = cx + ',' + cy;
+					if (!grid[key]) grid[key] = [];
+					grid[key].push(i);
+				}
+				const drawn = Object.create(null);
+				for (let i = 0; i < particles.length; i += stride) {
+					const p = particles[i];
+					const cx = Math.floor(p.x / cellSize);
+					const cy = Math.floor(p.y / cellSize);
+					for (let dy = -1; dy <= 1; dy++) {
+						for (let dx = -1; dx <= 1; dx++) {
+							const key = (cx + dx) + ',' + (cy + dy);
+							const cell = grid[key];
+							if (!cell) continue;
+							for (let k = 0; k < cell.length; k++) {
+								const j = cell[k];
+								if (j <= i || (stride > 1 && (j - i) % stride !== 1)) continue;
+								const pairKey = i < j ? i + ',' + j : j + ',' + i;
+								if (drawn[pairKey]) continue;
+								const dxx = particles[i].x - particles[j].x;
+								const dyy = particles[i].y - particles[j].y;
+								const distSq = dxx * dxx + dyy * dyy;
+								if (distSq < connectionDistanceSq) {
+									drawn[pairKey] = true;
+									ctx.beginPath();
+									ctx.moveTo(particles[i].x, particles[i].y);
+									ctx.lineTo(particles[j].x, particles[j].y);
+									ctx.strokeStyle = lineColor;
+									ctx.lineWidth = stride === 1 ? 0.7 : 0.5;
+									ctx.globalAlpha = (1 - (distSq / connectionDistanceSq)) * (stride === 1 ? 1 : 0.75);
+									ctx.stroke();
+									ctx.globalAlpha = 1;
+								}
+							}
 						}
 					}
 				}
@@ -169,58 +196,88 @@
 		animate();
 	}
 
-	// Interactive tilt cards to make buying feel premium
+	// Interactive tilt cards (throttled via RAF + delegation)
 	function initCardTilt() {
 		const cards = document.querySelectorAll('.ultimate-tilt');
 		if (!cards.length) return;
-		const tier = (window.__Motion && window.__Motion.tier) || document.body.dataset.motionTier || 'balanced';
 		const hasFine = window.matchMedia && window.matchMedia('(pointer:fine)').matches;
-		if (tier !== 'immersive' || !hasFine) return;
+		if (!hasFine) return;
 
-		cards.forEach((card) => {
-			card.addEventListener('mousemove', (e) => {
+		let lastEv = null;
+		let scheduled = false;
+		function apply() {
+			scheduled = false;
+			if (!lastEv) return;
+			const card = lastEv.target.closest('.ultimate-tilt');
+			if (card) {
+				const under = document.elementFromPoint(lastEv.clientX, lastEv.clientY);
+				if (!under || !card.contains(under)) {
+					card.style.transform = '';
+					return;
+				}
 				const rect = card.getBoundingClientRect();
-				const px = (e.clientX - rect.left) / rect.width;
-				const py = (e.clientY - rect.top) / rect.height;
+				const px = (lastEv.clientX - rect.left) / rect.width;
+				const py = (lastEv.clientY - rect.top) / rect.height;
 				const rotateX = (0.5 - py) * 9;
 				const rotateY = (px - 0.5) * 12;
 				card.style.transform = `perspective(900px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-6px)`;
-			}, { passive: true });
-
-			card.addEventListener('mouseleave', () => {
-				card.style.transform = '';
-			});
+			}
+		}
+		document.addEventListener('mousemove', (e) => {
+			lastEv = e;
+			if (!scheduled) {
+				scheduled = true;
+				requestAnimationFrame(apply);
+			}
+		}, { passive: true });
+		cards.forEach((card) => {
+			card.addEventListener('mouseleave', () => { card.style.transform = ''; });
 		});
 	}
 
 	function initMicroTilt() {
 		const chips = document.querySelectorAll('.ultimate-tilt-chip');
 		if (!chips.length) return;
-		const tier = (window.__Motion && window.__Motion.tier) || document.body.dataset.motionTier || 'balanced';
 		const hasFine = window.matchMedia && window.matchMedia('(pointer:fine)').matches;
-		if (tier !== 'immersive' || !hasFine) return;
+		if (!hasFine) return;
 
-		chips.forEach((chip) => {
-			chip.addEventListener('mousemove', (e) => {
+		let lastEv = null;
+		let scheduled = false;
+		function apply() {
+			scheduled = false;
+			if (!lastEv) return;
+			const chip = lastEv.target.closest('.ultimate-tilt-chip');
+			if (chip) {
+				const under = document.elementFromPoint(lastEv.clientX, lastEv.clientY);
+				if (!under || !chip.contains(under)) {
+					chip.style.transform = '';
+					return;
+				}
 				const rect = chip.getBoundingClientRect();
-				const px = (e.clientX - rect.left) / rect.width;
-				const py = (e.clientY - rect.top) / rect.height;
+				const px = (lastEv.clientX - rect.left) / rect.width;
+				const py = (lastEv.clientY - rect.top) / rect.height;
 				const rotateX = (0.5 - py) * 4;
 				const rotateY = (px - 0.5) * 6;
 				chip.style.transform = `perspective(650px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg)`;
-			}, { passive: true });
-			chip.addEventListener('mouseleave', () => {
-				chip.style.transform = '';
-			});
+			}
+		}
+		document.addEventListener('mousemove', (e) => {
+			lastEv = e;
+			if (!scheduled) {
+				scheduled = true;
+				requestAnimationFrame(apply);
+			}
+		}, { passive: true });
+		chips.forEach((chip) => {
+			chip.addEventListener('mouseleave', () => { chip.style.transform = ''; });
 		});
 	}
 
 	function initReactiveHover() {
 		const reactiveNodes = document.querySelectorAll('.ultimate-reactive');
 		if (!reactiveNodes.length) return;
-		const tier = (window.__Motion && window.__Motion.tier) || document.body.dataset.motionTier || 'balanced';
 		const hasFine = window.matchMedia && window.matchMedia('(pointer:fine)').matches;
-		if (tier !== 'immersive' || !hasFine) return;
+		if (!hasFine) return;
 
 		const runWhenIdle = (fn) => {
 			if (typeof requestIdleCallback !== 'undefined') {
@@ -249,6 +306,10 @@
 			node.dataset.lettersReady = '1';
 		}
 
+		let layoutInvalidTS = 0;
+		window.addEventListener('scroll', () => { layoutInvalidTS = Date.now(); }, { passive: true });
+		window.addEventListener('resize', () => { layoutInvalidTS = Date.now(); });
+
 		runWhenIdle(() => {
 		reactiveNodes.forEach((node) => {
 			const wantsLetterFlow = node.classList.contains('ultimate-letterflow');
@@ -260,16 +321,29 @@
 			let mx = 0;
 			let my = 0;
 			const radius = 96;
+			let cache = null;
+			let cacheTS = 0;
+
+			function refreshCache() {
+				cache = [];
+				for (let i = 0; i < letters.length; i++) {
+					const letter = letters[i];
+					if (letter.classList.contains('ultimate-letter-space')) { cache.push(null); continue; }
+					const rect = letter.getBoundingClientRect();
+					cache.push({ cx: rect.left + rect.width * 0.5, cy: rect.top + rect.height * 0.5 });
+				}
+				cacheTS = Date.now();
+			}
 
 			function paint() {
 				raf = 0;
+				if (!cache || layoutInvalidTS > cacheTS) refreshCache();
 				for (let i = 0; i < letters.length; i++) {
 					const letter = letters[i];
 					if (letter.classList.contains('ultimate-letter-space')) continue;
-					const rect = letter.getBoundingClientRect();
-					const cx = rect.left + rect.width * 0.5;
-					const cy = rect.top + rect.height * 0.5;
-					const dist = Math.hypot(mx - cx, my - cy);
+					const c = cache[i];
+					if (!c) continue;
+					const dist = Math.hypot(mx - c.cx, my - c.cy);
 					const glow = Math.max(0, 1 - dist / radius);
 					letter.style.setProperty('--glow', glow.toFixed(3));
 					letter.style.setProperty('--lift', `${(-glow * 3.2).toFixed(2)}px`);

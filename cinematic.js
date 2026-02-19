@@ -17,9 +17,9 @@
 	// ─── Tier configuration ───
 	const tier = (window.__Motion && window.__Motion.tier) || document.body.dataset.motionTier || 'balanced';
 	const TIER_CONFIG = {
-		low:       { base: 22,  connDist: 96,  speed: 0.2,  mouseRadius: 110, auraRadius: 90 },
-		balanced:  { base: 38,  connDist: 122, speed: 0.28, mouseRadius: 145, auraRadius: 135 },
-		immersive: { base: 70,  connDist: 146, speed: 0.34, mouseRadius: 190, auraRadius: 185 },
+		low:       { base: 30, connDist: 110, speed: 0.22, mouseRadius: 120, auraRadius: 100 },
+		balanced:  { base: 52, connDist: 138, speed: 0.31, mouseRadius: 155, auraRadius: 145 },
+		immersive: { base: 82, connDist: 168, speed: 0.36, mouseRadius: 195, auraRadius: 190 },
 	};
 	const cfg = TIER_CONFIG[tier] || TIER_CONFIG.balanced;
 
@@ -33,28 +33,6 @@
 	let running = true;
 	let dpr = 1;
 	let particleCount = cfg.base;
-
-	// ─── FPS monitor — downgrades particle count if frame budget exceeded ───
-	let fpsFrames = 0;
-	let fpsLast = performance.now();
-	let fpsCurrent = 60;
-	let downgraded = false;
-
-	function checkFPS(now) {
-		fpsFrames++;
-		if (now - fpsLast >= 1000) {
-			fpsCurrent = fpsFrames;
-			fpsFrames = 0;
-			fpsLast = now;
-			// Auto-downgrade if consistently below 40fps
-			if (!downgraded && fpsCurrent < 40 && particles.length > 20) {
-				downgraded = true;
-				var keep = Math.max(20, Math.floor(particles.length * 0.6));
-				particles.length = keep;
-				particleCount = keep;
-			}
-		}
-	}
 
 	// ─── Hero burst: extra particles spawned once on first hero reveal ───
 	let heroBurstFired = false;
@@ -97,10 +75,10 @@
 		width = window.innerWidth;
 		height = window.innerHeight;
 		dpr = tier === 'low' ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
-		var densityFactor = width < 900 ? 0.7 : 1;
+		var densityFactor = width < 900 ? 0.82 : 1;
 		var motionFactor = prefersReduced ? 0.4 : 1;
-		const powerFactor = lowPower ? 0.72 : 1;
-		particleCount = Math.max(15, Math.round(cfg.base * densityFactor * motionFactor * powerFactor));
+		const powerFactor = lowPower ? 0.9 : 1;
+		particleCount = Math.max(24, Math.round(cfg.base * densityFactor * motionFactor * powerFactor));
 		canvas.width = Math.floor(width * dpr);
 		canvas.height = Math.floor(height * dpr);
 		canvas.style.width = width + 'px';
@@ -145,8 +123,6 @@
 			return;
 		}
 		lastFrame = now;
-		checkFPS(now);
-
 		var isLight = document.body.classList.contains('theme-light');
 		ctx.fillStyle = isLight ? 'rgba(249, 250, 251, 0.16)' : 'rgba(2, 1, 6, 0.2)';
 		ctx.fillRect(0, 0, width, height);
@@ -200,22 +176,49 @@
 			ctx.globalAlpha = 1;
 		}
 
-		// Draw connections (skip for low tier to save budget)
-		if (tier === 'immersive' && !lowPower) {
+		// Draw connections via spatial grid (O(n) vs O(n²)) — preserves visual density
+		if (!prefersReduced) {
+			var stride = tier === 'low' ? 2 : 1;
+			var cellSize = cfg.connDist + 2;
+			var grid = Object.create(null);
 			for (i = 0; i < particles.length; i++) {
-				for (var j = i + 1; j < particles.length; j++) {
-					var dx2 = particles[i].x - particles[j].x;
-					var dy2 = particles[i].y - particles[j].y;
-					var distSq = dx2 * dx2 + dy2 * dy2;
-					if (distSq < connectionDistanceSq) {
-						ctx.beginPath();
-						ctx.moveTo(particles[i].x, particles[i].y);
-						ctx.lineTo(particles[j].x, particles[j].y);
-						ctx.strokeStyle = lineColor;
-						ctx.lineWidth = 0.55;
-						ctx.globalAlpha = 1 - (distSq / connectionDistanceSq);
-						ctx.stroke();
-						ctx.globalAlpha = 1;
+				var p = particles[i];
+				var cx = Math.floor(p.x / cellSize);
+				var cy = Math.floor(p.y / cellSize);
+				var key = cx + ',' + cy;
+				if (!grid[key]) grid[key] = [];
+				grid[key].push(i);
+			}
+			var drawn = Object.create(null);
+			for (i = 0; i < particles.length; i += stride) {
+				var p = particles[i];
+				var cx = Math.floor(p.x / cellSize);
+				var cy = Math.floor(p.y / cellSize);
+				for (var dy = -1; dy <= 1; dy++) {
+					for (var dx = -1; dx <= 1; dx++) {
+						var key = (cx + dx) + ',' + (cy + dy);
+						var cell = grid[key];
+						if (!cell) continue;
+						for (var k = 0; k < cell.length; k++) {
+							var j = cell[k];
+							if (j <= i || (stride > 1 && (j - i) % stride !== 1)) continue;
+							var pairKey = i < j ? i + ',' + j : j + ',' + i;
+							if (drawn[pairKey]) continue;
+							var dx2 = particles[i].x - particles[j].x;
+							var dy2 = particles[i].y - particles[j].y;
+							var distSq = dx2 * dx2 + dy2 * dy2;
+							if (distSq < connectionDistanceSq) {
+								drawn[pairKey] = true;
+								ctx.beginPath();
+								ctx.moveTo(particles[i].x, particles[i].y);
+								ctx.lineTo(particles[j].x, particles[j].y);
+								ctx.strokeStyle = lineColor;
+								ctx.lineWidth = stride === 1 ? 0.62 : 0.45;
+								ctx.globalAlpha = (1 - (distSq / connectionDistanceSq)) * (stride === 1 ? 1 : 0.72);
+								ctx.stroke();
+								ctx.globalAlpha = 1;
+							}
+						}
 					}
 				}
 			}
@@ -241,8 +244,6 @@
 			if (rafId) cancelAnimationFrame(rafId);
 		} else if (!running) {
 			running = true;
-			fpsLast = performance.now();
-			fpsFrames = 0;
 			animate();
 		}
 	});

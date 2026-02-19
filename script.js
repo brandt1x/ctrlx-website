@@ -1,15 +1,21 @@
 // Populate current year and add UI behaviors
 document.addEventListener('DOMContentLoaded', function () {
-	// #region agent log
-	(function logLogoDebug() {
-		const dark = document.querySelector('.logo-image.logo-dark');
-		const light = document.querySelector('.logo-image.logo-light');
-		const hasThemeLight = document.body.classList.contains('theme-light') || document.documentElement.classList.contains('theme-light');
-		const darkDisplay = dark ? window.getComputedStyle(dark).display : null;
-		const lightDisplay = light ? window.getComputedStyle(light).display : null;
-		fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'script.js:logo-debug', message: 'Logo visibility', data: { hasThemeLight, darkSrc: dark ? dark.src : null, lightSrc: light ? light.src : null, darkDisplay, lightDisplay, visibleLogo: darkDisplay === 'block' ? 'dark' : lightDisplay === 'block' ? 'light' : 'none' }, timestamp: Date.now(), hypothesisId: 'H1' }) }).catch(function () { });
+	// Mobile hamburger menu
+	(function setupMobileMenu() {
+		const toggle = document.querySelector('.mobile-menu-toggle');
+		const headerRight = document.querySelector('.header-right');
+		if (!toggle || !headerRight) return;
+		toggle.addEventListener('click', function () {
+			const open = headerRight.classList.toggle('mobile-open');
+			toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+		});
+		headerRight.querySelectorAll('a').forEach(function (link) {
+			link.addEventListener('click', function () {
+				headerRight.classList.remove('mobile-open');
+				toggle.setAttribute('aria-expanded', 'false');
+			});
+		});
 	})();
-	// #endregion
 
 	const yearEl = document.getElementById('year');
 	if (yearEl) yearEl.textContent = new Date().getFullYear();
@@ -107,8 +113,9 @@ document.addEventListener('DOMContentLoaded', function () {
 		Motion.observe(sections, function (section) {
 			section.classList.add('scroll-visible');
 			const children = section.querySelectorAll('[data-scroll-item]');
+			const staggerMs = section.classList.contains('how') ? 100 : 12;
 			children.forEach(function (child, i) {
-				setTimeout(function () { child.classList.add('scroll-visible'); }, i * 12);
+				setTimeout(function () { child.classList.add('scroll-visible'); }, i * staggerMs);
 			});
 		}, { threshold: 0.12 });
 
@@ -413,6 +420,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			const colors = ['red', 'coral', 'darkred', 'brightred'];
 			let count = 0;
 			const spawn = () => {
+				const frag = document.createDocumentFragment();
 				for (let i = 0; i < 18; i++) {
 					const r = 25 + Math.sqrt(Math.random()) * 50;
 					const theta = Math.random() * Math.PI * 2;
@@ -428,12 +436,13 @@ document.addEventListener('DOMContentLoaded', function () {
 					const el = document.createElement('div');
 					el.className = `site-load-hyperspace-streak site-load-hs-${color}`;
 					el.style.cssText = `--x:${x}%;--y:${y}%;--angle:${angle}deg;--len:${Math.max(60, Math.min(len, 280))}px;--delay:0s;`;
-					container.appendChild(el);
+					frag.appendChild(el);
 					count++;
 				}
+				container.appendChild(frag);
 			};
 			spawn();
-			const interval = setInterval(spawn, 18);
+			const interval = setInterval(spawn, 30);
 			setTimeout(() => clearInterval(interval), 480);
 			hyperspaceStarted = true;
 			// Require at least 450ms of hyperspace before finishing
@@ -452,7 +461,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		document.body.classList.add('insane-mode');
 	}
 
-	// Cursor halo for premium desktop feel
+	// Cursor halo for premium desktop feel (unified RAF)
 	(function setupCursorHalo() {
 		if (prefersReducedMotion || !hasFinePointer || Motion.tier === 'low' || document.body.classList.contains('ultimate-page')) return;
 		const halo = document.createElement('div');
@@ -462,65 +471,97 @@ document.addEventListener('DOMContentLoaded', function () {
 		let targetY = 0;
 		let currentX = 0;
 		let currentY = 0;
-		let raf = 0;
+		let registered = false;
 
 		function tick() {
 			currentX += (targetX - currentX) * 0.18;
 			currentY += (targetY - currentY) * 0.18;
 			halo.style.transform = `translate(${currentX}px, ${currentY}px) translate(-50%, -50%)`;
-			raf = requestAnimationFrame(tick);
 		}
 
 		window.addEventListener('mousemove', (e) => {
 			targetX = e.clientX;
 			targetY = e.clientY;
 			halo.classList.add('active');
-			if (!raf) raf = requestAnimationFrame(tick);
+			if (!registered) {
+				registered = true;
+				Motion.registerRAF('cursorHalo', tick);
+			}
 		}, { passive: true });
 
 		window.addEventListener('mousedown', () => halo.classList.add('pressed'));
 		window.addEventListener('mouseup', () => halo.classList.remove('pressed'));
-		window.addEventListener('mouseleave', () => halo.classList.remove('active'));
+		window.addEventListener('mouseleave', () => {
+			halo.classList.remove('active');
+			if (registered) {
+				registered = false;
+				Motion.unregisterRAF('cursorHalo');
+			}
+		});
 	})();
 
-	// Spotlight feedback on interactive elements
+	// Spotlight feedback on interactive elements (throttled via RAF)
 	(function setupInteractiveSpotlight() {
 		if (prefersReducedMotion || !hasFinePointer || Motion.tier !== 'immersive') return;
 		const targets = document.querySelectorAll('nav a, .btn, .select-btn, .contact-link');
 		if (!targets.length) return;
-		targets.forEach((el) => {
-			el.classList.add('interactive-spot');
-			el.addEventListener('mousemove', (e) => {
+		targets.forEach((el) => el.classList.add('interactive-spot'));
+		let lastEv = null;
+		let scheduled = false;
+		function apply() {
+			scheduled = false;
+			if (!lastEv) return;
+			const el = lastEv.target.closest('.interactive-spot');
+			if (el) {
 				const rect = el.getBoundingClientRect();
-				const x = ((e.clientX - rect.left) / rect.width) * 100;
-				const y = ((e.clientY - rect.top) / rect.height) * 100;
+				const x = ((lastEv.clientX - rect.left) / rect.width) * 100;
+				const y = ((lastEv.clientY - rect.top) / rect.height) * 100;
 				el.style.setProperty('--mx', `${x.toFixed(2)}%`);
 				el.style.setProperty('--my', `${y.toFixed(2)}%`);
 				el.classList.add('is-hot');
-			}, { passive: true });
-			el.addEventListener('mouseleave', () => {
-				el.classList.remove('is-hot');
-			});
+			}
+		}
+		document.addEventListener('mousemove', (e) => {
+			lastEv = e;
+			if (!scheduled) {
+				scheduled = true;
+				requestAnimationFrame(apply);
+			}
+		}, { passive: true });
+		targets.forEach((el) => {
+			el.addEventListener('mouseleave', () => el.classList.remove('is-hot'));
 		});
 	})();
 
-	// Tilt removed – animations on letters only, no box effects
-
-	// Premium magnetic feel on key controls
+	// Premium magnetic feel on key controls (throttled via RAF)
 	(function setupMagneticControls() {
 		if (prefersReducedMotion || !hasFinePointer || Motion.tier !== 'immersive') return;
 		const targets = document.querySelectorAll('nav a, .btn, .select-btn, .cart-toggle, .theme-toggle, .site-cart-close, .site-cart-item-remove, .contact-link');
 		if (!targets.length) return;
-		targets.forEach((el) => {
-			el.classList.add('magnetic');
-			el.addEventListener('mousemove', (e) => {
+		targets.forEach((el) => el.classList.add('magnetic'));
+		let lastEv = null;
+		let scheduled = false;
+		function apply() {
+			scheduled = false;
+			if (!lastEv) return;
+			const el = lastEv.target.closest('.magnetic');
+			if (el) {
 				const rect = el.getBoundingClientRect();
-				const px = (e.clientX - rect.left) / rect.width - 0.5;
-				const py = (e.clientY - rect.top) / rect.height - 0.5;
+				const px = (lastEv.clientX - rect.left) / rect.width - 0.5;
+				const py = (lastEv.clientY - rect.top) / rect.height - 0.5;
 				const max = el.classList.contains('btn') ? 5 : 4;
 				el.style.setProperty('--mag-x', `${(px * max).toFixed(2)}px`);
 				el.style.setProperty('--mag-y', `${(py * max).toFixed(2)}px`);
-			}, { passive: true });
+			}
+		}
+		document.addEventListener('mousemove', (e) => {
+			lastEv = e;
+			if (!scheduled) {
+				scheduled = true;
+				requestAnimationFrame(apply);
+			}
+		}, { passive: true });
+		targets.forEach((el) => {
 			el.addEventListener('mouseleave', () => {
 				el.style.setProperty('--mag-x', '0px');
 				el.style.setProperty('--mag-y', '0px');
@@ -614,42 +655,70 @@ document.addEventListener('DOMContentLoaded', function () {
 			node.dataset.glowReady = '1';
 		}
 
+		let layoutInvalidTS = 0;
+		window.addEventListener('scroll', () => { layoutInvalidTS = Date.now(); }, { passive: true });
+		window.addEventListener('resize', () => { layoutInvalidTS = Date.now(); });
+
+		const activeGlowNodes = new Set();
+		function paintGlowNodes() {
+			activeGlowNodes.forEach((node) => {
+				if (node._glowPaint) node._glowPaint();
+			});
+		}
+
 		runWhenIdle(() => {
 		targets.forEach((node) => {
 			splitLetters(node);
 			const letters = Array.from(node.querySelectorAll('.glow-letter'));
 			if (!letters.length) return;
 
-			let raf = 0;
 			let mx = 0;
 			let my = 0;
 			const radius = 88;
+			let cache = null;
+			let cacheTS = 0;
+
+			function refreshCache() {
+				cache = [];
+				for (let i = 0; i < letters.length; i++) {
+					const letter = letters[i];
+					if (letter.classList.contains('glow-letter-space')) { cache.push(null); continue; }
+					const rect = letter.getBoundingClientRect();
+					cache.push({ cx: rect.left + rect.width * 0.5, cy: rect.top + rect.height * 0.5 });
+				}
+				cacheTS = Date.now();
+			}
 
 			function paint() {
-				raf = 0;
+				if (!cache || layoutInvalidTS > cacheTS) refreshCache();
 				for (let i = 0; i < letters.length; i++) {
 					const letter = letters[i];
 					if (letter.classList.contains('glow-letter-space')) continue;
-					const rect = letter.getBoundingClientRect();
-					const cx = rect.left + rect.width * 0.5;
-					const cy = rect.top + rect.height * 0.5;
-					const dist = Math.hypot(mx - cx, my - cy);
+					const c = cache[i];
+					if (!c) continue;
+					const dist = Math.hypot(mx - c.cx, my - c.cy);
 					const glow = Math.max(0, 1 - dist / radius);
 					letter.style.setProperty('--g', glow.toFixed(3));
 				}
 			}
+			node._glowPaint = paint;
 
-			node.addEventListener('mouseenter', () => node.classList.add('glow-active'));
+			node.addEventListener('mouseenter', () => {
+				node.classList.add('glow-active');
+				activeGlowNodes.add(node);
+				if (activeGlowNodes.size === 1) Motion.registerRAF('globalLetterGlow', paintGlowNodes);
+			});
 			node.addEventListener('mouseleave', () => {
 				node.classList.remove('glow-active');
 				for (let i = 0; i < letters.length; i++) {
 					letters[i].style.setProperty('--g', '0');
 				}
+				activeGlowNodes.delete(node);
+				if (activeGlowNodes.size === 0) Motion.unregisterRAF('globalLetterGlow');
 			});
 			node.addEventListener('mousemove', (e) => {
 				mx = e.clientX;
 				my = e.clientY;
-				if (!raf) raf = requestAnimationFrame(paint);
 			}, { passive: true });
 		});
 		});
@@ -1419,6 +1488,17 @@ document.addEventListener('DOMContentLoaded', function () {
 			}
 		};
 
+		let layoutInvalidTS = 0;
+		window.addEventListener('scroll', () => { layoutInvalidTS = Date.now(); }, { passive: true });
+		window.addEventListener('resize', () => { layoutInvalidTS = Date.now(); });
+
+		const activeNavGlowLinks = new Set();
+		function paintNavGlowLinks() {
+			activeNavGlowLinks.forEach((link) => {
+				if (link._navGlowPaint) link._navGlowPaint();
+			});
+		}
+
 		runWhenIdle(() => {
 		links.forEach((link) => {
 			if (link.dataset.lettersReady === '1') return;
@@ -1435,34 +1515,51 @@ document.addEventListener('DOMContentLoaded', function () {
 			link.appendChild(frag);
 			link.dataset.lettersReady = '1';
 			const letters = Array.from(link.querySelectorAll('.nav-ultimate-letter'));
-			let raf = 0;
 			let mx = 0;
 			let my = 0;
 			const radius = 90;
+			let cache = null;
+			let cacheTS = 0;
+
+			function refreshCache() {
+				cache = [];
+				for (let i = 0; i < letters.length; i++) {
+					const letter = letters[i];
+					if (letter.classList.contains('nav-ultimate-letter-space')) { cache.push(null); continue; }
+					const rect = letter.getBoundingClientRect();
+					cache.push({ cx: rect.left + rect.width * 0.5, cy: rect.top + rect.height * 0.5 });
+				}
+				cacheTS = Date.now();
+			}
 
 			function paint() {
-				raf = 0;
+				if (!cache || layoutInvalidTS > cacheTS) refreshCache();
 				for (let i = 0; i < letters.length; i++) {
 					const letter = letters[i];
 					if (letter.classList.contains('nav-ultimate-letter-space')) continue;
-					const rect = letter.getBoundingClientRect();
-					const cx = rect.left + rect.width * 0.5;
-					const cy = rect.top + rect.height * 0.5;
-					const dist = Math.hypot(mx - cx, my - cy);
+					const c = cache[i];
+					if (!c) continue;
+					const dist = Math.hypot(mx - c.cx, my - c.cy);
 					const glow = Math.max(0, 1 - dist / radius);
 					letter.style.setProperty('--glow', glow.toFixed(3));
 				}
 			}
+			link._navGlowPaint = paint;
 
-			link.addEventListener('mousemove', (e) => {
-				mx = e.clientX;
-				my = e.clientY;
-				if (!raf) raf = requestAnimationFrame(paint);
+			link.addEventListener('mouseenter', () => {
+				activeNavGlowLinks.add(link);
+				if (activeNavGlowLinks.size === 1) Motion.registerRAF('navLetterGlow', paintNavGlowLinks);
 			});
 			link.addEventListener('mouseleave', () => {
 				for (let i = 0; i < letters.length; i++) {
 					letters[i].style.setProperty('--glow', '0');
 				}
+				activeNavGlowLinks.delete(link);
+				if (activeNavGlowLinks.size === 0) Motion.unregisterRAF('navLetterGlow');
+			});
+			link.addEventListener('mousemove', (e) => {
+				mx = e.clientX;
+				my = e.clientY;
 			});
 		});
 		});

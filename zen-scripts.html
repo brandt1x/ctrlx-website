@@ -11,8 +11,12 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" as="style">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="preload" href="style.css" as="style">
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" type="image/png" href="images/logo.png">
+  <link rel="preload" href="images/logo.new.png" as="image">
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
 </head>
 
 <body>
@@ -21,8 +25,15 @@
 
   <header class="site-header">
     <div class="container header-inner">
-      <a href="index.html"><img src="images/logo.png" alt="CTRLX Logo" class="logo-image logo-dark" fetchpriority="high" decoding="async" /></a>
-      <a href="index.html"><img src="images/whitelogo.png" alt="CTRLX Logo" class="logo-image logo-light" loading="lazy" decoding="async" /></a>
+      <a href="index.html" class="logo-link">
+        <img src="images/logo.new.png" alt="CTRLX Logo" class="logo-image logo-dark" width="656" height="204" fetchpriority="high" decoding="async" />
+        <img src="images/whitelogo.new.png" alt="CTRLX Logo" class="logo-image logo-light" width="982" height="302" loading="lazy" decoding="async" />
+      </a>
+      <button class="mobile-menu-toggle" type="button" aria-label="Toggle menu" aria-expanded="false">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
       <div class="header-right">
         <nav class="nav-left">
           <a href="index.html">Home</a>
