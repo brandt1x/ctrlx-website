@@ -12,7 +12,7 @@ const PRODUCT_TO_FLAGS = {
 	rust: ['hasRust'],
 	'all-scripts': ['hasAllBundle'],
 	'vision-x': ['hasVisionX'],
-	'vision-x-plus': ['hasVisionX'],
+	'vision-x-plus': ['hasVisionXPlus'],
 	'aim-x': ['hasAimX'],
 };
 
@@ -32,6 +32,7 @@ function getPurchaseFlags(items) {
 		hasRust: false,
 		hasAllBundle: false,
 		hasVisionX: false,
+		hasVisionXPlus: false,
 		hasAimX: false,
 	};
 
@@ -54,7 +55,8 @@ function getPurchaseFlags(items) {
 		if (name.includes('siege') || price === 20) flags.hasSiege = true;
 		if (name.includes('rust') || price === 20) flags.hasRust = true;
 		if (name.includes('all zen scripts') || name.includes('all scripts') || price === 100) flags.hasAllBundle = true;
-		if (name.includes('vision-x') || name.includes('vision x') || name.includes('vision+x') || price === 500 || price === 750) flags.hasVisionX = true;
+		if (name.includes('vision+x') || name.includes('vision x plus') || price === 750) flags.hasVisionXPlus = true;
+		else if (name.includes('vision-x') || name.includes('vision x') || price === 500) flags.hasVisionX = true;
 		if (name.includes('aim-x') || name.includes('aim x') || price === 350) flags.hasAimX = true;
 	}
 

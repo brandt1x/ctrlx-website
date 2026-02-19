@@ -1,0 +1,17 @@
+{
+  "name": "aim-x",
+  "productName": "AIM-X",
+  "version": "1.0.0",
+  "description": "Control-X AIM-X - Elite targeting system for precision and consistency",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron ."
+  },
+  "keywords": ["control-x", "aim-x", "targeting"],
+  "author": "Control-X",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^28.0.0"
+  }
+}
