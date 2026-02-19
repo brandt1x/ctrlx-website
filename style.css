@@ -171,7 +171,10 @@ body.theme-light .site-header {
 	position: absolute;
 	left: -150px;
 	top: 52.5%;
-	transform: translateY(-50%);
+	/* Crop black canvas margins from provided logos */
+	clip-path: inset(31% 14% 29% 14%);
+	transform: translateY(-50%) scale(1.22);
+	transform-origin: left center;
 }
 
 /* Show dark logo in dark mode, hide in light mode */

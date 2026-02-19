@@ -1,5 +1,16 @@
 // Populate current year and add UI behaviors
 document.addEventListener('DOMContentLoaded', function () {
+	// #region agent log
+	(function logLogoDebug() {
+		const dark = document.querySelector('.logo-image.logo-dark');
+		const light = document.querySelector('.logo-image.logo-light');
+		const hasThemeLight = document.body.classList.contains('theme-light') || document.documentElement.classList.contains('theme-light');
+		const darkDisplay = dark ? window.getComputedStyle(dark).display : null;
+		const lightDisplay = light ? window.getComputedStyle(light).display : null;
+		fetch('http://127.0.0.1:7247/ingest/14e09fd4-ef14-4c17-a7af-1afd0c9a1266', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'script.js:logo-debug', message: 'Logo visibility', data: { hasThemeLight, darkSrc: dark ? dark.src : null, lightSrc: light ? light.src : null, darkDisplay, lightDisplay, visibleLogo: darkDisplay === 'block' ? 'dark' : lightDisplay === 'block' ? 'light' : 'none' }, timestamp: Date.now(), hypothesisId: 'H1' }) }).catch(function () { });
+	})();
+	// #endregion
+
 	const yearEl = document.getElementById('year');
 	if (yearEl) yearEl.textContent = new Date().getFullYear();
 
@@ -294,7 +305,6 @@ document.addEventListener('DOMContentLoaded', function () {
 			}
 			const isLight = document.body.classList.contains('theme-light');
 			const mode = isLight ? 'light' : (sessionStorage.getItem('ultimateTransitionMode') || 'dark');
-			const logoSrc = mode === 'light' ? 'images/whitelogo.svg' : 'images/logo.svg';
 			const overlay = document.createElement('div');
 			overlay.className = 'ultimate-loading-overlay ultimate-mode-' + mode;
 			overlay.setAttribute('aria-hidden', 'true');
@@ -309,9 +319,6 @@ document.addEventListener('DOMContentLoaded', function () {
 					<div class="ultimate-loading-sparks">${sparks}</div>
 				</div>
 				<div class="ultimate-loading-center">
-					<div class="ultimate-loading-brand-wrap">
-						<img src="${logoSrc}" alt="Control-X" class="ultimate-loading-brand-img" />
-					</div>
 					<div class="ultimate-loading-logo">
 						<span class="ultimate-logo-layer base">CTRLX</span>
 						<span class="ultimate-logo-layer glitch g1">CTRLX</span>
@@ -356,7 +363,6 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 
 		const isLight = document.body.classList.contains('theme-light');
-		const logoSrc = isLight ? 'images/whitelogo.svg' : 'images/logo.svg';
 		const streaks = Array.from({ length: 12 }, (_, i) =>
 			`<div class="site-load-streak" style="--delay:${(i * 0.08).toFixed(2)}s;--y:${(Math.random() * 100).toFixed(1)}%;--angle:${-15 + Math.random() * 30}deg;"></div>`
 		).join('');
@@ -376,9 +382,6 @@ document.addEventListener('DOMContentLoaded', function () {
 				<div class="site-load-stars">${stars}</div>
 			</div>
 			<div class="site-load-center">
-				<div class="site-load-brand-wrap">
-					<img src="${logoSrc}" alt="Control-X" class="site-load-brand-img" />
-				</div>
 				<div class="site-load-pulse"></div>
 				<div class="site-load-title">Control-X</div>
 				<div class="site-load-subtitle">Precision Scripts</div>
@@ -1485,7 +1488,6 @@ document.addEventListener('DOMContentLoaded', function () {
 			navigating = true;
 			const isLight = document.body.classList.contains('theme-light');
 			const mode = isLight ? 'light' : nextMode();
-			const logoSrc = mode === 'light' ? 'images/whitelogo.svg' : 'images/logo.svg';
 			const overlay = document.createElement('div');
 			overlay.className = 'ultimate-loading-overlay';
 			overlay.classList.add(`ultimate-mode-${mode}`);
@@ -1500,9 +1502,6 @@ document.addEventListener('DOMContentLoaded', function () {
 					<div class="ultimate-loading-sparks">${sparks}</div>
 				</div>
 				<div class="ultimate-loading-center">
-					<div class="ultimate-loading-brand-wrap">
-						<img src="${logoSrc}" alt="Control-X" class="ultimate-loading-brand-img" />
-					</div>
 					<div class="ultimate-loading-logo">
 						<span class="ultimate-logo-layer base">CTRLX</span>
 						<span class="ultimate-logo-layer glitch g1">CTRLX</span>
