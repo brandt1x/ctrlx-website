@@ -4800,9 +4800,9 @@ html.site-preload .ultimate-loading-overlay * {
 	}
 
 	.profile-dropdown {
-		right: 0;
-		left: auto;
-		transform: none;
+		left: 50%;
+		right: auto;
+		transform: translateX(-50%);
 		min-width: min(88vw, 260px);
 	}
 
