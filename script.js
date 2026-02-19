@@ -1180,7 +1180,18 @@ document.addEventListener('DOMContentLoaded', function () {
 		hub.addEventListener('click', (e) => {
 			const target = e.target;
 			if (!(target instanceof HTMLElement)) return;
-			if (target.dataset.close === '1' || target.classList.contains('account-hub-close')) closeHub();
+			if (target.dataset.close === '1' || target.classList.contains('account-hub-close')) {
+				closeHub();
+				return;
+			}
+			const tabBtn = target.closest('.account-hub-tab');
+			if (tabBtn && tabBtn.dataset.hubTab) {
+				e.preventDefault();
+				setHubTab(tabBtn.dataset.hubTab);
+				if (tabBtn.dataset.hubTab === 'purchases') {
+					ensureClient().then((c) => c && loadPurchasesIntoHub(c));
+				}
+			}
 		});
 		window.addEventListener('blur', closeDropdown);
 		window.addEventListener('scroll', () => {
