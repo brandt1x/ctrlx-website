@@ -109,6 +109,21 @@ module.exports = async (req, res) => {
 			return;
 		}
 
+		if (type === 'aim-x') {
+			if (!flags.hasAimX) return res.status(403).json({ error: 'Aim-X not purchased' });
+			const aimXDir = path.join(__dirname, '..', 'aim-x');
+			if (!fs.existsSync(aimXDir)) {
+				return res.status(503).json({ error: 'Aim-X download is being prepared. Contact support for delivery.' });
+			}
+			res.setHeader('Content-Type', 'application/zip');
+			res.setHeader('Content-Disposition', 'attachment; filename="Aim-X.zip"');
+			const archive = archiver('zip', { zlib: { level: 9 } });
+			archive.pipe(res);
+			archive.directory(aimXDir, 'Aim-X');
+			await archive.finalize();
+			return;
+		}
+
 		if (type === 'all-scripts') {
 			if (!flags.hasAllBundle) return res.status(403).json({ error: 'Bundle not purchased' });
 			const scriptsDir = path.join(__dirname, 'scripts');
@@ -142,7 +157,7 @@ module.exports = async (req, res) => {
 			return;
 		}
 
-		return res.status(400).json({ error: 'Invalid type. Use type=vision-x|siege|all-scripts|script' });
+		return res.status(400).json({ error: 'Invalid type. Use type=vision-x|aim-x|siege|all-scripts|script' });
 	} catch (err) {
 		console.error(err);
 		res.status(500).json({ error: err.message || 'Download failed' });

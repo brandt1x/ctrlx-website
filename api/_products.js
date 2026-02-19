@@ -13,6 +13,8 @@ const PRODUCT_CATALOG = {
 	'rust': { name: 'Rust Zen Script', price: 20 },
 	'all-scripts': { name: 'All Zen Scripts Bundle', price: 100 },
 	'vision-x': { name: 'VISION-X Computer Vision', price: 500 },
+	'vision-x-plus': { name: 'VISION+X Computer Vision', price: 750 },
+	'aim-x': { name: 'AIM-X Aim Engine', price: 350 },
 	'vision-setup': { name: 'CTRL-X Vision Setup', price: 25 },
 };
 

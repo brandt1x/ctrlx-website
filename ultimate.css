@@ -353,7 +353,13 @@ nav a.nav-ultimate::after,
 	font-weight: 800;
 	color: var(--accent);
 	margin-bottom: 20px;
-	text-shadow: 0 0 24px rgba(239, 68, 68, 0.25);
+}
+
+.ultimate-lifetime {
+	font-size: 0.65em;
+	font-weight: 600;
+	color: var(--muted);
+	letter-spacing: 0.08em;
 }
 
 .ultimate-add-btn {
