@@ -428,7 +428,7 @@
 				const { data: { session } } = await supabase.auth.getSession();
 				if (!session?.access_token) return false;
 				if (showProcessing) {
-					purchasesEl.innerHTML = '<p class="muted">Processing your purchase...</p>';
+					purchasesEl.innerHTML = '<p class="muted">Preparing your downloads...</p>';
 				}
 				const res = await fetch('/api/my-purchases', {
 					headers: { 'Authorization': 'Bearer ' + session.access_token } });
