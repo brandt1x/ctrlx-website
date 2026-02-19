@@ -2216,6 +2216,15 @@ body.theme-light .hero {
 	min-height: 2.5em;
 }
 
+.zen-ultimate-link {
+	color: var(--accent);
+	text-decoration: none;
+}
+
+.zen-ultimate-link:hover {
+	text-decoration: underline;
+}
+
 .price {
 	margin: 10px 0;
 	font-weight: 700;
