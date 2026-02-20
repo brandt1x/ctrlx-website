@@ -15,7 +15,7 @@ const PRODUCT_CATALOG = {
 	'vision-x': { name: 'VISION-X Computer Vision', price: 500 },
 	'vision-x-plus': { name: 'VISION+X Computer Vision', price: 750 },
 	'aim-x': { name: 'AIM-X Aim Engine', price: 350 },
-	'vision-setup': { name: 'CTRL-X Vision Setup', price: 25 },
+	'vision-setup': { name: 'CTRL-X All Services Setup', price: 25 },
 };
 
 function getProduct(productId) {

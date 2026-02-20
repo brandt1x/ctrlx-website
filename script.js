@@ -1431,7 +1431,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		if (!btn) return;
 		btn.addEventListener('click', () => {
 			const productId = btn.getAttribute('data-product-id') || '';
-			const name = btn.getAttribute('data-name') || 'CTRL-X Vision Setup';
+			const name = btn.getAttribute('data-name') || 'CTRL-X All Services Setup';
 			const price = btn.getAttribute('data-price') || '0';
 			window.__addToSiteCart(productId, name, price);
 			const cartToggle = document.getElementById('site-cart-toggle');
