@@ -6,7 +6,8 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1" />
 	<script>(function(){if(typeof localStorage!=='undefined'&&localStorage.getItem('theme')==='light')document.documentElement.classList.add('theme-light');})();</script>
 	<script>document.documentElement.classList.add('site-preload');window.addEventListener('load',()=>document.documentElement.classList.remove('site-preload'),{once:true});setTimeout(()=>document.documentElement.classList.remove('site-preload'),4000);</script>
-	<title>Thank You — Control-X</title>
+	<title>Download Your Purchase — Control-X</title>
+	<meta name="description" content="Download your Control-X purchase. One-time download—save your files." />
 	<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -62,13 +63,23 @@
 			<div class="ultimate-product-glow"></div>
 			<div class="ultimate-product-content">
 				<h2 class="success-title">Thank you for your purchase!</h2>
-				<p class="success-subtitle">Your payment was successful.</p>
-				<div id="success-downloads" class="success-downloads"></div>
-				<div class="success-slide-box">
-					<p class="success-support-text">Questions or need help? <a href="contact.html">Contact us</a> or <a href="https://discord.gg/q9KWFd9xxH" target="_blank" rel="noopener">join our Discord</a>.</p>
+				<p class="success-subtitle">Your payment was successful. Download your scripts below.</p>
+
+				<div id="guest-download-area" class="success-downloads">
+					<p id="guest-download-status" class="muted">Preparing your download...</p>
+					<button id="guest-download-btn" class="btn" type="button" disabled style="margin-top: 1rem;">Download Now</button>
+					<p id="guest-download-warning" class="guest-download-warning muted" style="margin-top: 1rem; font-size: 0.9rem; max-width: 420px;">
+						<strong>One-time download.</strong> Save your files—this link cannot be used again. Available for 24 hours.
+					</p>
+				</div>
+
+				<div id="guest-download-error" class="account-error" hidden style="margin-top: 1rem;"></div>
+
+				<div class="success-slide-box" style="margin-top: 2rem;">
+					<p class="success-support-text">Need help? <a href="contact.html">Contact support</a> or <a href="https://discord.gg/q9KWFd9xxH" target="_blank" rel="noopener">join our Discord</a>.</p>
 					<div class="success-support-btns">
-						<a href="contact.html" class="btn">Contact Page</a>
-						<a href="https://discord.gg/q9KWFd9xxH" target="_blank" rel="noopener" class="btn ghost">Join Discord</a>
+						<a href="zen-scripts.html" class="btn ghost">Browse More Scripts</a>
+						<a href="index.html" class="btn ghost">Back to Home</a>
 					</div>
 				</div>
 			</div>
@@ -84,8 +95,57 @@
 	<script src="script.js" defer></script>
 	<script src="cinematic.js" defer></script>
 	<script>
-		// All checkouts redirect to account.html. Redirect legacy success URLs.
-		window.location.replace('/account.html');
+		(function() {
+			document.getElementById('year').textContent = new Date().getFullYear();
+
+			const params = new URLSearchParams(location.search);
+			const sessionId = params.get('session_id');
+
+			if (!sessionId) {
+				document.getElementById('guest-download-status').textContent = 'No purchase session found. If you just completed checkout, wait a moment and refresh.';
+				document.getElementById('guest-download-btn').hidden = true;
+				document.getElementById('guest-download-warning').hidden = true;
+				return;
+			}
+
+			const statusEl = document.getElementById('guest-download-status');
+			const btnEl = document.getElementById('guest-download-btn');
+			const warningEl = document.getElementById('guest-download-warning');
+			const errorEl = document.getElementById('guest-download-error');
+
+			statusEl.textContent = 'Click below to download your purchase.';
+			btnEl.disabled = false;
+
+			btnEl.addEventListener('click', async () => {
+				btnEl.disabled = true;
+				btnEl.textContent = 'Downloading...';
+				errorEl.hidden = true;
+
+				try {
+					const url = '/api/download-guest?session_id=' + encodeURIComponent(sessionId);
+					const res = await fetch(url);
+					if (!res.ok) {
+						const data = await res.json().catch(() => ({}));
+						throw new Error(data.error || 'Download failed');
+					}
+					const blob = await res.blob();
+					const a = document.createElement('a');
+					a.href = URL.createObjectURL(blob);
+					a.download = 'Cntrl-X-Purchase.zip';
+					a.click();
+					URL.revokeObjectURL(a.href);
+					statusEl.textContent = 'Download started. Save your files—this link cannot be used again.';
+					btnEl.textContent = 'Download used';
+					btnEl.disabled = true;
+					warningEl.innerHTML = '<strong>Download complete.</strong> Load the .gpc file(s) into Zen Studio and flash to your CronusZen.';
+				} catch (err) {
+					errorEl.textContent = err.message || 'Download failed. Please try again.';
+					errorEl.hidden = false;
+					btnEl.disabled = false;
+					btnEl.textContent = 'Download Now';
+				}
+			});
+		})();
 	</script>
 </body>
 
