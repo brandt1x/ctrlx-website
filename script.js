@@ -819,6 +819,10 @@ document.addEventListener('DOMContentLoaded', function () {
 	})();
 
 	// GLOBAL CART (all pages)
+	const PROMO_KEY = 'LAUNCH';
+	const PROMO_STORAGE_KEY = 'siteCartPromo';
+	const PROMO_CUTOFF = new Date('2025-02-24T00:00:00Z');
+
 	const Cart = (function () {
 		const STORAGE_KEY = 'siteCart';
 		let items = [];
@@ -850,6 +854,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		function clear() {
 			items = [];
 			save();
+			setPromo(null);
 		}
 
 		function remove(id) {
@@ -865,9 +870,30 @@ document.addEventListener('DOMContentLoaded', function () {
 			return items.reduce((sum, item) => sum + (item.price || 0), 0);
 		}
 
+		function setPromo(code) {
+			try {
+				if (window.sessionStorage) {
+					if (code) sessionStorage.setItem(PROMO_STORAGE_KEY, code);
+					else sessionStorage.removeItem(PROMO_STORAGE_KEY);
+				}
+			} catch (e) { }
+		}
+
+		function getPromo() {
+			try {
+				if (window.sessionStorage) return sessionStorage.getItem(PROMO_STORAGE_KEY) || null;
+			} catch (e) { }
+			return null;
+		}
+
+		function isPromoValid() {
+			const code = getPromo();
+			return code && code.toUpperCase().trim() === PROMO_KEY && new Date() < PROMO_CUTOFF;
+		}
+
 		load();
 
-		return { addItem, clear, remove, getItems, getTotal };
+		return { addItem, clear, remove, getItems, getTotal, setPromo, getPromo, isPromoValid };
 	})();
 
 	(function setupCartUI() {
@@ -875,37 +901,61 @@ document.addEventListener('DOMContentLoaded', function () {
 		const toggle = document.getElementById('site-cart-toggle');
 		const closeBtn = document.getElementById('site-cart-close');
 		const backdrop = document.getElementById('site-cart-backdrop');
-		const countEl = document.getElementById('site-cart-count');
 		const itemsEl = document.getElementById('site-cart-items');
 		const totalEl = document.getElementById('site-cart-total');
 		const summaryEl = document.getElementById('site-cart-summary');
 		const clearBtn = document.getElementById('site-cart-clear');
 
-		if (!toggle || !itemsEl || !totalEl || !summaryEl || !countEl || !clearBtn || !backdrop) return;
+		if (!toggle || !itemsEl || !totalEl || !summaryEl || !clearBtn || !backdrop) return;
+
+		document.querySelectorAll('.cart-toggle-mobile').forEach((btn) => {
+			btn.addEventListener('click', () => toggle?.click());
+		});
 
 		function render() {
 			const items = Cart.getItems();
+			const promoMsgEl = document.getElementById('site-cart-promo-message');
+			const promoBlock = document.querySelector('.site-cart-promo');
+			if (promoBlock) promoBlock.style.display = items.length ? 'block' : 'none';
+
 			if (!items.length) {
 				itemsEl.innerHTML = '';
 				summaryEl.textContent = 'No items in your cart yet.';
 				totalEl.textContent = 'Total: $0';
-				countEl.textContent = '0';
+				document.querySelectorAll('.site-cart-count').forEach((el) => { el.textContent = '0'; });
+				if (promoMsgEl) promoMsgEl.textContent = '';
 				return;
 			}
 			itemsEl.innerHTML = items.map(item => {
 				const id = item.id || '';
+				const displayPrice = Cart.isPromoValid() ? (item.price * 0.5) : item.price;
+				const priceStr = displayPrice % 1 === 0 ? displayPrice : displayPrice.toFixed(2);
 				return `<li data-id="${id}">
 					<div class="site-cart-item-main">
 						<span class="site-cart-item-name">${item.name}</span>
-						<span class="site-cart-item-price">$${item.price}</span>
+						<span class="site-cart-item-price">$${priceStr}</span>
 					</div>
 					<button class="site-cart-item-remove" type="button" data-id="${id}" aria-label="Remove item">🗑️</button>
 				</li>`;
 			}).join('');
 			const total = Cart.getTotal();
-			totalEl.textContent = `Total: $${total}`;
+			const displayTotal = Cart.isPromoValid() ? total * 0.5 : total;
+			const totalStr = displayTotal % 1 === 0 ? displayTotal : displayTotal.toFixed(2);
+			totalEl.textContent = `Total: $${totalStr}`;
 			summaryEl.textContent = `You have ${items.length} item${items.length > 1 ? 's' : ''} in your cart.`;
-			countEl.textContent = String(items.length);
+			document.querySelectorAll('.site-cart-count').forEach((el) => { el.textContent = String(items.length); });
+
+			if (promoMsgEl) {
+				if (Cart.isPromoValid()) {
+					promoMsgEl.textContent = 'LAUNCH applied — 50% off';
+					promoMsgEl.classList.remove('site-cart-promo-error');
+				} else if (Cart.getPromo()) {
+					promoMsgEl.textContent = 'Promo expired or invalid.';
+					promoMsgEl.classList.add('site-cart-promo-error');
+				} else {
+					promoMsgEl.textContent = '';
+				}
+			}
 
 			// animate items in
 			requestAnimationFrame(() => {
@@ -1027,6 +1077,7 @@ document.addEventListener('DOMContentLoaded', function () {
 						},
 						body: JSON.stringify({
 						productIds: items.map(i => i.productId).filter(Boolean),
+						promoCode: Cart.isPromoValid() ? Cart.getPromo() : null,
 					}),
 					});
 					const data = await res.json();

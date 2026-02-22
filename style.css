@@ -202,6 +202,11 @@ body.theme-light .logo-light {
 	display: none;
 }
 
+/* Mobile cart – visible only on small screens, hidden on desktop */
+.cart-toggle-mobile {
+	display: none;
+}
+
 /* Mobile hamburger toggle */
 .mobile-menu-toggle {
 	display: none;
@@ -2764,6 +2769,51 @@ body.theme-light .how-chip:hover {
 	font-weight: 700;
 }
 
+.site-cart-promo {
+	margin-top: 10px;
+	display: none;
+}
+
+.site-cart-promo-row {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.site-cart-promo-input {
+	flex: 1;
+	min-width: 0;
+	padding: 8px 10px;
+	font-size: 0.9rem;
+	border: 1px solid rgba(15, 23, 42, 0.5);
+	border-radius: 6px;
+	background: rgba(15, 23, 42, 0.3);
+	color: inherit;
+}
+
+.site-cart-promo-input::placeholder {
+	opacity: 0.6;
+}
+
+.site-cart-promo-input:focus {
+	outline: none;
+	border-color: var(--accent-2, #f43f5e);
+}
+
+.site-cart-promo-message {
+	margin-top: 6px;
+	font-size: 0.85rem;
+}
+
+.site-cart-promo-message.site-cart-promo-error {
+	color: #f43f5e;
+}
+
+body.theme-light .site-cart-promo-input {
+	border-color: rgba(15, 23, 42, 0.2);
+	background: rgba(255, 255, 255, 0.6);
+}
+
 .site-cart-footer {
 	margin-top: 12px;
 	padding-top: 14px;
@@ -4228,6 +4278,10 @@ html.site-preload .ultimate-loading-overlay * {
 	.logo-link {
 		width: 103px;
 		height: 32px;
+	}
+
+	.cart-toggle-mobile {
+		display: flex;
 	}
 
 	.mobile-menu-toggle {

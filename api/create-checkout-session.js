@@ -26,13 +26,32 @@ module.exports = async (req, res) => {
 		return res.status(401).json({ error: 'Sign in required to checkout' });
 	}
 
-	const { productIds } = req.body;
+	const { productIds, promoCode } = req.body;
 	const result = validateAndBuildLineItems(productIds);
 	if (!result) {
 		return res.status(400).json({ error: 'Invalid or empty cart. Use valid product IDs only.' });
 	}
 
-	const { lineItems, items } = result;
+	let { lineItems, items } = result;
+
+	// LAUNCH promo: 50% off, valid until end of Feb 23, 2025 UTC
+	const LAUNCH_CUTOFF = new Date('2025-02-24T00:00:00Z');
+	const isLaunchValid = promoCode && String(promoCode).toUpperCase().trim() === 'LAUNCH' && new Date() < LAUNCH_CUTOFF;
+	if (promoCode && !isLaunchValid) {
+		if (String(promoCode).toUpperCase().trim() === 'LAUNCH') {
+			return res.status(400).json({ error: 'LAUNCH promo has expired.' });
+		}
+		return res.status(400).json({ error: 'Invalid promo code.' });
+	}
+	if (isLaunchValid) {
+		lineItems = lineItems.map((li) => ({
+			...li,
+			price_data: {
+				...li.price_data,
+				unit_amount: Math.round(li.price_data.unit_amount * 0.5),
+			},
+		}));
+	}
 
 	try {
 		const origin = (req.headers.origin || req.headers.referer || '').replace(/\/$/, '');
