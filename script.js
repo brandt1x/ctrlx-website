@@ -821,7 +821,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	// GLOBAL CART (all pages)
 	const PROMO_KEY = 'LAUNCH';
 	const PROMO_STORAGE_KEY = 'siteCartPromo';
-	const PROMO_CUTOFF = new Date('2025-02-24T00:00:00Z');
+	const PROMO_CUTOFF = new Date('2026-02-24T00:00:00Z');
 
 	const Cart = (function () {
 		const STORAGE_KEY = 'siteCart';
@@ -1000,6 +1000,40 @@ document.addEventListener('DOMContentLoaded', function () {
 			Cart.clear();
 			render();
 		});
+
+		function applyPromo() {
+			const promoInput = document.getElementById('site-cart-promo-input');
+			const promoMsgEl = document.getElementById('site-cart-promo-message');
+			if (!promoInput || !promoMsgEl) return;
+			const code = (promoInput.value || '').trim().toUpperCase();
+			if (!code) {
+				Cart.setPromo(null);
+				render();
+				return;
+			}
+			if (code === PROMO_KEY && new Date() < PROMO_CUTOFF) {
+				Cart.setPromo(code);
+				promoInput.value = '';
+				promoMsgEl.classList.remove('site-cart-promo-error');
+				render();
+			} else {
+				Cart.setPromo(null);
+				promoMsgEl.textContent = code === PROMO_KEY ? 'LAUNCH promo has expired.' : 'Invalid promo code.';
+				promoMsgEl.classList.add('site-cart-promo-error');
+			}
+		}
+
+		const promoInput = document.getElementById('site-cart-promo-input');
+		const promoApplyBtn = document.getElementById('site-cart-promo-apply');
+		if (promoApplyBtn) promoApplyBtn.addEventListener('click', applyPromo);
+		if (promoInput) {
+			promoInput.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					applyPromo();
+				}
+			});
+		}
 
 		itemsEl.addEventListener('click', (e) => {
 			const target = e.target;

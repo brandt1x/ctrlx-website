@@ -203,8 +203,8 @@ body.theme-light .logo-light {
 }
 
 /* Mobile cart – visible only on small screens, hidden on desktop */
-.cart-toggle-mobile {
-	display: none;
+.cart-toggle.cart-toggle-mobile {
+	display: none !important;
 }
 
 /* Mobile hamburger toggle */
@@ -4280,8 +4280,8 @@ html.site-preload .ultimate-loading-overlay * {
 		height: 32px;
 	}
 
-	.cart-toggle-mobile {
-		display: flex;
+	.cart-toggle.cart-toggle-mobile {
+		display: flex !important;
 	}
 
 	.mobile-menu-toggle {

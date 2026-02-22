@@ -34,8 +34,8 @@ module.exports = async (req, res) => {
 
 	let { lineItems, items } = result;
 
-	// LAUNCH promo: 50% off, valid until end of Feb 23, 2025 UTC
-	const LAUNCH_CUTOFF = new Date('2025-02-24T00:00:00Z');
+	// LAUNCH promo: 50% off, valid until end of Feb 23, 2026 UTC
+	const LAUNCH_CUTOFF = new Date('2026-02-24T00:00:00Z');
 	const isLaunchValid = promoCode && String(promoCode).toUpperCase().trim() === 'LAUNCH' && new Date() < LAUNCH_CUTOFF;
 	if (promoCode && !isLaunchValid) {
 		if (String(promoCode).toUpperCase().trim() === 'LAUNCH') {
