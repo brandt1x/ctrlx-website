@@ -6,7 +6,7 @@ _________   ____________________________.____              ____  ___
  \______  /\____|__  /____|    |____|_  /_______ \         /___/\  \
         \/         \/                 \/        \/               \_/
 
-Welcome to Cntrl-x Siege Attackers! This is the Premium model Siege Attackers Cronus Zen script.
+Welcome to Cntrl-x Siege Defenders! This is the Premium model Siege Defenders Cronus Zen script.
 
 To protect the quality of our scripts and community, all guides and settings are private.
 To unlock full access, open a ticket in our Discord and verify your order. Once verified, you'll unlock private guides, fast support and personalized help.
@@ -14,13 +14,13 @@ To unlock full access, open a ticket in our Discord and verify your order. Once 
 Support:
 Cntrl-x.com
 */
-const string OperatorName[] 		= {
+const string OperatorName[] 	= {
 	//	0			1			2			3			4			5			6			7			8			9
-	"SLEDGE", 	"THATCHER", 	"ASH", 		"THERMITE", "TWITCH", 	"MONTAGNE", "GLAZ", 	"FUZE", 	"BLITZ", 	"IQ",
-	"BUCK",		"BLACKBEARD",	"CAPITAO",	"HIBANA",	"JACKAL", 	"YING",		"ZOFIA",	"DOKKAEBI",	"LION",		"FINKA",	   
-	"MAVERICK",	"NOMAD",		"GRIDLOCK", "NOKK",		"AMARU",	"KALI",		"IANA",		"ACE",		"ZERO",		"FLORES",		
-	"OSA",		"SENS",			"GRIM",		"BRAVA",	"RAM",		"DEIMOS",	"STRIKER",  "RAUORA",	/*38 Attackers */ ""};
-const string GunName[]				= {
+	"SMOKE",	"MUTE",			"CASTLE",	"PULSE",	"DOC",		"ROOK", 	"KAPKAN",	"TACHANKA",	"JAGER",	"BANDIT",
+	"FROST",	"VALKYRIE",		"CAVEIRA",	"ECHO",		"MIRA",		"LESION",	"ELA",		"VIGIL",	"MAESTRO",	"ALIBI",
+	"CLASH",	"KAID",			"MOZZIE",	"WARDEN",	"GOYO",		"WAMAI",	"ORYX",		"MELUSI",	"ARUNI", 	"THUNDERBIRD", 	
+	"THORN",	"AZAMI", 		"SOLIS",	"FENRIR",	"TUBARAO",	"SENTRY",	"SKOPOS", /*37 Defenders*/ ""};
+const string GunName[]			= {
 //	0				1				2				3				4				5				6				7				8			9
 "L85A2",		"M590A1",		"P226 MK 25",	"SMG-11",		"USP40",		"ARX200",		"G36C",			"MK1 9MM",		"AUG A2",	"P12",			
 //	10				11				12				13				14				15				16				17				18			19
@@ -31,18 +31,18 @@ const string GunName[]				= {
 "AR33",			"F2",			"417",			"SG-CQB",		"CAMRS",		"C8-SFW",		"M249",			"PARA-308",		"PRB92",	"552COMMANDO",
 //	40				41				42				43				44				45				46				47				48			49	
 "OTS-03",		"AK-12",		"6P41",			"SR-25",		"MK17 CQB",		"TYPE-89",		"C7E",			"ITA12S",		"ITA12L",	"PDW9",
-//	50				51				52				53				54				55				56				57				58			59
-".44MAG SEMI",	"Q-929",		"T-95 LSW",		"BEARING 9",	"SIX12",		"RG15",			"BOSG.12.2",	"SPSMG9",		"LMG-E",	"M762",
+//	50				51				52				53				54				55				56				57				58			29
+".44MAG SEMI",	"Q-929",		"T-95 LSW",		"BEARING 9",	"SIX12 SD",		"RG15",			"BOSG.12.2",	"SPSMG9",		"LMG-E",	"M762",
 //	60				61				62				63				64				65				66				67				68			69		
-"Mk 14 EBR",	"V308",			"SPEAR .308",	"AR-15.50",		"M4",			"1911 TACOPS",	"AK-74M",		"F90",			"SC3000K",	"Shield",
+"Mk 14 EBR",	"V308",			"SPEAR .308",	"AR-15.50",		"M4 GS",		"1911 TACOPS",	"AK-74M",		"F90",			"SC3000K",	"Shield",
 //	70				71				72				73				74				75				76				77				78			79
 "Gonne-6",		"SASG-12",		"SPAS-12",		"MP5",			"Bailiff 410",	"MP5K",			"VECTOR .45",	"TCSG12",		"MPX",		"P-10C",		
 //	80				81				82				83				84				85				86				87				88			89
 "COMMANDO 9",	"P10 RONI",		"SDP 9mm",		"UMP45",		"P90",			"M870",			"416CCARBINE",	"9X19VSN",		"9MM C1",	"SUPER90",
 //	90				91				92				93				94				95				96				97				98			99
 "AUG A3",		"T-5 SMG",		"M12",			"SPAS-15",		"LUISON",		"MP5SD",		"SCORPION",		"FO-12",		"K1A",		"ALDA 5.56",	
-//	100				101				102				103				104				105				106             107
-"ACS12",		"KERATOS.357",	"Mx4 Storm",	"DP27",			"UZK50GI",		"POF-9",		".44VENDETTA",  "REAPER MK2",	""};
+//	100				101				102				103				104				105             106             107
+"ACS12",		"KERATOS.357",	"Mx4 Storm",	"DP27",			"UZK50GI",		"POF-9",		".44VENDETTA",	"PCX-33",	""};
 const int8 	 GunDetail[][]		= {
 //	0		1		2		3		4		5		6		7		8		9
 	{0,0},	{1,1},	{2,1},	{4,0},	{2,1},	{0,0},	{0,0},	{2,1},	{0,0},	{2,1},			
@@ -57,128 +57,117 @@ const int8 	 GunDetail[][]		= {
 //	50		51		52		53		54		55		56		57		58		29
 	{2,1},	{2,1},	{6,0},	{4,0},	{1,1},	{2,1},	{1,0},	{4,0},	{6,0},	{0,0},
 //	60		61		62		63		64		65		66		67		68		69		
-	{5,1},	{0,0},	{0,0},	{0,1},	{0,0},	{2,1},	{0,0},	{0,0},	{0,0},	{8,0},
+	{5,1},	{0,0},	{0,0},	{0,1},	{0,0},	{2,1},	{0,0},	{0,0},	{0,0},	{8,1},
 //	70		71		72		73		74		75		76		77		78		79
 	{7,0},	{1,1},	{1,1},	{3,0},	{2,0},	{3,0},	{3,0},	{1,1},	{3,0},	{2,1},		
 //	80		81		82		83		84		85		86		87		88		89
 	{0,0},	{3,0},	{2,1},	{3,0},	{3,0},	{1,1},	{0,0},	{3,0},	{3,0},	{1,1},
 //	90		91		92		93		94		95		96		97		98		99
 	{3,0},	{3,0},	{3,0},	{1,1},	{2,1},	{3,0},	{3,0},	{1,1},	{3,0},	{6,0},	
-//	100		101		102		103		104		105		106     107
-	{1,1},	{2,1},	{3,0},	{6,0},	{3,0},	{0,0},	{2,1},   {3,0}};
+//	100		101		102		103		104		105     106     107
+	{1,1},	{2,1},	{3,0},	{6,0},	{3,0},	{0,0},	{2,1},	{0,0}};
 const string GunTypeName[] 		= {
 //	0,  			1,  		2,  		3,			4,  	5,  		6,  	7,  		8
 	"ASSAULT RFL", "SHOTGUN", "HANDGUN", "SMG", "MACHINE PTL", "MARKSMAN", "LMG", "HANDGONNE", "HANDGUN", ""};
-const int8	 GunAssigment[][] 		= {
-	{0,   1, -1,  2, -1, -1},	/* SLEDGE */	{0,  30,  1, 2, -1,  -1},	/* THATCHER */	{21,  6, -1, 17, 22, -1},	/* Ash */		{29, 23, -1, 17, 22, -1},	/* THERMITE */
-	{31, 32, 33, 24, 25, -1},	/* TWITCH */	{69, -1, -1, 24, 25, -1},	/* MONTAGNE */	{40, -1, -1, 53, 70, 27},	/* GLAZ */		{41, 42, 69, 28, 27, -1},	/* FUZE */
-	{69, -1, -1,  9, -1, -1},	/* BLITZ */		{39,  8, 12,  9, -1, -1},	/* IQ */		{35, 34, -1,  7, -1, -1},	/* BUCK */		{43, 44, -1, 18, -1, -1},	/* BLACKBEARD */	
-	{37, 36, -1, 70, 38, -1},	/* CAPITÃO */	{45, 13, -1, 53, 14, -1},	/* HIBANA */	{46, 49, 48,  47, 4, -1},	/* JACKAL */	{52, 54, -1, 51, -1, -1},	/* YING */			
-	{58, 59, -1, 55, -1, -1},	/* ZOFIA */		{60, 56, -1, 19, 70, 11},	/* DOKKAEBI */	{61, 32, 33, 24, -1, 25},	/* LION */		{42, 62, 71, 28, -1, 27},	/* FINKA */			
-	{64, 63, -1, 65, -1, -1},	/* MAVERICK */	{5,  66, -1, 38, 50, -1},	/* NOMAD */		{36, 67, -1, 20, 70, 82},	/* GRIDLOCK */	{15, 16, -1, 18, 17, -1},	/* NOKK */			
-	{12, 13, -1,  3, 70, 47},	/* Amaru */		{10, -1, -1, 57, 11,  2},	/* KALI */		{5,   6, -1,  70, 7, -1},	/* IANA */		{41, 23, -1, 24, -1, -1},	/* ACE */			 
-	{68, 26, -1, 70, 17, -1},	/* ZERO */		{30, 43, -1, 28, -1, -1},	/* FLORES */	{49, 29, -1, 27, -1, -1},	/* OSA */		{32,105, -1, 82, -1, -1},	/* SENSE */
-	{39, 33, -1, 74, 14, -1},	/* GRIM */		{37, 34, -1,  20, 4, -1},	/* BRAVA */		{21, 58, -1, 47,  7, -1},	/* RAM*/		{66,  1, -1, 106,-1, -1},	/* DEIMOS */
-	{64, 36, -1, 47, 17, -1},	/* STRIKER */   {32, 36, -1, 107, 28, -1}	/* RAUORA */
-		
+const int8	 GunAssigment[][] 	= {
+	{1, 15,	 -1, 3,	  2, -1}, /* SMOKE */	{1, 75,  -1, 3,	  2, -1}, /* MUTE */ 		{83,  23, -1, 20,  17, 22}, /* CASTLE */	{83,   23, -1, 17,  22, -1}, /* PULSE */
+	{73, 33, 84, 74, 25, 24}, /* DOC */		{73, 33, 84, 24, 25, -1}, /* ROOK */ 		{87,  71, -1, 28,  27, -1}, /* KAPKAN */	{87,  103, -1, 53,  28, 27}, /* TACHANKA */
+	{86, 85, -1, 9,  -1, -1}, /* JAGER */	{26, 85, -1, 9,  -1, -1}, /* BANDIT */		{88,  89, -1, 47,   7, -1}, /* FROST */		{78,   72, -1, 18,  -1, -1}, /* VALKYRIE */	
+	{92, 93, -1, 94, -1, -1}, /* CAVEIRA */	{95, 13, -1, 53, 14, -1}, /* ECHO */		{76,  48, -1, 47,   4, -1}, /* MIRA */		{91,   54, -1, 20,  51, -1}, /* LESION */	
+	{96, 97, -1, 55, -1, -1}, /* ELA */ 	{56, 98, -1, 19, 11, -1}, /* VIGIL */		{99, 100, -1, 74, 101, -1}, /* MAESTRO */	{102, 100, -1, 74, 101, -1}, /* ALIBI */		
+	{57, 20, 79, -1, -1, -1}, /* CLASH */ 	{77, 90, -1, 25, 50, -1}, /* KAID */		{80,  81, -1, 82,  -1, -1}, /* MOZZIE */	{1,    78, -1, 19,  79, -1}, /* WARDEN */	
+	{76, 77, -1, 14, -1, -1}, /* GOYO */	{8,  75, -1, 101, 9, -1}, /* WAMAI */		{91,  72, -1, 74,   4, -1}, /* ORYX */		{73,   89, -1, 47,  55, -1}, /* Melusi */	
+	{60, 81, -1, 38, -1, -1}, /* ARUNI */	{62, 93, -1, 53, 51, -1}, /* THUNDERBIRD */	{104, 85, -1, 11,  65, -1}, /* THORN */		{87,  100, -1, 18,  -1, -1}, /* AZAMI */
+	{84, 48, -1, 3,  -1, -1},  /* SOLIS */	{26, 71, -1, 74, 17, -1}, /* FENRIR */	    {63,  78, -1, 2,   -1, -1}, /* TUBARAO */	{80,   85, -1, 20,  11, -1}  /* SENTRY */
+    ,{107, -1, -1, 14,-1, -1}  /* SKOPOS */
 };
-const int8	 GunAntiRecoil[][]		= {
-	{39,7,95,		39,7,95,	39,7,95,	25,3,95,	25,3,95,	25,3,95},	/* SLEDGE */	{39,7,95,		39,7,95,	39,7,95,	25,3,95,	25,3,95,	25,3,95},	/* THATCHER */	
-	{63,-3,95,		63,-3,95,   63,-3,95,	24,3,95,	24,3,95,	24,3,95},	/* Ash */		{40,5,95,		40,5,95,	40,5,95,	24,3,95,	24,3,95,	24,3,95},	/* THERMITE */	
-	{70,-3,95,		70,-3,95,	70,-3,95,	22,2,95,	22,2,95,	22,2,95},	/* TWITCH */	{24,3,95,		24,3,95,	24,3,95,	24,3,95,	24,3,95,	24,3,95},	/* MONTAGNE */
-	{41,2,95,		41,2,95,	41,2,95,	65,-2,95,	65,-2,95,	65,-2,95},	/* GLAZ */		{45,-4,95,		45,-4,95,	45,-4,95,	22,3,95,	22,3,95,	22,3,95},	/* FUZE */		
-	{27,3,95,		27,3,95,	27,3,95,	27,3,95,	27,3,95,	27,3,95},	/* BLITZ */		{52,-3,95,		52,-3,95,	52,-3,95,	27,3,95,	27,3,95,	27,3,95},	/* IQ */		
-	{47,-1,95,		47,-1,95,	47,-1,95,	23,3,95,	23,3,95,	23,3,95},	/* BUCK */		{41,-1,95,		41,-1,95,	41,-1,95,	44,0,95,	44,0,95,	44,0,95},	/* BLACKBEARD */
-	{45,-3,95,		45,-3,95,	45,-3,95,	24,0,95,	24,0,95,	24,0,95},	/* CAPITÃO */	{44,-4,95,		44,-4,95,	44,-4,95,	65,-2,95,	65,-2,95,	65,-2,95},	/* HIBANA */	
-	{41,-3,95,		41,-3,95,	41,-3,95,	22,0,95,	22,0,95,	22,0,95},	/* JACKAL */	{39,1,95,		39,1,95,	39,1,95,	31,-1,95,	31,-1,95,	31,-1,95},	/* YING */		
-	{58,-3,95,		58,-3,95,	58,-3,95,	26,0,95,	26,0,95,	26,0,95},	/* ZOFIA */		{33,-3,95,		33,-3,95,	33,-3,95,	67,10,95,	67,10,95,	67,10,95},	/* DOKKAEBI */	
-	{44,2,95,		44,2,95,	44,2,95,	22,3,95,	22,3,95,	22,3,95},	/* LION */		{51,-3,95,		51,-3,95,	51,-3,95,	22,2,95,	22,2,95,	22,2,95},	/* FINKA */		
-	{50,-4,95,		50,-4,95,	50,-4,95,	31,-1,95,	31,-1,95,	31,-1,95},	/* MAVERICK */	{41,-2,95,		41,-2,95,	41,-2,95,	24,0,95,	24,0,95,	24,0,95},	/* NOMAD */		
-	{42,4,95,		42,4,95,	42,4,95,	25,0,95,	25,0,95,	25,0,95},	/* GRIDLOCK */	{45,4,95,		45,4,95,	45,4,95,	44,0,95,	44,0,95,	44,0,95},	/* NOKK */
-	{38,-4,95,		38,-4,95,	38,-4,95,	64,3,95,	64,3,95,	64,3,95},	/* Amaru */		{0,0,95,		0,0,95,		0,0,95,		41,1,95,	41,1,95,	41,1,95},	/* KALI	*/		
-	{41,-1,95,		41,-1,95,	41,-1,95,	21,0,95,	21,0,95,	21,0,95},	/* IANA */		{45,-4,95,		45,-4,95,	45,-4,95,	22,4,95,	22,4,95,	22,4,95},	/* ACE */		
-	{43,-2,95,		43,-2,95,	43,-2,95,	25,0,95,	25,0,95,	25,0,95},	/* ZERO */		{41,-3,95,		41,-3,95,	41,-3,95,	22,2,95,	22,2,95,	22,2,95},	/* FLORES */	
-	{41,-2,95,		41,-2,95,	41,-2,95,	30,-2,95,	30,-2,95,	30,-2,95},	/* OSA */		{31,3,95,		31,3,95,	31,3,95,	31,-1,95,	31,-1,95,	31,-1,95},	/* SENSE */
-	{52,-3,95,		52,-3,95,	52,-3,95,	21,0,95,	21,0,95,	21,0,95},	/* GRIM */		{45,-3,95,		45,-3,95,	45,-3,95,	22,0,95,	22,0,95,	22,0,95},	/* BRAVA */
-	{63,-3,95,		63,-3,95,	63,-3,95,	21,0,95,	21,0,95,	21,0,95},	/* RAM */		{43,-3,95,		43,-3,95,	43,-3,95,	44,0,95,	44,0,95,	44,0,95},   /* DEIMOS */
-	{50,-4,95,		50,-4,95,	50,-4,95,	 0,0,95,	 0,0,95,	 0,0,95},	/* STRIKER */   {31,0,95,		31,0,95,	31,0,95,	57,-6,95,	57,-6,95,	57,-6,95}	/* RAUORA */
+const int8	 GunAntiRecoil[][]	= {
+	{0,0,95,		0,0,95,		0,0,95,		64,3,95,	64,3,95,	64,3,95},	/* SMOKE */		{0,0,95,		0,0,95,		0,0,95,		64,3,95,	64,3,95,	64,3,95}, /* MUTE */
+	{37,-1,95,		37,-1,95,	37,-1,95,	 0,0,95,	 0,0,95,	 0,0,95},	/* CASTLE */	{32,-1,95,		32,-1,95,	32,-1,95,	24,3,95,	24,3,95,	24,3,95}, /* PULSE */		
+	{46,-2,95,		46,-2,95,	46,-2,95,	 0,0,95,	 0,0,95,	 0,0,95},	/* DOC */		{46,-2,95,		46,-2,95,	46,-2,95,	22,4,95,	22,4,95,	22,4,95}, /* ROOK */		
+	{36,-4,95,		36,-4,95,	36,-4,95,	22,2,95,	22,2,95,	22,2,95},	/* KAPKAN */	{42,-4,95,		42,-4,95,	42,-4,95,	65,-1,95,	65,-1,95,	65,-1,95}, /* TACHANKA */	
+	{51,-3,95,		51,-3,95,	51,-3,95,	25,3,95,	25,3,95,	25,3,95},	/* JAGER */		{43,6,95,		43,6,95,	43,6,95,	25,4,95,	25,4,95,	25,4,95}, /* BANDIT */	
+	{37,6,95,		37,6,95,	37,6,95,	 0,0,95,	 0,0,95,	 0,0,95},	/* FROST */		{41,-1,95,		41,-1,95,	41,-1,95,	45,0,95,	45,0,95,	45,0,95}, /* VALKYRIE */
+	{31,-2,95,		31,-2,95,	31,-2,95,	37,8,95,	37,8,95,	37,8,95},	/* CAVEIRA */	{46,-3,95,		46,-3,95,	46,-3,95,	65,-1,95,	65,-1,95,	65,-1,95}, /* ECHO */		
+	{51,4,95,		51,4,95,	51,4,95,     0,0,95,	 0,0,95,	 0,0,95},	/* MIRA */		{39,-1,95,		39,-1,95,	39,-1,95,	 0,0,95,	 0,0,95,	 0,0,95}, /* LESION */	
+	{54,7,95,		54,7,95,	54,7,95,	26,3,85,	26,3,85,	26,3,85},	/* Ela */		{0,0,95,		 0,0,95,	 0,0,95,	66,9,95,	66,9,95,	66,9,95}, /* VIGIL */
+	{44,0,95,		44,0,95,	44,0,95,	 0,0,95,	 0,0,95,	 0,0,95},	/* MAESTRO */	{49,6,95,		49,6,95,	49,6,95,	 0,0,95,	 0,0,95,	 0,0,95}, /* ALIBI */		
+	{41,-1,95,		41,-1,95,	41,-1,95,	0,0,95,		0,0,95,		0,0,95},	/* CLASH */		{66,0,95,		66,0,95,	66,0,95,	60,1,95,	60,1,95,	60,1,95}, /* KAID */		
+	{37,-3,95,		37,-3,95,	37,-3,95,	31,-1,95,	31,-1,95,	31,-1,95},	/* MOZZIE */	{0,0,95,		 0,0,95,	 0,0,95,	66,9,95,	66,9,95,	66,9,95}, /* WARDEN */	
+	{55,1,95,		55,1,95,	55,1,95,	26,2,95,	26,2,95,	26,2,95},	/* GOYO */		{42,6,95,		42,6,95,	42,6,95,	38,0,95,	38,0,95,	38,0,95}, /* WAMAI */		
+	{39,-1,95,		39,-1,95,	39,-1,95,	 0,0,95,	 0,0,95,	 0,0,95},	/* ORYX */		{39,-3,95,		39,-3,95,	39,-3,95,	 0,0,95,	 0,0,95,	 0,0,95}, /* Melusi */	
+	{33,-3,95,		33,-3,95,	33,-3,95,	24,3,95,	24,3,95,	24,3,95},	/* ARUNI */		{48,-4,95,		48,-4,95,	48,-4,95,	65,-1,95,	65,-1,95,	65,-1,95}, /* THUNDERBIRD */
+	{40,1,95,		40,1,95,	40,1,95,	48,2,95,	48,2,95,	48,2,95},	/* THORN */		{36,-4,95,		36,-4,95,	36,-4,95,	45,0,95,	45,0,95,	45,0,95}, /* AZUMI */
+	{45,2,95,		45,2,95,	45,2,95,	64,3,95,	64,3,95,	64,3,95},    /* SOLIS */	{43,6,95,		43,6,95,	43,6,95,	 0,0,95,	 0,0,95,	 0,0,95}, /* FENRIR */
+	{31,1,95,		31,1,95,	31,1,95,	26,1,95,	26,1,95,	26,1,95},     /* TUBARAO */	{37,-3,95,		37,-3,95,	37,-3,95,	 0,0,95,	 0,0,95,	0,0,95}  /* SENTRY */
+    ,{38,-4,95,		38,-4,95,	38,-4,95,	26,3,95,	26,3,95,	26,3,95}     /* SKOPOS  */
 };
-const int8	 AbilityAntiRecoil[][]	= {
-	{59,-4,95}	/* GLAZ */
+const int8   operatorsByYear[] 	= {SMOKE, FROST, MIRA, MAESTRO, MOZZIE, ORYX, THUNDERBIRD, AZUMI, FENRIR};
+const string onCamsCaption[]	= {
+	"Operator", "On Cams", ""
+}
+const string avilityName[] 		= {
+	"", "", //SMOKE,
+	"SIGNAL", "DISRUPTOR",//MUTE,
+	"", "", //CASTLE,	
+	"HEARTBEAT","SENSOR", //PULSE,	
+	"STIM", 	"PISTOL", //DOC,		
+	"ARMOR", "PACK", //ROOK, 	
+	"", "", //KAPKAN,	
+	"SHUMIKHA", "LAUNCHER", //TACHANKA,	
+	"", "", //JAGER,	
+	"", "", //BANDIT,
+	"", "", //FROST,	
+	"", "", //VALKYRIE,		
+	"SILENT", 	"STEP", //CAVEIRA,	
+	"", "YOKAI", //ECHO,		
+	"", "", //MIRA,		
+	"", "", //LESION,	
+	"", "", //ELA,		
+	"", "", //VIGIL,	
+	"EVIL", 	"EYE", //MAESTRO,	
+	"", "", //ALIBI,
+	"CCE", 		"SHIELD", //CLASH,	
+	"", "", //KAID,			
+	"PEST", "LAUNCHER", //MOZZIE,	
+	"", "", //WARDEN,	
+	"", "", //GOYO,		
+	"", "", //WAMAI,	
+	"", "", //ORYX,		
+	"", "", //MELUSI,	
+	"", "", //ARUNI, 	
+	"", "", //THUNDERBIRD, 	
+	"", "", //THORN,	
+	"", "", //AZAMI, 		
+	"ELECTRO", 	"SENSOR", //SOLIS
+	"", ""
 };
-
-const int8   operatorsByYear[] 		= {SLEDGE, BUCK, JACKAL, LION, GRIDLOCK, IANA, FLORES, SENS, BRAVA, DEIMOS};
-const string avilityName[] 			= {
-	"","", 						//SLEDGE,
-	"","", 						//THATCHER,
-	"BREACHING",	"ROUNDS", 	//ASH,
-	"","", 						//THERMITE, 
-	"","", 						//TWITCH, 	
-	"","", 						//MONTAGNE, 
-	"GLAZ", "FLIP SIGHT", 		//GLAZ, 	
-	"","", 						//FUZE, 	
-	"","", 						//BLITZ, 	
-	"ELECTRONICS", 	"DETECTOR", //IQ,
-	"SKELETON", 	"KEY", 		//BUCK,		
-	"","", 						//BLACKBEARD,	
-	"TACTICAL", 	"CROSSBOW", //CAPITAO,	
-	"", 			"X-KAIROS", //HIBANA,	
-	"","", 						//JACKAL, 	
-	"","", 						//YING,		
-	"KS79", 		"LIFELNE", 	//ZOFIA,	
-	"","", 						//DOKKAEBI,	
-	"","", 						//LION,		
-	"","", 						//FINKA,	   
-	"BREACHING", 	"TORCH", 	//MAVERICK,	
-	"","", 						//NOMAD,		
-	"","", 						//GRIDLOCK, 
-	"","", 						//NOKK,		
-	"GARRA","HOOK", 			//AMARU,	
-	"","", 						//KALI,		
-	"GEMINI", 		"REPLICATOR", //IANA,		
-	"","", 						//ACE,		
-	"ARGUS",		"LAUNCHER", //ZERO,		
-	"RCE-RATERO", 	"CHARGE", 	//FLORES,		
-	"TALON-8", 		"SHIELD", 	//OSA,		
-	"","", 						//SENS,			
-	"KAWAN HIVE", 	"LAUNCHER", //GRIM,		
-	"KLUDGE", 		"DRONE", 	//BRAVA									   														
-	"BU-GI AUTO", 	"BREACHER", //RAM
-	"DEATHMARK","TRACKER", 		//DEIMOS
-	"","",						//STRIKER
-	"D.O.M","PANEL LAUNCHER",						//RAUORA
-	"",""
-};
-const string operatorType[]			= {"Attackers", ""};
-const string operationYear[] 		= {"",		  	"Year 1",	"Year 2", 	"Year 3",	"Year 4",	"Year 5",	"Year 6",	"Year 7", 	"Year 8", 		"Year 9",	""};
-const string operationName[] 		= {"Original",	"Black",	"Velvet", 	"Para",		"Burnt", 	"Void", 	"Crimson",	"Demon", 	"Commanding", 	"DEADLY",	""};
-const string operationName2[] 		= {"Operators",	"Ice",		"Shell",	"Bellum",	"Horizon",	"Edge", 	"Heist",	"Veil", 	"Force", 		"OMEN", 	""};
-const string gunIndexMsg[]			= {"Primary", "Secondary", ""};
-const string configuration[]		= {"Anti-recoil", "Guns", "Mod Values", "Reset", "VM-Speed", "Layouts", "Profiles", ""};
-const string enterSlotMsg[]			= {"Enter slot number", "for the", "Defenders script", ""};	
-const string movAdjust[]			= {"Percent", "Adjustment", ""};
-
-const string toggleEdits[]			= {"A/X to EDIT", ""};
-const string toggleStatus[]			= {"OFF", "ON", ""};
-									   
-const string vmSpeed[]				= {"10 Ms.(def)", "XBOX ONE", "PS4/PS5", "XBOX X/S","PC", ""};
-const string vmSpeedCaption[]		= {"VM Speed", ""};
-const string gameLayouts[] 			= {"Default", "Lefty", "SouthPaw","SPaw Lefty", "Bumper Swap", "Bmpr Lean", "LB L1","RB R1","RT R2", "XIM", "M&K",  ""};
-const string gameLayoutsCaption[]	= {"Layout", ""};
-const string saveMessage			= "SAVED";
-const string resetMessage			= "Reset";
-
-const string configurationText		= "Configure";
-const string yes 					= "Yes";
-const string no  					= "No";
-const string resetOperator			= "Reset";
-const string resetOperator2			= "Operator?";
-int yesNoIndex						= TRUE;
-
-const string quickToggleNames[]		= {"Crouch Spam", "Strafe", "Shaiko Lean", "Lean Spam", "Prone Shot", "tBag LOL","Rapid Fire", "Dead Zone",
-									"On Cams","R-Fire 4All", "Auto Lean", "Hip Lean", "Pin On Shot", "Auto Scan", "Inverted", "Abilities", "SkltonK RF", "LED", ""};  
-const string onCamsCaption[]		= {"Operator", "On Drones", ""}
-
+const string operatorType[]		= {"Defenders", ""};
+const string operationYear[] 	= {"",		  	"Year 1",	"Year 2", 	"Year 3",	"Year 4",	"Year 5",	"Year 6",	"Year 7", 	"Year 8", 		"Year 9",	"", ""};
+const string operationName[] 	= {"Original",	"Black",	"Velvet", 	"Para",		"Burnt", 	"Void", 	"Crimson",	"Demon", 	"Commanding", 	"TWIN",	    ""};
+const string operationName2[] 	= {"Operators",	"Ice",		"Shell",	"Bellum",	"Horizon",	"Edge", 	"Heist",	"Veil", 	"Force", 		"SHELLS", 	""};
+const string gunIndexMsg[]		= {"Primary", "Secondary", ""};
+const string configuration[]	= {"Anti-recoil", "Guns", "Mod Values", "Reset", "VM-Speed", "Layouts", "Profiles",  ""};
+const string enterSlotMsg[]		= {"Enter slot number", "for the", "Attakers script", ""};	
+const string movAdjust[]		= {"Percent", "Adjustment", ""};
+const string toggleEdits[]		= {"A/X to EDIT", ""};
+const string toggleStatus[]		= {"OFF", "ON", ""};
+const string vmSpeed[]			= {"10 Ms.(def)", "XBOX ONE", "PS4/PS5", "XBOX X/S","PC", ""};
+const string vmSpeedCaption[]	= {"VM Speed", ""};
+const string gameLayouts[] 		= {"Default", "Lefty", "SouthPaw","SPaw Lefty", "Bumper Swap", "Bmpr Lean", "LB L1","RB R1","RT R2", "XIM", "M&K",  ""};
+const string gameLayoutsCaption[]= {"Layout", ""};
+const string saveMessage		= "SAVED";
+const string resetMessage		= "Reset";
+const string siegeSplashTitle	= "Cntrl-x Siege";
+const string siegeSplashUrl		= "CNTRL-X.COM";
+const string configurationText	= "Configure";
+const string yes 				= "Yes";
+const string no  				= "No";
+const string resetOperator		= "Reset";
+const string resetOperator2		= "Operator?";
+const string quickToggleNames[]	= {"Crouch Spam", "Strafe", "Shaiko Lean", "Lean Spam", "Prone Shot", "tBag LOL","Rapid Fire", "Dead Zone",
+								"On Cams", "R-Fire 4All", "Auto Lean", "Hip Lean", "Pin On Shot", "Auto Scan", "Inverted", "Abilities", "LED", ""};
+int yesNoIndex					= TRUE;
 const string gameProfiles[]			= {"Controller", "XIM", "M&K",""};
 const string gameProfilesDesc[]		= {"No SAB", 	"Configure SAB", "SAB is used ",	""};
 const string gameProfilesDesc2[]	= {"", 			"from XIM", 	 "from Script",		""};
@@ -232,8 +221,8 @@ enum{
 	TEA_BAG_LOL,
 	RAPID_FIRE,
 	DEAD_ZONE,
-	
 	ON_CAMS,
+
 	RAPID_FIRE_FOR_ALL,
 	AUTO_LEAN,	
 	HIP_LEAN,
@@ -241,55 +230,55 @@ enum{
 	AUTO_SCAN,
 	INVERTED,
 	ABILITIES,
-	SKELETON_KEY_RF,
 	LED
 }
 enum{
-	SLEDGE,
-	THATCHER,
-	ASH,
-	THERMITE, 
-	TWITCH, 	
-	MONTAGNE, 
-	GLAZ, 	
-	FUZE, 	
-	BLITZ, 	
-	IQ,
-	BUCK,		
-	BLACKBEARD,	
-	CAPITAO,	
-	HIBANA,	
-	JACKAL, 	
-	YING,		
-	ZOFIA,	
-	DOKKAEBI,	
-	LION,		
-	FINKA,	   
-	MAVERICK,	
-	NOMAD,		
-	GRIDLOCK, 
-	NOKK,		
-	AMARU,	
-	KALI,		
-	IANA,		
-	ACE,		
-	ZERO,		
-	FLORES,		
-	OSA,		
-	SENS,			
-	GRIM,		
-	BRAVA,
-	RAM,
-	DEIMOS,
-	STRIKER,
-	RAUORA
+	SMOKE,
+	MUTE,
+	CASTLE,	
+	PULSE,	
+	DOC,		
+	ROOK, 	
+	KAPKAN,	
+	TACHANKA,	
+	JAGER,	
+	BANDIT,
+	FROST,	
+	VALKYRIE,		
+	CAVEIRA,	
+	ECHO,		
+	MIRA,		
+	LESION,	
+	ELA,		
+	VIGIL,	
+	MAESTRO,	
+	ALIBI,
+	CLASH,	
+	KAID,			
+	MOZZIE,	
+	WARDEN,	
+	GOYO,		
+	WAMAI,	
+	ORYX,		
+	MELUSI,	
+	ARUNI, 	
+	THUNDERBIRD, 	
+	THORN,	
+	AZUMI, 		
+	SOLIS,
+	FENRIR,
+	TUBARAO,
+	SENTRY,
+    SKOPOS
 }
 enum{
 	PROFILE_CONTROLLER,
 	PROFILE_XIM,
 	PROFILE_MnK
 }
+
 const int16 quickToggleMinMaxDef[][]= {
+
 	//Min	Max 	DefVal	DefStatus
 	{10,	200,	60,		0},	//CROUCH_SPAM,
 	{100,	200,	200,	0},	//STRAFE,
@@ -302,92 +291,93 @@ const int16 quickToggleMinMaxDef[][]= {
 	
 	{0,	1, 0, 0},	//ON_CAMS,
 	{0,	1, 0, 0},	//RAPID_FIRE_FOR_ALL,
-	{0,	1, 0, 0},	//AUTO_LEAN,	
+	{0,	1, 0, 0},	//AUTO_LEAN,
 	{0, 1, 0, 0},   //HIP_LEAN
 	{0,	1, 0, 0},	//PIN_ON_SHOT,
 	{0,	1, 0, 1},	//AUTO_SCAN,
 	{0,	1, 0, 0},	//INVERTED,
-	{0,	1, 0, 1},	//ABILITIES,	
-	{0,	1, 0, 0},	//SKELETON_KEY_RF
-	{0,	1, 0, 1}	//LED
+	{0,	1, 0, 1},	//ABILITIES,
+	{0, 1, 0, 1}	//LED
 };	
 
-define MAX_QT_COUNT					= 17;
-define OPERATORS_COUNT 				= 38;
-define SEASON_YEARS					= 9;
+define MAX_QT_COUNT					= 16;
+define OPERATORS_COUNT 				= 37;
+define SEASON_YEARS					= 8;
 
 int	GunMovementAdjustment[OPERATORS_COUNT * 2];
 int	quickToggleValue[MAX_QT_COUNT + 1];
 int	quickToggleState[MAX_QT_COUNT + 1];
-int currentMod						= MOD_DEFAULT;
 
-int toggleIndex						= 0;
-int forIndex 						= 1;	
-int activeGun						= 0;
-int operatorsByYearIndex			= 0;	
-int currentConfigModIndex			= 0;
-int activeOperator					= 0;
-int LINE_TOP						= 7;
-int LINE_CENTER						= 25;
-int LINE_BOTTOM						= 45;
+int currentMod					= MOD_DEFAULT;
+
+int toggleIndex					= 0;
+int forIndex 					= 1;	
+int activeGun					= 0;
+int operatorsByYearIndex		= 0;	
+int currentConfigModIndex		= 0;
+int activeOperator				= 0;
+int LINE_TOP					= 7;
+int LINE_CENTER					= 25;
+int LINE_BOTTOM					= 45;
 
 	//Game buttons
-int Ads								= XB1_LT;
-int Shoot							= XB1_RT;
-int Ability  						= XB1_RB;
-int Gadget							= XB1_LB;
-int Ping							= XB1_UP;
-int DeployDrone 					= XB1_RIGHT;
-int ObservationTools				= XB1_DOWN;
-int DropDefuser						= XB1_LEFT;
-int WeaponSwap      				= XB1_Y;
-int Prone    						= XB1_B;
-int Vault    						= XB1_A;
-int Reload  						= XB1_X;
-int Sprint    						= XB1_LS;
-int Melee     						= XB1_RS;
-int MoveVertical					= XB1_LY;
-int MoveHorizontal					= XB1_LX;
-int AimVertical						= XB1_RY;
-int AimHorizontal					= XB1_RX;
-
+int Ads							= XB1_LT;
+int Shoot						= XB1_RT;
+int Ability  					= XB1_RB;
+int Gadget						= XB1_LB;
+int Ping						= XB1_UP;
+int DeployDrone 				= XB1_RIGHT;
+int ObservationTools			= XB1_DOWN;
+int DropDefuser					= XB1_LEFT;
+int WeaponSwap      			= XB1_Y;
+int Prone    					= XB1_B;
+int Vault    					= XB1_A;
+int Reload  					= XB1_X;
+int Sprint    					= XB1_LS;
+int Melee     					= XB1_RS;
+int MoveVertical				= POLAR_LY;
+int MoveHorizontal				= POLAR_LX;
+int AimVertical					= POLAR_RY;
+int AimHorizontal				= POLAR_RX;
 
 //System buttons
-int Modifier						= XB1_LT;
-int Next 							= XB1_RIGHT;
-int Previous 						= XB1_LEFT;
-int Select 	 						= XB1_A;
-int Back	 						= XB1_B;
+int Modifier					= XB1_LT;
+int Next 						= XB1_RIGHT;
+int Previous 					= XB1_LEFT;
+int Select 	 					= XB1_A;
+int Back	 					= XB1_B;
 
-int TurnOn							= XB1_UP;
-int TurnOff							= XB1_DOWN;
-int Menus							= XB1_MENU;
-int Views							= XB1_VIEW;
+int TurnOn						= XB1_UP;
+int TurnOff						= XB1_DOWN;
+int Menus						= XB1_MENU;
+int Views						= XB1_VIEW;
+int Touchpad                    = PS4_TOUCH;
 
-int ShaikoLeanLeft					= XB1_LEFT;
-int ShaikoLeanRight					= XB1_RIGHT;
+int ShaikoLeanLeft				= XB1_LEFT;
+int ShaikoLeanRight				= XB1_RIGHT;
 
 //Modifier + DoubleTab
-int ForceWeaponSwap					= XB1_A;
-
-int CrouchSpamToggle				= XB1_UP;
-int LeanSpamToggle					= XB1_DOWN;
-int AutoScanToggle					= XB1_Y;
+int CrouchSpamToggle			= XB1_UP;
+int LeanSpamToggle				= XB1_DOWN;
+int ForceWeaponSwap				= XB1_A;
+int AutoScanToggle				= XB1_Y;
 
 //Hold 
-int TeaBagLOL						= XB1_LEFT;
-int OnCams							= FALSE;
-int abilityCoolDown					= FALSE;
-int abilityTimeCheck				= FALSE;
-int abilityReleasing				= FALSE;
-int abilityActive					= FALSE;
-int abilityFocus					= FALSE;
-int abilityDeployCount				= 0;
-int abilityReleasingTime 			= 0;
-int abilityCountDown				= 0;
+int TeaBagLOL					= XB1_LEFT;
 
-int autoLeanDelay					= FALSE;
-int autoLeanDelayCountDown 			= 0;
+int OnCams						= FALSE;
+int abilityDeploying			= FALSE;
+int abilityCoolDown				= FALSE;
+int abilityTimeCheck			= FALSE;
+int abilityReleasing			= FALSE;
+int abilityActive				= FALSE;
+int abilityFocus				= FALSE;
+int abilityDeployCount			= 0;
+int abilityReleasingTime 		= 0;
+int abilityCountDown			= 0;
+
+int autoLeanDelay				= FALSE;
+int autoLeanDelayCountDown 		= 0;
 int gunRapidFire;
 
 //AR Vars 
@@ -405,11 +395,8 @@ int serverLogo = 0;
 define SSTime = 60000;
 int ScreenSaverTime = SSTime;
 int ProneOk = TRUE;
-int FlipSightOn = 0;
 int autoDefuse = FALSE;
 int vmSpeedIndex = 0;
-int gunAbility = FALSE;
-
 int OPScrollDelay = 125;
 int SABOn = FALSE;
 int	autoScanActive = FALSE;
@@ -419,7 +406,7 @@ int gameLayout 	= 0;
 int profile		= 0;
 
 int HipLeanDelay;
-int InvertedLean = TRUE;
+int InvertedLean = FALSE;
 int active_key, release_key, key_buffer, key_list_idx, k, _continue,  k_timer;
 int key_array[6];
 int key_array_ptime[6];
@@ -433,16 +420,12 @@ int incled = 1, decled, colorledx[3];
 */	
 init{	
 	colorledx = 255;
-	
 	DrawLogo();
 	
 	ReadConfig();	
-
+	
 	quickToggleState[CROUCH_SPAM] = 0; //This should be off by defaul...use the QuickToggle to turn it ON
 	
-	InvertedAR = 1;
-   	
-   	if(quickToggleState[INVERTED] == 1) InvertedAR = -1;  
    	
 	Strafe = (quickToggleValue[STRAFE] * 32767) / 100;	
 
@@ -460,22 +443,18 @@ init{
 main {	  
 	ApplySAB();
 	
-	if(activeOperator == BLITZ) { if(get_val(Ads) && quickToggleState[RAPID_FIRE] == 1) combo_run(RapidFire) }
-	if(activeOperator == MONTAGNE) { if(get_val(Ads) && quickToggleState[RAPID_FIRE] == 1) combo_run(RapidFire) }
-	
 	ScreenSaverTime = max(0, ScreenSaverTime - get_rtime());
 	if(ScreenSaverTime <= get_rtime() && serverLogo == 0) {
 		ClearInfo();
 		serverLogo = 1;
-	}
-	if(serverLogo == 1) {
+    }
+    if(serverLogo == 1) {
 		hexDataInfo();
-	}
+    }
 	if(ActivityDetected()){
 		if(serverLogo) DisplayMod(currentMod);
 		serverLogo = 0;
 		ScreenSaverTime = SSTime;
-		
 	}
 	if(autoDefuse){
 		if(isqrt(pow(abs(get_ival(XB1_LX)),2) + pow(abs(get_ival(XB1_LY)),2)) > 
@@ -487,46 +466,25 @@ main {
 		Set(Reload);
 	}
 	if(autoLeanDelay){                            
-	    autoLeanDelayCountDown += get_rtime();
-	    if(autoLeanDelayCountDown >= 3000){
-	    	autoLeanDelay	= FALSE;
-	    }
+        autoLeanDelayCountDown += get_rtime();
+        if(autoLeanDelayCountDown >= 3000){
+        	autoLeanDelay	= FALSE;
+        }
 	}	
 	if(changeOperators){
 		currentMod = -1;
 		gameResume += get_rtime();
-		
-	    if(gameResume >= 500){
-	    	changeOperators	= FALSE;
-	    	DisplayOperatorSelection();
+        if(gameResume >= 500){
+        	changeOperators	= FALSE;
+        	DisplayOperatorSelection();
 			DisplayMod(MOD_OPERATOR_SELECTION);
 			operatorsByYearIndex = 0;
-	    }
-	}
-	//Force Gun switch for Ability Only    	
-	if(ButtonHold(Ads) && DoubleTab(ForceWeaponSwap) && activeOperator == GLAZ){ 
-		if(activeGun == GUN_SECONDARY && !gunAbility){
-			verticalAR 	  	= AbilityAntiRecoil[0][0];
-			horizontalAR  	= AbilityAntiRecoil[0][1];
-			moveAdj		  	= AbilityAntiRecoil[0][2];
-			gunRapidFire  	= 1;
-			PrintAvilityName();
-			abilityActive 	= TRUE;
-			FlipSightOn 	= TRUE;
-			abilityFocus  	= 1;
-			gunAbility	 	= TRUE;
-	
-		}else{
-			activeGun 		= !activeGun;
-			gunAbility 		= FALSE;
-			DisplaySwitchGun();
-		}
+        }
 	}
 	
 	switch(currentMod){
 		case MOD_GAME:{
-			
-			if(ButtonHold(Modifier) && ButtonPress(Menus)) DisplayMod(MOD_OPERATOR_SELECTION);	
+			if(ButtonHold(Modifier) && ButtonPress(Menus)) DisplayMod(MOD_OPERATOR_SELECTION);			
 			if(get_controller() == PIO_PS5 || get_controller() == PIO_PS4) {
 				 if((ButtonHold(Modifier) && event_press(PS5_TOUCH)) ||
 				 	(ButtonHold(Modifier) && ButtonPress(Views))){ 
@@ -536,14 +494,14 @@ main {
 				if(ButtonHold(Modifier) && ButtonPress(Views)) {
 					 DisplayMod(MOD_CONFIG);
 				} 
-			}					
-			
+			}
 			if(!OnCams){
 				//This will turn Heir Trigger on
 				deadzone(Shoot, Ads, 100, 100);
+			
 				if(abilityFocus || !abilityActive){
-					if(ButtonHold(Shoot) && ButtonHold(Ads)) VeritasAR();
 					
+					if(ButtonHold(Shoot) && ButtonHold(Ads)) VeritasAR();
 					
 					//Rapid Fire
 					if(ButtonHold(Shoot)){
@@ -555,7 +513,6 @@ main {
 						combo_stop(RapidFire);
 					}
 					
-					
 					//When using Gonne 6 do a gun swap after fireing
 					if(ButtonRelease(Shoot) && GunAssigment[activeOperator][GetGunIndex()] == 70 ){
 						activeGun = !activeGun;
@@ -566,14 +523,13 @@ main {
 					if(ButtonPress(Shoot) && quickToggleState[PIN_ON_SHOT]) Set(Ping);
 					
 				}
-				if(!abilityActive){
-					
-					//Force Gun switch    	
-					if(ButtonHold(Modifier) && DoubleTab(ForceWeaponSwap) && activeOperator != GLAZ){ 
+				if(!abilityActive){	
+					//Force Gun switch
+					if(ButtonHold(Modifier) && DoubleTab(ForceWeaponSwap)){ 
 						activeGun 	= !activeGun;
-						DisplaySwitchGun();
-						
+						DisplaySwitchGun();						
 					}
+					
 					//Gun switch 	
 					if(ButtonRelease(WeaponSwap) && get_ptime(WeaponSwap) < 500){
 						if(	!ButtonHold(Gadget)		&& 
@@ -594,15 +550,15 @@ main {
 					}
 					
 					//Auto Defues/Barrecade/Plant:
-					if(ButtonHoldFor(Reload, 1500)) autoDefuse = TRUE;		
+					if(ButtonHoldFor(Reload, 1500)) autoDefuse = TRUE;
 					
 					//Crouch Spam
 					if(quickToggleState[CROUCH_SPAM]){
-						if(ButtonHold(Shoot))	 combo_run(CrouchSpam);
-						if(!ButtonHold(Shoot) && combo_running(CrouchSpam)) combo_stop(CrouchSpam);
+						if(ButtonHold(Shoot)) 	combo_run(CrouchSpam);
+						if(!ButtonHold(Shoot)&& combo_running(CrouchSpam)) combo_stop(CrouchSpam);
 					}
 					if(quickToggleState[LEAN_SPAM]){
-						if(ButtonHold(Ads) 		&& ButtonHold(Shoot)) 			combo_run(LeanSpam);
+						if(ButtonHold(Ads) 	&& ButtonHold(Shoot)) 		combo_run(LeanSpam);
 						if(!ButtonHold(Shoot)	&& combo_running(LeanSpam)) 	combo_stop(LeanSpam);
 					}
 					
@@ -613,6 +569,7 @@ main {
 					if(quickToggleState[HIP_LEAN]){
 						if(profile == PROFILE_MnK) {
 							if(!get_val(Ads)) {
+								SABOn = FALSE;
 								if(vmSpeedIndex == 0) { HipLeanDelay = 50; }
 								if(vmSpeedIndex == 1) { HipLeanDelay = 60; }
 								if(vmSpeedIndex == 2) { HipLeanDelay = 70; }
@@ -656,7 +613,7 @@ main {
 						}
 					}
 					
-					// AutoLean
+					//AutoLean
 					if(quickToggleState[AUTO_LEAN]){
 						if(!ButtonHold(Shoot)){
 							if(ButtonHoldFor(Ads, 300) && abs(get_val(MoveHorizontal)) > 5){
@@ -685,7 +642,6 @@ main {
 						Unset(ShaikoLeanRight);
 						Unset(ShaikoLeanLeft);
 					}					
-					
 				}
 				
 				//Quick Toggle					
@@ -698,15 +654,13 @@ main {
 						EditQuickToggle(LEAN_SPAM);
 						Unset(LeanSpamToggle);
 					}
-
-					
 				}
 				
 				//Enter/Exit the operator avility
 				if(quickToggleState[ABILITIES]){
 					if(abilityActive) CheckAbilityOff();
 					else DisplayAbility();
-				}
+				}			
 				if(!quickToggleState[ON_CAMS]){
 					//Auto Scan
 					if(quickToggleState[AUTO_SCAN] && ButtonHoldFor(AutoScanToggle, 1280)) autoScanActive = TRUE;
@@ -728,7 +682,6 @@ main {
 				} else {
 					set_rgb(0, 0, 0);
 				}
-
 			}else{
 				
 				//Auto Scan
@@ -879,6 +832,7 @@ main {
 			}
 			if(ButtonPress(Back)) DisplayMod(MOD_CHANGE_SLOT);
 			block_all_inputs();
+			Unset(Select);
 			break;
 		}
 		case MOD_GUN_MOV_ADJ:{
@@ -944,7 +898,7 @@ main {
 				SaveConfig();
 				DisplayQuickToggles(toggleIndex);
 			}
-			
+						
 			if(ButtonRelease(Select) && (toggleIndex < AUTO_LEAN && toggleIndex < ON_CAMS)) {
 				DisplayMod(MOD_QUICK_TOGGLE_EDIT);
 			}else if(ButtonRelease(Vault)){				
@@ -1038,10 +992,13 @@ main {
 		swap(XB1_RT, XB1_RB);
 	}
 	
-	set_val(TRACE_1, horizontalAR);
-	set_val(TRACE_2, verticalAR);
-	set_val(TRACE_3, moveAdj);
-	set_val(TRACE_4, Gadget);
+	set_val(TRACE_1, 1);
+	set_val(TRACE_2, activeOperator);
+	set_val(TRACE_3, horizontalAR);
+	set_val(TRACE_4, verticalAR);
+	set_val(TRACE_5, moveAdj);
+	set_val(TRACE_6, activeGun);
+	
 	if(ButtonHold(Modifier)){ 
 		set_val(Menus, 0);
 		set_val(Views, 0);
@@ -1090,15 +1047,16 @@ function SetGameLayouts(){
 			Gadget 	= XB1_LT;	Ability = XB1_RT;
 			break;	
 		}
+		
 		case LAYOUT_CROUCH_LB_L1:{
             Ads        = XB1_LT;   Shoot = XB1_RT;
             Gadget     = XB1_RB;   Ability = XB1_B;
-            Prone      = XB1_LB;   
+            Prone     = XB1_LB;   
             break;
         }
         case LAYOUT_CROUCH_RB_R1:{
             Ads        = XB1_LT;  Shoot = XB1_RT;
-            Gadget     = XB1_LB;   Ability = XB1_B;
+            Gadget     = XB1_LT;   Ability = XB1_B;
             Prone     = XB1_RB;
             break;
        }
@@ -1134,10 +1092,7 @@ combo rgb {
 	wait(1);
   	set_rgb(colorledx, colorledx[1], colorledx[2]);
   	colorledx[decled] -= 5; colorledx[incled] += 5;
-  	if(!colorledx[decled]){
-  		incled = (incled + 1) % 3; 
-  		decled = (decled + 1) % 3; 
-  	}
+  	if(!colorledx[decled]) { incled = (incled + 1) % 3; decled = (decled + 1) % 3; }
 }
 combo AutoScan{
 	Set(WeaponSwap);
@@ -1163,10 +1118,10 @@ combo SaveNofication{
 	block_all_inputs();
 }
 combo RapidFire {
-    wait(quickToggleValue[RAPID_FIRE]); 
+    wait(quickToggleValue[RAPID_FIRE]);  // 20ms
     if(gameLayout == LAYOUT_BUMPERS_SWAP) Unset(Ability);
     else Unset(Shoot);
-    wait(quickToggleValue[RAPID_FIRE]); 
+    wait(quickToggleValue[RAPID_FIRE]);  // 20-10 = 10ms
 }
 combo ResetNotify{
 	cls_oled(0);	
@@ -1342,6 +1297,7 @@ function GetSAB(){
 	if(SABOn) return random(-100, 100);
 	return 0;
 }
+
 //
 function key_press(a) { return (a == active_key); }
 function key_release(a) { return (a == release_key); }
@@ -1398,7 +1354,6 @@ function get_key(key) {
   return get_keyboard(key);
 }
 //
-
 function LoadARInfo(){	
 	spvar_current_slot = (32768 - activeOperator) * -1;
 	spvar_current_bit = 0;
@@ -1439,9 +1394,9 @@ function SaveARInfo(){
 	save_spvar(gunIndex[GUN_PRIMARY],	 		0, 2);
 	save_spvar(gunIndex[GUN_SECONDARY],	 		0, 2);
 	save_spvar(gunARInfo[PRIMARY_VERTICAL], 	0, 99);
-	save_spvar(gunARInfo[PRIMARY_HORIZONTAL], -20, 20);
+	save_spvar(gunARInfo[PRIMARY_HORIZONTAL], -30, 30);
 	save_spvar(gunARInfo[SECONDARY_VERTICAL], 	0, 99);
-	save_spvar(gunARInfo[SECONDARY_HORIZONTAL],-20,20);
+	save_spvar(gunARInfo[SECONDARY_HORIZONTAL],-30,30);
 	
 	//Prepare to Save Mov Adj
 	GunMovementAdjustment[2 * activeOperator] 		= gunARInfo[PRIMARY_MOVEMENT_ADJ]
@@ -1450,7 +1405,7 @@ function SaveARInfo(){
 	combo_run(SaveNofication);
 }
 function SaveMovAdj(){
-	spvar_current_slot 	= SPVAR_40;
+	spvar_current_slot 	= SPVAR_40
 	spvar_current_bit 	= 0;
 	spvar_current_value = 0;
 	spvar_total_bits 	= 0;
@@ -1462,7 +1417,7 @@ function SaveMovAdj(){
 	}
 }
 function LoadMovAdj(){
-	spvar_current_slot 	= SPVAR_40
+	spvar_current_slot 	= SPVAR_40;
 	spvar_current_bit 	= 0;
 	spvar_current_value = 0;
 	spvar_total_bits 	= 0;
@@ -1485,7 +1440,7 @@ function SaveConfig(){
 	SaveToggles(STRAFE);
 	SaveToggles(SHAIKO_LEAN);
 	SaveToggles(LEAN_SPAM);
-	SaveToggles(PRONE_SHOT);	
+	SaveToggles(PRONE_SHOT);
 	SaveToggles(TEA_BAG_LOL);
 	SaveToggles(RAPID_FIRE);
 	SaveToggles(ON_CAMS);
@@ -1496,9 +1451,8 @@ function SaveConfig(){
 	SaveToggles(AUTO_SCAN);
 	SaveToggles(INVERTED);
 	SaveToggles(ABILITIES);
-	SaveToggles(SKELETON_KEY_RF);
 	SaveToggles(LED);
-	
+
 	SaveTogglesValues(CROUCH_SPAM);
 	SaveTogglesValues(STRAFE);
 	SaveTogglesValues(SHAIKO_LEAN);
@@ -1507,12 +1461,19 @@ function SaveConfig(){
 	SaveTogglesValues(TEA_BAG_LOL);
 	SaveTogglesValues(RAPID_FIRE);
 	SaveTogglesValues(DEAD_ZONE);
-	
+
 	save_spvar(vmSpeedIndex, 	0, 5);
 	save_spvar(gameLayout,		0, 7);
 	save_spvar(profile,			0, 2);
 	save_spvar(slotNumber,		0, 8);
-		
+	
+	if(quickToggleState[INVERTED] == 1){
+		InvertedAR = -1;
+	}else{
+		InvertedAR = 1;
+	}
+	set_val(TRACE_5, quickToggleState[INVERTED]);
+	set_val(TRACE_6, InvertedAR);
 }
 function SaveToggles(index){
 	save_spvar(quickToggleState[index], 0, 1);
@@ -1533,7 +1494,6 @@ function ReadConfig(){
 		quickToggleState[SHAIKO_LEAN] 			= quickToggleMinMaxDef[SHAIKO_LEAN][3];
 		quickToggleState[LEAN_SPAM] 			= quickToggleMinMaxDef[LEAN_SPAM][3];
 		quickToggleState[PRONE_SHOT] 			= quickToggleMinMaxDef[PRONE_SHOT][3];
-		
 		quickToggleState[TEA_BAG_LOL] 			= quickToggleMinMaxDef[TEA_BAG_LOL][3];
 		quickToggleState[RAPID_FIRE] 			= quickToggleMinMaxDef[RAPID_FIRE][3];
 		quickToggleState[RAPID_FIRE_FOR_ALL]	= quickToggleMinMaxDef[RAPID_FIRE_FOR_ALL][3];
@@ -1545,8 +1505,8 @@ function ReadConfig(){
 		quickToggleState[AUTO_SCAN] 			= quickToggleMinMaxDef[AUTO_SCAN][3];
 		quickToggleState[INVERTED] 				= quickToggleMinMaxDef[INVERTED][3];
 		quickToggleState[ABILITIES] 			= quickToggleMinMaxDef[ABILITIES][3];
-		quickToggleState[SKELETON_KEY_RF] 		= quickToggleMinMaxDef[SKELETON_KEY_RF][3];
 		quickToggleState[LED]                   = quickToggleMinMaxDef[LED][3];
+		
 		quickToggleValue[CROUCH_SPAM] 			= quickToggleMinMaxDef[CROUCH_SPAM][2];
 		quickToggleValue[STRAFE] 				= quickToggleMinMaxDef[STRAFE][2];
 		quickToggleValue[SHAIKO_LEAN] 			= quickToggleMinMaxDef[SHAIKO_LEAN][2];
@@ -1556,15 +1516,18 @@ function ReadConfig(){
 		quickToggleValue[RAPID_FIRE] 			= quickToggleMinMaxDef[RAPID_FIRE][2];
 		quickToggleValue[DEAD_ZONE] 			= quickToggleMinMaxDef[DEAD_ZONE][2];
 		
+		if(quickToggleState[INVERTED] == 1){
+			InvertedAR = -1;
+		}else{
+			InvertedAR = 1;
+		}
 		return;
 	}
-	
 	ReadToggle(CROUCH_SPAM);
 	ReadToggle(STRAFE);
 	ReadToggle(SHAIKO_LEAN);
 	ReadToggle(LEAN_SPAM);
 	ReadToggle(PRONE_SHOT);
-	
 	ReadToggle(TEA_BAG_LOL);
 	ReadToggle(RAPID_FIRE);
 	ReadToggle(ON_CAMS);
@@ -1575,9 +1538,7 @@ function ReadConfig(){
 	ReadToggle(AUTO_SCAN);
 	ReadToggle(INVERTED);
 	ReadToggle(ABILITIES);
-	ReadToggle(SKELETON_KEY_RF);
 	ReadToggle(LED);
-	
 	ReadToggleValues(CROUCH_SPAM);
 	ReadToggleValues(STRAFE);
 	ReadToggleValues(SHAIKO_LEAN);
@@ -1590,8 +1551,12 @@ function ReadConfig(){
 	vmSpeedIndex 	= read_spvar(0, 5, 0);
 	gameLayout		= read_spvar(0, 7, 0);
 	profile			= read_spvar(0, 2, 0);
-	slotNumber		= read_spvar(0, 8, 0);	
-	
+	slotNumber		= read_spvar(0, 8, 0);		
+   	if(quickToggleState[INVERTED] == 1){
+		InvertedAR = -1;
+	}else{
+		InvertedAR = 1;
+	}
 }
 function ReadToggle(index){
 	quickToggleState[index] = read_spvar(0, 1, quickToggleMinMaxDef[index][3]);
@@ -1599,7 +1564,6 @@ function ReadToggle(index){
 function ReadToggleValues(index){
 	quickToggleValue[index] = read_spvar(quickToggleMinMaxDef[index][0], quickToggleMinMaxDef[index][1], quickToggleMinMaxDef[index][2]);
 }
-
 function GetGunIndex() 				{ return (3 * activeGun) + gunIndex[activeGun];}
 function GetGunAntiRecoilIndex()	{ return (9 * activeGun) + (gunIndex[activeGun] * 3);}
 function GetGunTypeIndex()			{ return GunDetail[GunAssigment[activeOperator][GetGunIndex()]][0];}
@@ -1633,12 +1597,12 @@ function ActivityDetected(){
 	return FALSE;
 }
 function ActivateOperator(){
-	block_all_inputs();	
+	DisplaySwitchGun();
 	DisplayMod(MOD_GAME);
 	abilityDeployCount = 0;
 	abilityActive = FALSE;
-	
-	ScreenSaverTime = SSTime;	
+	block_all_inputs();
+	ScreenSaverTime = SSTime;
 }
 function AdjustRecoilValue(){
 	arVal = 0;
@@ -1652,7 +1616,7 @@ function AdjustRecoilValue(){
 	if(arVal < 3) gunARInfo[1 + (3 * activeGun)] = EditARValues(gunARInfo[1 + (3 * activeGun)], -20, 20);
 	verticalAR	 = gunARInfo[0 + (3 * activeGun)];
 	horizontalAR = gunARInfo[1 + (3 * activeGun)];
-
+	
 	DisplayAntiRecoilMenu(arVal);
 }
 function CloseAvility(){
@@ -1666,242 +1630,177 @@ function CheckAbilityOff(){
 	if(abilityTimeCheck){				
 		abilityCountDown += get_rtime();
 		if(abilityCountDown >= abilityReleasingTime) {
-			if(activeOperator == FINKA){
-				abilityTimeCheck = FALSE;
-				ActivateOperator();
-			}
 			CloseAvility();
 			return;
 		}
 	}
 	switch(activeOperator){
-		case ASH:{
-			if(	ButtonRelease(WeaponSwap)){
-				abilityReleasing = TRUE;
-				//DisplaySwitchGun();
+		case MUTE:{
+			if(	ButtonRelease(Sprint)  	|| 	ButtonPress(Melee) 		|| 
+				ButtonPress(Shoot)		||	ButtonRelease(Gadget)	|| 
+				ButtonRelease(Ability) 	|| ButtonRelease(Reload))	
 				CloseAvility();
+				
+			if(ButtonPress(WeaponSwap)){	
+				activeGun = !activeGun;
+				CloseAvility()
 			}
-			if(	ButtonRelease(Ability)){
-				abilityReleasing = TRUE;
+			if(ButtonHold(Reload) && get_ptime(Reload) > 1700 && 
+				abilityDeployCount < 5	&&
+				abilityDeploying){				
+				abilityDeployCount ++;
 				CloseAvility();
-			}
-			if(ButtonPress(Shoot)) {
-				abilityDeployCount = abilityDeployCount + 1;
-			}
-			if(abilityDeployCount == 2 && abilityActive == TRUE) {
-				abilityDeployCount = 0;
-				abilityReleasing   = TRUE;
-				DisplaySwitchGun();
-				CloseAvility();
-			}
-			break;
-		}
-		case GLAZ:{
-			if(	ButtonRelease(WeaponSwap)){ 
-				abilityReleasing 	= TRUE;
-				abilityFocus 		= FALSE;
-				CloseAvility();
-			}
-			if(	ButtonRelease(Ability)){				
-				abilityReleasing 	= TRUE;
-				abilityFocus 		= FALSE;
-				FlipSightOn 		= FALSE;
-				activeGun = GUN_PRIMARY;
-				CloseAvility();
-			}
-			break;
-		}
-		case IQ:{
-			if(	ButtonRelease(WeaponSwap)){ 
-				activeGun	= 0;
-				CloseAvility();
-			}
-			if(	ButtonRelease(Ability)){
-				CloseAvility();
-				abilityReleasing = TRUE;
-				abilityFocus = FALSE;
-			}
-			break;
-		}
-		case BUCK:{
-			if(	ButtonRelease(Ability)){
-				activeGun	= GUN_PRIMARY;
-				CloseAvility();
-			}
-			if(	ButtonRelease(WeaponSwap)){
-				activeGun	= !activeGun;
-				DisplaySwitchGun();
-				if(activeGun == GUN_PRIMARY){
-					gunRapidFire = TRUE;
-					abilityFocus = TRUE;
-					abilityActive = TRUE;
-					PrintAvilityName();
-				}
-			}
-			
-			break;
-		}
-		case CAPITAO:{
-			if(	ButtonRelease(WeaponSwap)){
-				abilityReleasing = TRUE;
-				DisplaySwitchGun();
-				CloseAvility();
-			}
-			if(	ButtonRelease(Ability)){
-				abilityReleasing = TRUE;
-				CloseAvility();
-			}
-			break;
-		}
-		case HIBANA:{
-			if(	ButtonRelease(WeaponSwap)){
-				abilityReleasing = TRUE;
-				DisplaySwitchGun();
-				CloseAvility();
+				abilityDeploying = FALSE;
+				set_val(TRACE_1, 100);
+	
 			}
 
-			break;
-		}
-		case ZOFIA:{
-			if(	ButtonRelease(WeaponSwap)){
+			if(	ButtonRelease(Ability) && 
+				abilityDeployCount == 4){
 				abilityReleasing = TRUE;
-				DisplaySwitchGun();
-				CloseAvility();
+				abilityDeploying = FALSE;
+				
 			}
-			if(	ButtonRelease(Ability)){
-				abilityReleasing = TRUE;
-				CloseAvility();
-			}
-			break;
+			set_val(TRACE_2, abilityDeployCount);
+ 			break;
 		}
-		case MAVERICK:{
-			if(	ButtonRelease(Ability) || ButtonRelease(WeaponSwap)){
-				abilityReleasing = TRUE;
-				CloseAvility();
-			}
-			break;
-		}
-		case IANA:{
-			break;
-		}
-		case ZERO:{
-			if(	ButtonRelease(WeaponSwap)){
-				abilityReleasing = TRUE;
-				DisplaySwitchGun();
-				CloseAvility();
-			}
-			if(	ButtonRelease(Ability)){
-				abilityReleasing = TRUE;
-				CloseAvility();
+		case PULSE:{
+			if(	ButtonRelease(Sprint)	|| ButtonPress(Melee) 		|| 
+				ButtonPress(Shoot)		|| ButtonRelease(Ability) 	|| 
+				ButtonRelease(Gadget)
+			)	CloseAvility();
+
+			if(ButtonPress(WeaponSwap)){	
+				activeGun = !activeGun;
+				CloseAvility()
 			}
 			break;
 		}
-		case FLORES:{			
-			if(ButtonRelease(Reload) && get_ptime(Reload) > 1000){
-				abilityActive = TRUE;
-				abilityReleasingTime 	= 10000;
-				abilityCountDown		= 0;
-				abilityTimeCheck		= TRUE;
-				abilityDeployCount ++;
-			}
-			if(ButtonRelease(Shoot)) CloseAvility();
-			if(abilityDeployCount > 0 && ButtonRelease(ObservationTools)){
-				abilityReleasing = TRUE;
-				abilityDeployCount = 0;
-				CloseAvility();
-			}
-			if(abilityDeployCount > 0 && ButtonRelease(Prone)){
-				abilityReleasing = TRUE;
-				abilityDeployCount = 0;
-				CloseAvility();
-			}
+		case DOC:{
 			if(ButtonRelease(WeaponSwap)){
 				abilityReleasing = TRUE;
 				CloseAvility();
-				activeGun	= !activeGun;
-				DisplaySwitchGun();
-			}
-			if(ButtonRelease(DeployDrone)){
-				abilityReleasing = TRUE;
-				CloseAvility();
-			}
-			if(abilityDeployCount == 0 && ButtonRelease(Ability)){
-				abilityReleasing = TRUE;
-				CloseAvility();			
 			}
 			break;
 		}
-		case AMARU:{
-			if(	ButtonRelease(WeaponSwap)){
+		case ROOK:{
+			if(ButtonRelease(WeaponSwap)){
 				abilityReleasing = TRUE;
-				DisplaySwitchGun();
 				CloseAvility();
 			}
+			if(ButtonHold(Reload) && get_ptime(Reload) > 1700){
+				abilityDeployCount ++;
+				CloseAvility();
+			}
+			if(ButtonRelease(Reload)&& get_ptime(Reload) < 1600){
+				CloseAvility();
+			}
+			break;
+		}
+		case TACHANKA:{
+			if(ButtonRelease(Ability)){
+				abilityReleasing = TRUE;
+				CloseAvility();
+			}
+			if(ButtonPress(WeaponSwap)){	
+				activeGun = !activeGun;
+				CloseAvility()
+			}
+			break;
+		}
+		case CAVEIRA:{
+			if(ButtonRelease(Gadget)) 	CloseAvility();
+			if(ButtonRelease(TurnOff)) 	CloseAvility();
+			if(ButtonRelease(WeaponSwap)){
+				activeGun = !activeGun;
+				CloseAvility();
+			}
+			if(ButtonRelease(Ability)){
+				abilityReleasing = TRUE;
+				CloseAvility();
+			}
+			break;
+		}
+		case ECHO:{
+			if(abilityDeployCount == 2 && 
+				ButtonPress(Prone)){
+				CloseAvility();
+				return;				
+			}	
+			break;
+		}
+		case MAESTRO:{
+			if(ButtonHold(Reload) && get_ptime(Reload) > 1700 && 
+				abilityDeployCount < 4	&&
+				abilityDeploying){				
+				abilityDeployCount ++;
+				CloseAvility();
+				abilityDeploying = FALSE;
+			}
+			if(	ButtonRelease(ObservationTools) ||
+				ButtonRelease(Prone)){
+				CloseAvility();
+				OnCams = FALSE;
+			}
+			if(	ButtonRelease(Ability) && 
+				abilityDeployCount == 3){
+				abilityReleasing = TRUE;
+				abilityDeploying = FALSE;
+				
+			}
+			break;
+		}
+		case MOZZIE:{
 			if(	ButtonRelease(Ability)){
 				abilityReleasing = TRUE;
 				CloseAvility();
 			}
-			if(	ButtonHold(Shoot) && get_ptime(Shoot) > 1000){
-				abilityReleasing = TRUE;
-				DisplaySwitchGun();
-				CloseAvility();	
-			}
+			if(	ButtonRelease(WeaponSwap)){ 			
+				CloseAvility();
+			}	
 			break;
 		}
-		case OSA:{
-			if(	ButtonHold(Reload) && get_ptime(Reload) > 1700){
-				CloseAvility();
-			}			
-			if(	ButtonRelease(Ability)		||	ButtonRelease(Gadget)	||
-				ButtonRelease(Sprint)	||	ButtonRelease(Melee)){
+		case CLASH:{
+			if(	ButtonRelease(Gadget) 	|| 
+				ButtonPress(TurnOff)){  
 				abilityReleasing = TRUE;
 				CloseAvility();
 			}
-			if(ButtonRelease(WeaponSwap) || ButtonPress(Shoot)){
-				abilityReleasing = TRUE;
-				//activeGun	= !activeGun;
-				DisplaySwitchGun();
-				CloseAvility();
-			}
-			break;
-		}
-		case GRIM:{
-			if(ButtonRelease(Shoot)) abilityDeployCount++;
-			if(	ButtonRelease(Ability)){
+			if(	ButtonRelease(Ability)){ 
 				abilityReleasing = TRUE;
 				CloseAvility();
 			}
-			if(	ButtonRelease(WeaponSwap) || abilityDeployCount == 4){
-				abilityReleasing = TRUE;
-				//activeGun	= !activeGun;
-				DisplaySwitchGun();
+			if(	ButtonRelease(WeaponSwap)){ 			
 				CloseAvility();
 			}
-			break;
-		}
-		case DEIMOS:{
-		
-			abilityCountDown = 34000;
-		    abilityCountDown = max(0, abilityCountDown - get_rtime());		
-			if( ButtonRelease(Ability) || abilityCountDown <= get_rtime()){
-				abilityReleasing = TRUE;
-				abilityTimeCheck = TRUE;
-				abilityCountDown = 0;
-				activeGun = GUN_SECONDARY;
-				DisplaySwitchGun();
+			if(ButtonHold(Modifier) && DoubleTab(ForceWeaponSwap)){ 
 				CloseAvility();
 			}
 			
+			break;
+		}
+		case SOLIS:{
+			if(OnCams) return;
+			if(	ButtonRelease(WeaponSwap)){ 			
+				CloseAvility();
+			}			
+			if(	ButtonRelease(Ability)){ 				
+				abilityReleasing = TRUE;
+				CloseAvility();
+			}
+			if(	ButtonRelease(WeaponSwap)){ 			
+				CloseAvility();
+			}
 			break;
 		}
 	}
 }
 
 function CheckOnCamsOff(){
-	if(	ButtonRelease(ObservationTools) ||		
+	if(	ButtonRelease(ObservationTools) ||
 		ButtonRelease(Prone)){
 		switch(activeOperator){
-			case ASH:{
+			case TACHANKA:{
 				if(abilityActive){
 					PrintAvilityName();
 					abilityActive = TRUE;
@@ -1910,25 +1809,7 @@ function CheckOnCamsOff(){
 				}
 				break;
 			}
-			case IQ{
-				if(abilityActive){
-					PrintAvilityName();
-					abilityActive = TRUE;
-					OnCams = FALSE;
-					return;
-				}
-				break;
-			} 
-			case CAPITAO{
-				if(abilityActive){
-					PrintAvilityName();
-					abilityActive = TRUE;
-					OnCams = FALSE;
-					return;
-				}
-				break;
-			} 
-			case HIBANA{
+			case MOZZIE:{
 				if(abilityActive){
 					PrintAvilityName();
 					abilityActive = TRUE;
@@ -1937,67 +1818,20 @@ function CheckOnCamsOff(){
 				}
 				break;
 			}
-			case ZOFIA:{
+			case SOLIS:{
 				if(abilityActive){
 					PrintAvilityName();
 					abilityActive = TRUE;
 					OnCams = FALSE;
 					return;
 				}
-				break;
-			}
-			case MAVERICK{
-				if(abilityActive){
-					PrintAvilityName();
-					abilityActive = TRUE;
-					OnCams = FALSE;
-					return;
-				}
-				break;
-			}
-			case AMARU:{
-				if(abilityActive){
-					PrintAvilityName();
-					abilityActive = TRUE;
-					OnCams = FALSE;
-					return;
-				}
-				break;
-			}
-			case ZERO:{
-				if(abilityActive){
-					PrintAvilityName();
-					abilityActive = TRUE;
-					OnCams = FALSE;
-					return;
-				}
-				break;
-			}
-			case GRIM:{
-				if(abilityActive){
-					PrintAvilityName();
-					abilityActive = TRUE;
-					OnCams = FALSE;
-					return;
-				}
-				break;
-			}
-			case DEIMOS:{
-				if(abilityActive) {
-					PrintAvilityName();
-					abilityActive = TRUE;
-					OnCams = FALSE;
-					return;
-					}
 				break;
 			}
 		}
-		
 		OnCams = FALSE;
 		DisplaySwitchGun();
 	}
 }
-
 function DisplayAntiRecoilDirectionMenu(charIndex){
 	if(charIndex != 1){
 		putc_oled(1, 133);
@@ -2040,178 +1874,141 @@ function DisplayAbility(){
 		if(abilityCountDown < abilityReleasingTime)return;
 		abilityCoolDown = FALSE
 	}
+	
 	switch(activeOperator){
-		case ASH:{
-			if(ButtonRelease(Ability)){
+		case MUTE:{
+			if(	ButtonRelease(Ability)){
+				if(abilityDeployCount < 4){
+					PrintAvilityName();
+					abilityActive = TRUE;
+					abilityDeploying = TRUE;
+ 				}
+			}
+			break;
+		}
+		case PULSE:{
+			if(	ButtonRelease(Ability)){
+				PrintAvilityName();
+				abilityActive 	= TRUE;		
+			}
+			break;
+		}
+		case DOC:{
+			if(	ButtonRelease(Ability)){
 				PrintAvilityName();
 				abilityActive = TRUE;
 			}
 			break;
 		}
-		case TWITCH:{
-			if(ButtonRelease(Ability)){
-				if(abilityDeployCount == 2){
-					OnCams = TRUE;
-					PrintOnCams();
-				}else{
-					abilityDeployCount ++;
-				}
+		case ROOK:{
+			if(	ButtonRelease(Ability) && abilityDeployCount < 1){
+				PrintAvilityName();
+				abilityActive = TRUE;
 			}
 			break;
 		}
-		case GLAZ:{
-			
-			if(ButtonRelease(Ability)){
-				verticalAR 	  =	AbilityAntiRecoil[0][0];
-				horizontalAR  = AbilityAntiRecoil[0][1];
-				moveAdj		  = AbilityAntiRecoil[0][2];
-				gunRapidFire  = 1;
-				abilityFocus  = 1;
+		case TACHANKA:{
+			if(	ButtonRelease(Ability)){
 				PrintAvilityName();
-				abilityActive = TRUE;
-				FlipSightOn = TRUE;
-			}
-			if(ButtonRelease(WeaponSwap) && FlipSightOn){
-				verticalAR 	  =	AbilityAntiRecoil[0][0];
-				horizontalAR  = AbilityAntiRecoil[0][1];
-				moveAdj		  = AbilityAntiRecoil[0][2];
-				gunRapidFire  = 1;
-				PrintAvilityName();
-				abilityActive = TRUE;
-				FlipSightOn = TRUE;
-				abilityFocus  = 1;
+				abilityActive 	= TRUE;		
 			}
 			break;
 		}
-		case IQ:{
-			if(ButtonRelease(Ability)){			
+		case CAVEIRA:{
+			if(	ButtonRelease(Ability)){
 				if(activeGun != GUN_SECONDARY){
 					 activeGun	= !activeGun;
 					 DisplaySwitchGun();
 				}
 				PrintAvilityName();
-				abilityActive = TRUE;
-				abilityFocus = TRUE;
-			}
-			break;
-		}
-		case BUCK:{
-			if(ButtonRelease(Ability)){
-				if(activeGun == GUN_SECONDARY){
-					activeGun = !activeGun;
-					DisplaySwitchGun();
-				}
-				if(quickToggleState[SKELETON_KEY_RF] == 1) gunRapidFire = TRUE;
-				abilityFocus = TRUE;
-				abilityActive = TRUE;
-				PrintAvilityName();
-			}
-			break;
-		}
-		case CAPITAO:{
-			if(ButtonRelease(Ability)){
-				PrintAvilityName();
-				abilityActive = TRUE;
-			}
-			break;
-		}
-		case HIBANA:{
-			if(ButtonRelease(Ability)){
-				PrintAvilityName();
-				abilityActive = TRUE;
-			}
-			break;
-		}
-		case ZOFIA:{
-			if(ButtonRelease(Ability)){
-				PrintAvilityName();
-				abilityActive = TRUE;
-			}
-			break;
-		}
-		case FINKA:{
-			if(ButtonRelease(Ability) && abilityDeployCount < 3){			
+				abilityActive 			= TRUE;
+				abilityReleasingTime 	= 12500;
+				abilityCountDown		= 0;
 				abilityTimeCheck		= TRUE;
-				abilityReleasingTime	= 10000;
-				abilityDeployCount ++;
-				ActivateOperator();
+				abilityFocus			= TRUE;
+				
 			}
 			break;
 		}
-		case MAVERICK:{
-			if(ButtonRelease(Ability)){
-				PrintAvilityName();
-				abilityActive = TRUE;
-			}
-			break;
-		}
-		case AMARU:{
-			if(ButtonRelease(Ability)){
-				PrintAvilityName();
-				abilityActive = TRUE;
-			}
-			break;
-		}
-		case IANA:{
-			//- We uses her as beating, so its better to ignore the Ability
-			break;
-		}
-		case ZERO:{
-			if(ButtonRelease(Ability)){
-				PrintAvilityName();
-				abilityActive = TRUE;
-			}
-			break;
-		}
-		case FLORES:{
-			if(ButtonRelease(Ability) && abilityDeployCount < 4){
-				PrintAvilityName();
-				abilityActive = TRUE;
-			}
-			break;
-		}
-		case OSA :{
-			if(ButtonRelease(Ability)){
-				PrintAvilityName();
-				abilityActive = TRUE;
-			}
-			break;
-		}
-		case GRIM :{
-			if(ButtonRelease(Ability) && abilityDeployCount < 4){
-				PrintAvilityName();
-				abilityActive = TRUE;
-			}
-			break;
-		}
-		case DEIMOS:{
-			abilityCountDown = max(0, abilityCountDown - get_rtime())
-			if(ButtonRelease(Ability)) {
-			abilityCountDown = 34000;
-			activeGun = GUN_SECONDARY;
-			if(quickToggleState[RAPID_FIRE] == 1) gunRapidFire = TRUE;
-				abilityFocus = TRUE;
-				abilityActive = TRUE;
-				PrintAvilityName();
+		case ECHO:{
+			if(	ButtonRelease(Ability)){
+				if(abilityDeployCount == 2){
+					PrintAvilityName();
+					abilityActive = TRUE;
+				}else{
+					abilityDeployCount ++:
 				}
+			}
 			break;
 		}
-	}
+		case MAESTRO:{
+			if(	ButtonRelease(Ability)){
+				if(abilityDeployCount == 3){
+					PrintAvilityName();
+					abilityActive = TRUE;
+					OnCams = TRUE;
+				}else{
+					abilityDeploying = TRUE;
+					abilityActive = TRUE;
+				}
+			}
+			
+			break;
+		}
+		case MOZZIE:{
+			if(	ButtonRelease(Ability)){
+				PrintAvilityName();
+				abilityActive 	= TRUE;		
+			}
+			break;
+		}
+		case CLASH:{
+			if(	ButtonRelease(Ability)){
+				PrintAvilityName();
+				abilityActive 	= TRUE;		
+			}
+			if(ButtonRelease(WeaponSwap)){
+				PrintAvilityName();
+				abilityActive 	= TRUE;	
+			}
+			break;
+		}
+		case SOLIS:{
+			if(	ButtonRelease(Ability)){
+				PrintAvilityName();
+				abilityActive 	= TRUE;		
+			}
+			break;
+		}
+	}	
 }
 function DisplayOnCams(){
 	if(quickToggleState[ON_CAMS] == 0) return;
 	if(ButtonRelease(ObservationTools) && get_ptime(ObservationTools) < 500){
 		switch(activeOperator){
-			case FLORES:{
+			case PULSE:{
 				if(abilityActive) return;
 				break;
 			}
-			case OSA:{
+			case DOC:{
 				if(abilityActive) return;
 				break;
 			}
+			case ECHO:{
+				if(abilityActive){
+					CloseAvility();
+					return;
+				}
+				break;
+			}
+			case MAESTRO:{
+				if(abilityActive) return;
+				break;
+			} 
 		}
+		
 		OnCams = TRUE;
+		
 		PrintOnCams();
 	}
 }
@@ -2341,7 +2138,6 @@ function DisplayOperatorByYear(){
 	print(CenterText(operationYear[operatorsByYearIndex + 1] - operationYear[operatorsByYearIndex] - 1, OLED_FONT_MEDIUM_WIDTH), LINE_BOTTOM, OLED_FONT_MEDIUM, OLED_WHITE, operationYear[operatorsByYearIndex]);	
 }
 function DisplaySwitchGun(){
-
 	DisplayFrame();	
 	
 	if(activeGun == GUN_SECONDARY && GunAssigment[activeOperator][GetGunIndex()] == -1){
@@ -2437,14 +2233,6 @@ function PrintOnCams(){
 function PrintOperatorName(line){
 	print(CenterText(OperatorName[activeOperator + 1] - OperatorName[activeOperator] - 1, OLED_FONT_MEDIUM_WIDTH), line, OLED_FONT_MEDIUM, OLED_WHITE, OperatorName[activeOperator]);
 }
-function RefresAbility(){
-	if(activeOperator == IQ)		PrintAvilityName();
-	if(activeOperator == ZOFIA)		PrintAvilityName();
-	if(activeOperator == MAVERICK)	PrintAvilityName();	
-	if(activeOperator == IANA)		PrintAvilityName();
-	if(activeOperator == FLORES)	PrintAvilityName();
-}
-
 function ResetOperator(){
 	saveVar = (32768 - activeOperator) * -1;
 	set_pvar(saveVar, 0);
@@ -2474,7 +2262,6 @@ function EditValues(value, min, max, loop){
 
 	return value = clamp(value, min, max);
 }
-
 	//Information functions	
 function ClearScroll(scrollLine){
 	for (forIndex = 0; forIndex < 127; forIndex++) {		 
@@ -2711,9 +2498,9 @@ function DrawLogo() {
 	line_oled(2, OLED_HEIGHT - 3, 10, OLED_HEIGHT - 3, 1, OLED_WHITE);
 	line_oled(OLED_WIDTH - 3, OLED_HEIGHT - 3, OLED_WIDTH - 3, OLED_HEIGHT - 11, 1, OLED_WHITE);
 	line_oled(OLED_WIDTH - 11, OLED_HEIGHT - 3, OLED_WIDTH - 3, OLED_HEIGHT - 3, 1, OLED_WHITE);
-	print(24, 7, OLED_FONT_SMALL, OLED_WHITE, "Cntrl-x Siege");
-	print(40, 20, OLED_FONT_SMALL, OLED_WHITE, "Attackers");
-	print(26, 40, OLED_FONT_SMALL, OLED_WHITE, "CNTRL-X.COM");
+	print(24, 7, OLED_FONT_SMALL, OLED_WHITE, siegeSplashTitle[0]);
+	print(40, 20, OLED_FONT_SMALL, OLED_WHITE, operatorType[0]);
+	print(26, 40, OLED_FONT_SMALL, OLED_WHITE, siegeSplashUrl[0]);
 	line_oled(14, 55, OLED_WIDTH - 15, 55, 1, OLED_WHITE);
 	line_oled(14, 58, OLED_WIDTH - 15, 58, 1, OLED_WHITE);
 	rect_oled(16, 56, 96, 1, 1, OLED_WHITE);
@@ -2736,7 +2523,7 @@ const uint8 hexData[] = {
 	//0		1		2		3		4		5		6		7		8		9
 	0x0056, 0x0065, 0x0072, 0x0069, 0x0074, 0x0061, 0x0073, 0x0020, 
 	0x0056, 0x0065, 0x0072, 0x0073, 0x0069, 0x006F, 0x006E, 0x0020, 
-	0x0039, 0x002E, 0x0032, 0x002E, 0x0033, 0x0020, 
+	0x0039, 0x002E, 0x0033, 0x002E, 0x0030, 0x0020, 
 	0x004A, 0x006F, 0x0069, 0x006E, 0x0020, 
 	0x006F, 0x0075, 0x0072,	0x0020, 
 	0x0044, 0x0069, 0x0073, 0x0063, 0x006F, 0x0072, 0x0064, 0x0020 
@@ -2751,7 +2538,7 @@ function ClearInfo(){
 }
 int messageSize;
 int HexDataInfoCount	= 127;
-int line = 35;
+int line = 35
 function hexDataInfo(){
 	HexDataInfoCount --;
 	messageSize = 39;
@@ -2766,7 +2553,7 @@ function hexDataInfo(){
 		HexDataInfoCount = 127;
 		line = random(1, 50);
 	}
-} ����������������
+} ���������������� ����������������
 
 // LEAKED IN COLDZ VIP!
 // discord.gg/coldz 

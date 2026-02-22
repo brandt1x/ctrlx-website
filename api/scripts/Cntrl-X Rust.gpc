@@ -106,7 +106,10 @@ const string NumberSet[] = {
 };
 
 
-const string Menu[] = {"L4 V6.1"}
+const string Menu[] = {"Cntrl-x Rust"}
+const string rustSplashTitle	= "Cntrl-x Rust";
+const string rustSplashVer		= "V6.1";
+const string rustSplashUrl		= "CNTRL-X.COM";
 init 
 {
 	cls_oled(OLED_BLACK);
@@ -118,9 +121,9 @@ init
 	line_oled(2, OLED_HEIGHT - 3, 10, OLED_HEIGHT - 3, 1, OLED_WHITE);
 	line_oled(OLED_WIDTH - 3, OLED_HEIGHT - 3, OLED_WIDTH - 3, OLED_HEIGHT - 11, 1, OLED_WHITE);
 	line_oled(OLED_WIDTH - 11, OLED_HEIGHT - 3, OLED_WIDTH - 3, OLED_HEIGHT - 3, 1, OLED_WHITE);
-	print(36, 10, OLED_FONT_SMALL, OLED_WHITE, "Cntrl-x Rust");
-	print(42, 24, OLED_FONT_SMALL, OLED_WHITE, "V6.1");
-	print(26, 40, OLED_FONT_SMALL, OLED_WHITE, "CNTRL-X.COM");
+	print(36, 10, OLED_FONT_SMALL, OLED_WHITE, rustSplashTitle[0]);
+	print(42, 24, OLED_FONT_SMALL, OLED_WHITE, rustSplashVer[0]);
+	print(26, 40, OLED_FONT_SMALL, OLED_WHITE, rustSplashUrl[0]);
 	CurrentDeadzoneX= get_pvar(SPVAR_1, 0, 50, 5);
 	CurrentDeadzoneY= get_pvar(SPVAR_2, 0, 50, 5);
 	CurrentWeapon = get_pvar(SPVAR_3, 0, 6, 0);
@@ -1469,7 +1472,7 @@ set_val(XB1_RT, 100); // Fire
 set_val(XB1_RY, 52 + AddToCombosRY()); // Dynamic Recoil
 set_val(XB1_RX, 0 + AddToCombosRX());  // Dynamic Recoil
 wait(80);
-set_val(XB1_RT, 0);¬† ¬†// Release
+set_val(XB1_RT, 0);† †// Release
 set_val(XB1_RY, 52 + AddToCombosRY());
 set_val(XB1_RX, 0 + AddToCombosRX());
 wait(80);
@@ -3128,81 +3131,81 @@ combo M2_Crouched {
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -8 + AddToCombosRX());
-	set_val(RY,¬† 40 + AddToCombosRY());
+	set_val(RY,† 40 + AddToCombosRY());
 	wait(70);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -8 + AddToCombosRX());
-	set_val(RY,¬† 40 + AddToCombosRY());
+	set_val(RY,† 40 + AddToCombosRY());
 	wait(80);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -8 + AddToCombosRX());
-	set_val(RY,¬† 40 + AddToCombosRY());
+	set_val(RY,† 40 + AddToCombosRY());
 	wait(20);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -8 + AddToCombosRX());
-	set_val(RY,¬† 40 + AddToCombosRY());
+	set_val(RY,† 40 + AddToCombosRY());
 	wait(20);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -8 + AddToCombosRX());
-	set_val(RY,¬† 40 + AddToCombosRY());
+	set_val(RY,† 40 + AddToCombosRY());
 	wait(280);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -10 + AddToCombosRX());
-	set_val(RY,¬† 41 + AddToCombosRY());
+	set_val(RY,† 41 + AddToCombosRY());
 	wait(140);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -9 + AddToCombosRX());
-	set_val(RY,¬† 41 + AddToCombosRY());
+	set_val(RY,† 41 + AddToCombosRY());
 	wait(110);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -10 + AddToCombosRX());
-	set_val(RY,¬† 40 + AddToCombosRY());
+	set_val(RY,† 40 + AddToCombosRY());
 	wait(1990);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -9 + AddToCombosRX());
-	set_val(RY,¬† 40 + AddToCombosRY());
+	set_val(RY,† 40 + AddToCombosRY());
 	wait(360);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -9 + AddToCombosRX());
-	set_val(RY,¬† 40 + AddToCombosRY());
+	set_val(RY,† 40 + AddToCombosRY());
 	//Straight Down
 	wait(820);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -9 + AddToCombosRX());
-	set_val(RY,¬† 40 + AddToCombosRY());
+	set_val(RY,† 40 + AddToCombosRY());
 	
 	wait(1870);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -2 + AddToCombosRX());
-	set_val(RY,¬† 40 + AddToCombosRY());
+	set_val(RY,† 40 + AddToCombosRY());
 	wait(2000);
 	set_val(RT, 100);
 	set_val(LT, 100);
 	set_val(RX, -3 + AddToCombosRX());
-	set_val(RY,¬† 39 + AddToCombosRY());
+	set_val(RY,† 39 + AddToCombosRY());
 	wait(2600);
 	set_val(RT, 100);
 	set_val(LT, 100);
 
     set_val(RX, 0 + AddToCombosRX());
-	set_val(RY,¬† 39 + AddToCombosRY());
+	set_val(RY,† 39 + AddToCombosRY());
 	
 	wait(1130);
 	
 	set_val(RT, 100);
 	set_val(LT, 100);
-	set_val(RY,¬† 40 + AddToCombosRY());
+	set_val(RY,† 40 + AddToCombosRY());
 	set_val(RX, -10 + AddToCombosRX());
 	wait(10);
 	set_val(RT, 100);
@@ -4179,4 +4182,4 @@ combo AK_Stand_HIP {
 	set_val(XB1_RY, 12 + AddToCombosRY());
 	wait(10);
 	
-} ˙ºç¥Ö∂á∑áµÜ«Ò«˜¬
+} ????????????????

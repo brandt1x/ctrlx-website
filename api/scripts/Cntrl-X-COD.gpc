@@ -226,7 +226,7 @@ define SCREENSAVER_TIME = 60000;
 const string _nothingToEdit[] = { "Nothing", "To Edit" };
 
 // Navigation
-const string _homeScreenStrings[] = { "Falcon", "LethalPanda", "FPS Script", "Version " };
+const string _homeScreenStrings[] = { "Cntrl-x COD", "By", "CNTRL-X.COM", "Version " };
 const string _menuScreenStrings[] = { "Anti Recoil", "Aim Assist v4", "Left Stick Assist", "Aim&Fire Boost", "YY Spam", "Slide Cancel", "Head Assist", "Hold Breath", "Enemy Ping", "Dodge Shot", "Rapid Fire", "Aim Abuse", "VM Speed", "Button Layout", "Stick Layout" };
 
 // Sub Menu
@@ -469,6 +469,7 @@ int settings[34];
 int spvar[5];
 int state[4];
 int stick[6];
+int CX_post_load_menu_opened = FALSE;
 
 // =============================================================
 // Script Initialization
@@ -487,6 +488,11 @@ main {
 	if (CX_isLoadingScreen) {
 		CX_Tick(FALSE);
 	} else {
+		if (!CX_post_load_menu_opened) {
+			ChangeScreen(Screen_Menu);
+			UpdateSettingsInfo();
+			CX_post_load_menu_opened = TRUE;
+		}
 		ProcessDisplay();
 		ProcessInput();
 		ProcessOutput();
@@ -944,8 +950,9 @@ function GetSubMenuHeader(sub_menu) {
 
 // Handles home screen input
 function HandleHomeScreen() {
-	// Check for entering the menu
+	// Check for entering the menu (L2+Options)
 	if(input[HoldingADS] && event_press(XB1_MENU)) {
+		state[ScreenSaver] = 0;
 		ChangeScreen(Screen_Menu);
 		UpdateSettingsInfo();
 		return;
@@ -1172,12 +1179,13 @@ function ProcessInput() {
 
 // Processes any display update
 function ProcessDisplay() {
-	// Check for a display update
-	if(!display[Update]) {
-		return;
-	}
+	// Check for screensaver first (must run even when display[Update] is false)
 	if(CheckScreenSaver()) {
 		CX_Tick(TRUE);
+		return;
+	}
+	// Check for a display update
+	if(!display[Update]) {
 		return;
 	}
 	

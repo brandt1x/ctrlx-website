@@ -10,16 +10,16 @@ const SCRIPT_MAP = {
 	'2k': { file: 'Cntrl-X-2K.gpc', filename: 'Cntrl-X-2K.gpc', price: 35, nameMatch: '2k' },
 	'cod': { file: 'Cntrl-X-COD.gpc', filename: 'Cntrl-X-COD.gpc', price: 20, nameMatch: 'cod' },
 	'apex': { file: 'Cntrl-X-Apex.gpc', filename: 'Cntrl-X-Apex.gpc', price: 15, nameMatch: 'apex' },
-	'arc': { file: 'Cntrl-X-Arc.gpc', filename: 'Cntrl-X-Arc.gpc', price: 15, nameMatch: 'arc' },
+	'arc': { file: 'Cntrl-X ARC.gpc', filename: 'Cntrl-X ARC.gpc', price: 15, nameMatch: 'arc' },
 	'fortnite': { file: 'Cntrl-X-Fortnite.gpc', filename: 'Cntrl-X-Fortnite.gpc', price: 20, nameMatch: 'fortnite' },
-	'rust': { file: 'Cntrl-X-Rust.gpc', filename: 'Cntrl-X-Rust.gpc', price: 20, nameMatch: 'rust' },
+	'rust': { file: 'Cntrl-X Rust.gpc', filename: 'Cntrl-X Rust.gpc', price: 20, nameMatch: 'rust' },
 };
 
-// Zen scripts only – excludes CONTROL+X and VISION-X (ultimate products)
+// Zen scripts only – excludes CONTROL+X and VISION-X (ultimate products). Includes base 2K script.
 const BUNDLE_FILES = [
-	'Cntrl-X-Apex.gpc', 'Cntrl-X-Arc.gpc', 'Cntrl-X-COD.gpc',
-	'Cntrl-X-Fortnite.gpc', 'Cntrl-X-Rust.gpc',
-	'Cntrl-X-R6-Attackers.gpc', 'Cntrl-X-R6-Defenders.gpc', 'R6-Read-Me.txt',
+	'Cntrl-X-Apex.gpc', 'Cntrl-X ARC.gpc', 'Cntrl-X-COD.gpc',
+	'Cntrl-X-Fortnite.gpc', 'Cntrl-X Rust.gpc',
+	'Cntrl-X R6 (Attackers).gpc', 'Cntrl-X R6 (Defenders).gpc', 'R6 Read.Me.txt',
 	'Cntrl-X-2K.gpc',
 ];
 
@@ -76,9 +76,9 @@ module.exports = async (req, res) => {
 			if (!flags.hasSiege) return res.status(403).json({ error: 'Siege not purchased' });
 			const scriptsDir = path.join(__dirname, 'scripts');
 			const siegeFiles = [
-				{ src: 'Cntrl-X-R6-Attackers.gpc', name: 'Cntrl-X-R6-Attackers.gpc' },
-				{ src: 'Cntrl-X-R6-Defenders.gpc', name: 'Cntrl-X-R6-Defenders.gpc' },
-				{ src: 'R6-Read-Me.txt', name: 'R6 Read.Me.txt' },
+				{ src: 'R6 Read.Me.txt', name: 'R6 Read.Me.txt' },
+				{ src: 'Cntrl-X R6 (Attackers).gpc', name: 'Cntrl-X R6 (Attackers).gpc' },
+				{ src: 'Cntrl-X R6 (Defenders).gpc', name: 'Cntrl-X R6 (Defenders).gpc' },
 			];
 			for (const f of siegeFiles) {
 				if (!fs.existsSync(path.join(scriptsDir, f.src))) {
