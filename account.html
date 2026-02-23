@@ -497,7 +497,13 @@
 						else if (type === 'siege') url += 'siege';
 						else if (type === 'all-scripts') url += 'all-scripts';
 						else url += 'script&script=' + (script || '');
-						const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + session.access_token } });
+						let res;
+						try {
+							res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + session.access_token } });
+						} catch (fetchErr) {
+							alert('Download failed. Network error.');
+							return;
+						}
 						if (!res.ok) {
 							const errData = await res.json().catch(() => ({}));
 							alert(errData.error || 'Download failed.');
@@ -508,7 +514,7 @@
 						a.href = URL.createObjectURL(blob);
 						a.download = type === 'vision-x' ? 'Vision-X-Tempo.zip' : type === 'vision-x-plus' ? 'Vision-X-Plus-Timing.zip' : type === 'aim-x' ? 'Aim-X.zip' : type === 'siege' ? 'Cntrl-X-R6-Siege.zip' : type === 'all-scripts' ? 'Cntrl-X-All-Scripts.zip' : (script || 'script') + '.gpc';
 						a.click();
-						URL.revokeObjectURL(a.href);
+						setTimeout(() => URL.revokeObjectURL(a.href), 3000);
 					});
 				});
 				return hasRequiredSession;
