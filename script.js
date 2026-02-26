@@ -819,9 +819,9 @@ document.addEventListener('DOMContentLoaded', function () {
 	})();
 
 	// GLOBAL CART (all pages)
-	const PROMO_KEY = 'LAUNCH';
+	const PROMO_CODES = ['2000!'];
 	const PROMO_STORAGE_KEY = 'siteCartPromo';
-	const PROMO_CUTOFF = new Date('2026-02-24T00:00:00Z');
+	const PROMO_CUTOFF = new Date('2026-02-28T00:00:00Z');
 
 	const Cart = (function () {
 		const STORAGE_KEY = 'siteCart';
@@ -888,7 +888,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 		function isPromoValid() {
 			const code = getPromo();
-			return code && code.toUpperCase().trim() === PROMO_KEY && new Date() < PROMO_CUTOFF;
+			const normalized = code && code.toUpperCase().trim();
+			return normalized && PROMO_CODES.includes(normalized) && new Date() < PROMO_CUTOFF;
 		}
 
 		load();
@@ -947,7 +948,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			if (promoMsgEl) {
 				if (Cart.isPromoValid()) {
-					promoMsgEl.textContent = 'LAUNCH applied — 50% off';
+					promoMsgEl.textContent = 'Promo applied — 50% off';
 					promoMsgEl.classList.remove('site-cart-promo-error');
 				} else if (Cart.getPromo()) {
 					promoMsgEl.textContent = 'Promo expired or invalid.';
@@ -1011,14 +1012,15 @@ document.addEventListener('DOMContentLoaded', function () {
 				render();
 				return;
 			}
-			if (code === PROMO_KEY && new Date() < PROMO_CUTOFF) {
+			const isValid = PROMO_CODES.includes(code) && new Date() < PROMO_CUTOFF;
+			if (isValid) {
 				Cart.setPromo(code);
 				promoInput.value = '';
 				promoMsgEl.classList.remove('site-cart-promo-error');
 				render();
 			} else {
 				Cart.setPromo(null);
-				promoMsgEl.textContent = code === PROMO_KEY ? 'LAUNCH promo has expired.' : 'Invalid promo code.';
+				promoMsgEl.textContent = PROMO_CODES.includes(code) ? 'Promo has expired.' : 'Invalid promo code.';
 				promoMsgEl.classList.add('site-cart-promo-error');
 			}
 		}

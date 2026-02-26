@@ -34,16 +34,18 @@ module.exports = async (req, res) => {
 
 	let { lineItems, items } = result;
 
-	// LAUNCH promo: 50% off, valid until end of Feb 23, 2026 UTC
-	const LAUNCH_CUTOFF = new Date('2026-02-24T00:00:00Z');
-	const isLaunchValid = promoCode && String(promoCode).toUpperCase().trim() === 'LAUNCH' && new Date() < LAUNCH_CUTOFF;
-	if (promoCode && !isLaunchValid) {
-		if (String(promoCode).toUpperCase().trim() === 'LAUNCH') {
-			return res.status(400).json({ error: 'LAUNCH promo has expired.' });
+	// Promo code 2000!: 50% off, valid until end of Feb 27, 2026 UTC
+	const PROMO_CODES = ['2000!'];
+	const PROMO_CUTOFF = new Date('2026-02-28T00:00:00Z');
+	const normalizedPromo = promoCode && String(promoCode).toUpperCase().trim();
+	const isPromoValid = normalizedPromo && PROMO_CODES.includes(normalizedPromo) && new Date() < PROMO_CUTOFF;
+	if (promoCode && !isPromoValid) {
+		if (PROMO_CODES.includes(normalizedPromo)) {
+			return res.status(400).json({ error: 'Promo has expired.' });
 		}
 		return res.status(400).json({ error: 'Invalid promo code.' });
 	}
-	if (isLaunchValid) {
+	if (isPromoValid) {
 		lineItems = lineItems.map((li) => ({
 			...li,
 			price_data: {
