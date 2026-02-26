@@ -6,7 +6,7 @@ _________   ____________________________.____              ____  ___
  \______  /\____|__  /____|    |____|_  /_______ \         /___/\  \
         \/         \/                 \/        \/               \_/																																	/*
 
-Welcome to CONTROL+X! This is the Ultimate Premium NBA 2K26 Cronus Zen script with Tempo AI+.
+Welcome to CONTROL+X! This is the Premium model NBA 2K26 Cronus Zen script.
 
 To protect the quality of our scripts and community, all guides and settings are private.
 To unlock full access, open a ticket in our Discord and verify your order. Once verified, you'll unlock private guides, fast support and personalized help.
@@ -74,7 +74,7 @@ int dribble_up_btn    = PS4_UP;
 int dribble_right_btn = PS4_RIGHT;
 int dribble_down_btn  = PS4_DOWN;
 int dribble_left_btn  = PS4_LEFT;
-int sqRhythm, wait_time, btn_remapB, stickTempo, numpgs = 20, flick_delay = 150;
+int sqRhythm, wait_time, btn_remapB, stickTempo, numpgs = 21, flick_delay = 150;
 int autoQs;
 int l2Qs;
 int dribbleCombosToggle;
@@ -123,6 +123,7 @@ int releaseVibrator = 0;
 int releaseVibratorMs = 450;
 int oledColour = 0;
 int spotTakeMacro = 0;
+int stabilitySmoother = 50;
 
 int noDipShotEnabled = 0;
 int noDipShotDisplayValue = 13;
@@ -158,6 +159,7 @@ const string onOff[]          = {"OFF", "ON", ""};
 const string btn_remapB_m[]   = {"L3","R3","SQ"};
 const string btn_remapB_mX[]  = {"LS","RS","X"};
 const string ms[]             = {"MS"};
+const string pct[]            = {"%"};
 const string dribble_modes[] = {"OFF", "AUTO", "CUSTOM"};
 const string dribble_up_names[] = {"OFF", "BTB SPAM", "CURRY", "D BOOK"};
 const string dribble_down_names[] = {"OFF", "BTB SPAM", "CURRY", "D BOOK"};
@@ -199,7 +201,8 @@ const string menu_header[] = {
     "Spot Take Macro",
     "Instant Triggers",
     "Overclock AI+",
-    "ZEN Colour"
+    "ZEN Colour",
+    "Stability Smoother"
 };
 
 const string menu_headerX[] = {
@@ -223,7 +226,8 @@ const string menu_headerX[] = {
     "Spot Take Macro",
     "Instant Triggers",
     "Overclock AI+",
-    "ZEN Colour"
+    "ZEN Colour",
+    "Stability Smoother"
 };
 
 const string dribble_custom_header[] = {
@@ -815,6 +819,7 @@ function SAVE_SETTINGS() {
     set_pvar(SPVAR_2 + 28, autoGreenTempoMs);
     set_pvar(SPVAR_2 + 29, turboTimingMs);
     set_pvar(SPVAR_2 + 30, autoGreenNoDip);
+    set_pvar(SPVAR_2 + 32, stabilitySmoother);
     UPDATE_dribble_enabled();
 }
 
@@ -852,6 +857,7 @@ function LOAD_SETTINGS() {
     autoGreenTempoMs = get_pvar(SPVAR_2 + 28, 0, 300, 40);
     turboTimingMs = get_pvar(SPVAR_2 + 29, 100, 1500, 740);
     autoGreenNoDip = get_pvar(SPVAR_2 + 30, 0, 1, 0);
+    stabilitySmoother = get_pvar(SPVAR_2 + 32, 0, 100, 50);
     UPDATE_TEMPO_DELAY();
     CONVERT_NO_DIP_DISPLAY_TO_MS();
     UPDATE_dribble_enabled();
@@ -1243,6 +1249,13 @@ main {
                 toggleType = 1;
                 option_width = get_string_length(oled_colours[oledColour]) * OLED_FONT_MEDIUM_WIDTH;
                 print(center_x(get_string_length(oled_colours[oledColour]), OLED_FONT_MEDIUM_WIDTH), 30, OLED_FONT_MEDIUM, OLED_WHITE, oled_colours[oledColour]);
+            } else if (page == 21) {
+                menuSelection = 2;
+                toggleType = 0;
+                option_width = (FindDigits(stabilitySmoother) + 1) * OLED_FONT_MEDIUM_WIDTH;
+                NumberToString(stabilitySmoother, FindDigits(stabilitySmoother));
+                print(center_x(get_string_length(pct[0]) + 20, OLED_FONT_MEDIUM_WIDTH), 30, OLED_FONT_MEDIUM, OLED_WHITE, pct[0]);
+                DRAW_X_GRAPH(stabilitySmoother, 0, 100, 52);
             } else if (page == 3) {
                 menuSelection = 2;
                 toggleType = 0;
@@ -1669,6 +1682,23 @@ main {
                     if (oledColour < 0) oledColour = 4;
                     combo_run(vibration_valchg);
                     APPLY_OLED_COLOUR();
+                    SAVE_SETTINGS();
+                }
+            }
+
+            if (page == 21) {
+                menuSelection = 2;
+                toggleType = 0;
+                if (event_press(MOD_INCREASE)) {
+                    stabilitySmoother += 5;
+                    if (stabilitySmoother > 100) stabilitySmoother = 100;
+                    combo_run(vibration_valchg);
+                    SAVE_SETTINGS();
+                }
+                if (event_press(MOD_DECREASE)) {
+                    stabilitySmoother -= 5;
+                    if (stabilitySmoother < 0) stabilitySmoother = 0;
+                    combo_run(vibration_valchg);
                     SAVE_SETTINGS();
                 }
             }
