@@ -257,6 +257,20 @@
 	max-width: 100%;
 }
 
+/* Keep summary header collision-proof at any zoom level */
+.co-panel--summary .co-panel-header {
+	display: block;
+}
+
+.co-panel--summary .co-panel-title {
+	margin-bottom: 8px;
+}
+
+.co-panel--summary .co-badge {
+	display: inline-flex;
+	margin-left: 0;
+}
+
 /* ── Payment Element & Skeleton ──────────────────────── */
 
 #payment-element {
