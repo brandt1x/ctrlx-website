@@ -4,8 +4,10 @@
 
 .checkout-page {
 	padding-top: 100px;
-	padding-bottom: 32px;
+	padding-bottom: 48px;
 	min-height: 100vh;
+	/* Keep panels visually above the red/black gradient transition */
+	background: linear-gradient(180deg, transparent 0%, transparent 60%, rgba(5, 5, 9, 0.5) 100%);
 }
 
 .checkout-wrap {
@@ -159,9 +161,12 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	gap: 12px;
 	margin-bottom: 16px;
 	padding-bottom: 12px;
+	padding-right: 8px;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+	min-height: 0;
 }
 
 .co-panel-title {
@@ -172,6 +177,7 @@
 	align-items: center;
 	gap: 8px;
 	margin: 0;
+	min-width: 0;
 }
 
 .co-icon {
@@ -219,7 +225,9 @@
 	background: rgba(34, 197, 94, 0.08);
 	border: 1px solid rgba(34, 197, 94, 0.2);
 	border-radius: 999px;
-	padding: 3px 10px;
+	padding: 4px 12px;
+	flex-shrink: 0;
+	margin-left: auto;
 }
 
 .co-secure-badge .co-icon-sm {
@@ -681,6 +689,10 @@
 }
 
 /* ── Light Theme Overrides ───────────────────────────── */
+
+body.theme-light .checkout-page {
+	background: linear-gradient(180deg, transparent 0%, transparent 60%, rgba(249, 250, 251, 0.7) 100%);
+}
 
 body.theme-light .co-panel {
 	background: linear-gradient(180deg, #fff, #f8f9fb);
