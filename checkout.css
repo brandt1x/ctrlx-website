@@ -3,13 +3,13 @@
    ═══════════════════════════════════════════════════════ */
 
 .checkout-page {
-	padding-top: 110px;
-	padding-bottom: 60px;
+	padding-top: 100px;
+	padding-bottom: 32px;
 	min-height: 100vh;
 }
 
 .checkout-wrap {
-	max-width: 1100px;
+	max-width: 960px;
 }
 
 /* ── Progress Steps ──────────────────────────────────── */
@@ -19,7 +19,7 @@
 	align-items: center;
 	justify-content: center;
 	gap: 0;
-	margin-bottom: 36px;
+	margin-bottom: 20px;
 }
 
 .co-step {
@@ -30,13 +30,13 @@
 }
 
 .co-step-icon {
-	width: 36px;
-	height: 36px;
+	width: 30px;
+	height: 30px;
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 0.8rem;
+	font-size: 0.75rem;
 	font-weight: 700;
 	border: 2px solid rgba(255, 255, 255, 0.15);
 	color: rgba(255, 255, 255, 0.35);
@@ -77,11 +77,11 @@
 }
 
 .co-step-line {
-	width: 60px;
+	width: 48px;
 	height: 2px;
 	background: rgba(255, 255, 255, 0.1);
-	margin: 0 10px;
-	margin-bottom: 24px;
+	margin: 0 8px;
+	margin-bottom: 20px;
 	border-radius: 2px;
 	position: relative;
 	overflow: hidden;
@@ -111,8 +111,8 @@
 .co-panel {
 	background: linear-gradient(180deg, rgba(17, 17, 28, 0.85), rgba(8, 8, 16, 0.92));
 	border: 1px solid rgba(248, 113, 113, 0.12);
-	border-radius: 16px;
-	padding: 28px;
+	border-radius: 14px;
+	padding: 22px;
 	position: relative;
 	overflow: hidden;
 	box-shadow:
@@ -159,8 +159,8 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	margin-bottom: 22px;
-	padding-bottom: 16px;
+	margin-bottom: 16px;
+	padding-bottom: 12px;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -177,19 +177,34 @@
 .co-icon {
 	width: 20px;
 	height: 20px;
+	max-width: 20px;
+	max-height: 20px;
+	min-width: 20px;
+	min-height: 20px;
 	color: var(--accent);
 	flex-shrink: 0;
+	display: inline-block;
+	vertical-align: middle;
 }
 
 .co-icon-sm {
 	width: 14px;
 	height: 14px;
+	max-width: 14px;
+	max-height: 14px;
+	flex-shrink: 0;
+	display: inline-block;
+	vertical-align: middle;
 }
 
 .co-icon-xs {
 	width: 13px;
 	height: 13px;
+	max-width: 13px;
+	max-height: 13px;
 	flex-shrink: 0;
+	display: inline-block;
+	vertical-align: middle;
 }
 
 .co-secure-badge {
@@ -224,20 +239,20 @@
 /* ── Payment Element & Skeleton ──────────────────────── */
 
 #payment-element {
-	margin-bottom: 20px;
-	min-height: 180px;
+	margin-bottom: 16px;
+	min-height: 140px;
 }
 
 .co-skeleton {
 	display: flex;
 	flex-direction: column;
-	gap: 14px;
-	padding: 4px 0;
+	gap: 10px;
+	padding: 2px 0;
 }
 
 .co-skeleton-line {
-	height: 40px;
-	border-radius: 10px;
+	height: 36px;
+	border-radius: 8px;
 	background: linear-gradient(90deg,
 		rgba(255, 255, 255, 0.04) 0%,
 		rgba(255, 255, 255, 0.08) 50%,
@@ -265,9 +280,9 @@
 
 .co-pay-btn {
 	width: 100%;
-	padding: 14px 24px;
+	padding: 12px 20px;
 	border: none;
-	border-radius: 12px;
+	border-radius: 10px;
 	background: linear-gradient(90deg, var(--accent-2), var(--accent));
 	color: #fff;
 	font-family: var(--font-sans);
@@ -325,12 +340,16 @@
 /* ── Message ─────────────────────────────────────────── */
 
 .co-message {
-	margin-top: 14px;
+	margin-top: 10px;
 	font-size: 0.85rem;
-	min-height: 20px;
+	min-height: 0;
 	text-align: center;
 	color: var(--muted);
 	transition: color 0.2s ease;
+}
+
+.co-message:empty {
+	display: none;
 }
 
 .co-message--error {
@@ -346,9 +365,9 @@
 .co-trust-row {
 	display: flex;
 	justify-content: center;
-	gap: 18px;
-	margin-top: 22px;
-	padding-top: 18px;
+	gap: 14px;
+	margin-top: 16px;
+	padding-top: 12px;
 	border-top: 1px solid rgba(255, 255, 255, 0.05);
 	flex-wrap: wrap;
 }
@@ -372,11 +391,11 @@
 .co-items {
 	list-style: none;
 	padding: 0;
-	margin: 0 0 18px;
+	margin: 0 0 14px;
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
-	max-height: 260px;
+	gap: 6px;
+	max-height: 200px;
 	overflow-y: auto;
 }
 
@@ -394,8 +413,8 @@
 	align-items: center;
 	justify-content: space-between;
 	gap: 10px;
-	padding: 12px 14px;
-	border-radius: 10px;
+	padding: 10px 12px;
+	border-radius: 8px;
 	background: rgba(255, 255, 255, 0.03);
 	border: 1px solid rgba(255, 255, 255, 0.06);
 	transition: border-color 0.2s ease, background 0.2s ease;
@@ -441,7 +460,7 @@
 /* ── Promo Code ──────────────────────────────────────── */
 
 .co-promo-section {
-	margin-bottom: 18px;
+	margin-bottom: 12px;
 }
 
 .co-promo-input-wrap {
@@ -550,8 +569,8 @@
 .co-totals {
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
-	margin-bottom: 16px;
+	gap: 8px;
+	margin-bottom: 12px;
 }
 
 .co-totals-row {
@@ -733,37 +752,46 @@ body.theme-light .co-badge {
 		order: -1;
 	}
 	.co-panel {
-		padding: 22px;
+		padding: 18px;
 	}
 	.co-progress {
-		margin-bottom: 24px;
+		margin-bottom: 16px;
 	}
 	.co-step-line {
-		width: 40px;
+		width: 36px;
 	}
 }
 
 @media (max-width: 480px) {
 	.checkout-page {
-		padding-top: 90px;
+		padding-top: 80px;
+		padding-bottom: 20px;
 	}
 	.co-panel {
-		padding: 18px;
-		border-radius: 12px;
+		padding: 14px;
+		border-radius: 10px;
 	}
 	.co-step-icon {
-		width: 30px;
-		height: 30px;
-		font-size: 0.7rem;
-	}
-	.co-step-label {
+		width: 26px;
+		height: 26px;
 		font-size: 0.65rem;
 	}
+	.co-step-label {
+		font-size: 0.6rem;
+	}
 	.co-step-line {
-		width: 28px;
-		margin: 0 6px;
+		width: 24px;
+		margin: 0 5px;
+		margin-bottom: 16px;
 	}
 	.co-trust-row {
-		gap: 12px;
+		gap: 10px;
+	}
+	.co-panel-header {
+		margin-bottom: 12px;
+		padding-bottom: 10px;
+	}
+	.co-grid {
+		gap: 16px;
 	}
 }
