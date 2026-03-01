@@ -161,7 +161,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 12px;
+	gap: 16px;
 	margin-bottom: 16px;
 	padding-bottom: 12px;
 	padding-right: 8px;
@@ -177,6 +177,14 @@
 	gap: 8px;
 	margin: 0;
 	min-width: 0;
+	flex: 1 1 0;
+	overflow: hidden;
+}
+
+.co-panel-title-text {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .co-icon {
@@ -242,8 +250,10 @@
 	border-radius: 999px;
 	padding: 4px 10px;
 	flex-shrink: 0;
+	flex-grow: 0;
 	white-space: nowrap;
 	line-height: 1.2;
+	margin-left: auto;
 }
 
 /* ── Payment Element & Skeleton ──────────────────────── */
