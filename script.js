@@ -1102,32 +1102,8 @@ document.addEventListener('DOMContentLoaded', function () {
 					window.location.href = '/account.html?returnTo=checkout';
 					return;
 				}
-				checkoutBtn.textContent = 'Redirecting...';
-				try {
-					const apiBase = window.location.origin;
-					const res = await fetch(`${apiBase}/api/create-checkout-session`, {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							'Authorization': 'Bearer ' + token,
-						},
-						body: JSON.stringify({
-						productIds: items.map(i => i.productId).filter(Boolean),
-						promoCode: Cart.isPromoValid() ? Cart.getPromo() : null,
-					}),
-					});
-					const data = await res.json();
-					if (data.url) {
-						window.location.href = data.url;
-					} else {
-						throw new Error(data.error || 'Checkout failed');
-					}
-				} catch (err) {
-					console.error(err);
-					alert(err.message || 'Checkout failed. Please try again.');
-				} finally {
-					resetCheckoutButton();
-				}
+				checkoutBtn.textContent = 'Opening Checkout...';
+				window.location.href = '/checkout.html';
 			});
 			window.addEventListener('pageshow', resetCheckoutButton);
 		}
