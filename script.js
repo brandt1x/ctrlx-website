@@ -833,7 +833,16 @@ document.addEventListener('DOMContentLoaded', function () {
 				const raw = localStorage.getItem(STORAGE_KEY);
 				if (!raw) return;
 				const parsed = JSON.parse(raw);
-				if (Array.isArray(parsed)) items = parsed;
+				if (Array.isArray(parsed)) {
+					items = parsed.map((item) => {
+						if (!item || typeof item !== 'object') return item;
+						if ((item.productId || '').toLowerCase() === 'aim-x') {
+							return { ...item, price: 175 };
+						}
+						return item;
+					});
+					save();
+				}
 			} catch (e) { }
 		}
 

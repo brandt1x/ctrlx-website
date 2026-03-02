@@ -53,7 +53,16 @@ document.addEventListener('DOMContentLoaded', () => {
 		try {
 			const raw = localStorage.getItem(CART_KEY);
 			const parsed = JSON.parse(raw || '[]');
-			return Array.isArray(parsed) ? parsed : [];
+			if (!Array.isArray(parsed)) return [];
+			const normalized = parsed.map((item) => {
+				if (!item || typeof item !== 'object') return item;
+				if ((item.productId || '').toLowerCase() === 'aim-x') {
+					return { ...item, price: 175 };
+				}
+				return item;
+			});
+			try { localStorage.setItem(CART_KEY, JSON.stringify(normalized)); } catch (_) {}
+			return normalized;
 		} catch (_) {
 			return [];
 		}
