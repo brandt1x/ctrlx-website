@@ -15,8 +15,9 @@ const SCRIPT_MAP = {
 	'rust': { file: 'Cntrl-X Rust.gpc', filename: 'Cntrl-X Rust.gpc', price: 20, nameMatch: 'rust' },
 };
 
-// Zen scripts only – excludes CONTROL+X and VISION-X (ultimate products). Includes base 2K script.
+// All script bundle includes CONTROL+X plus Zen script files.
 const BUNDLE_FILES = [
+	'CONTROL+X.gpc',
 	'Cntrl-X-Apex.gpc', 'Cntrl-X ARC.gpc', 'Cntrl-X-COD.gpc',
 	'Cntrl-X-Fortnite.gpc', 'Cntrl-X Rust.gpc',
 	'Cntrl-X R6 (Attackers).gpc', 'Cntrl-X R6 (Defenders).gpc', 'R6 Read.Me.txt',
