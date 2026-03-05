@@ -2387,7 +2387,7 @@ body.theme-light .card ul {
 
 /* When the Account button is replaced by profile icon, keep drawer slightly more right */
 body.site-account-hidden .site-cart {
-	width: min(340px, calc(100vw - 24px));
+	width: min(390px, calc(100vw - 24px));
 }
 
 .site-cart-header {
