@@ -88,6 +88,10 @@
 							You will be redirected to Stripe to securely complete payment.
 						</div>
 
+						<div id="co-guest-toggle-wrap" class="co-guest-toggle-wrap" hidden>
+							<button type="button" id="co-guest-mode-toggle" class="co-guest-mode-toggle">Checkout as guest instead</button>
+						</div>
+
 						<div id="co-guest-email-block" class="co-guest-email-block" hidden>
 							<label for="co-guest-email" class="co-guest-label">Guest checkout email</label>
 							<input
@@ -184,7 +188,8 @@
 		</div>
 	</footer>
 
-	<script src="script.js" defer></script>
-	<script src="checkout.js" defer></script>
+	<script src="https://js.stripe.com/v3/"></script>
+	<script src="script.js?v=20260305" defer></script>
+	<script src="checkout.js?v=20260305" defer></script>
 </body>
 </html>

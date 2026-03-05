@@ -292,6 +292,26 @@
 	margin-bottom: 16px;
 }
 
+.co-guest-toggle-wrap {
+	margin-bottom: 10px;
+}
+
+.co-guest-mode-toggle {
+	border: 1px solid rgba(255, 255, 255, 0.14);
+	background: rgba(255, 255, 255, 0.03);
+	color: var(--text);
+	font-size: 0.8rem;
+	font-weight: 600;
+	border-radius: 999px;
+	padding: 7px 12px;
+	cursor: pointer;
+}
+
+.co-guest-mode-toggle:hover {
+	border-color: rgba(248, 113, 113, 0.45);
+	color: var(--accent);
+}
+
 .co-guest-label {
 	display: block;
 	margin-bottom: 6px;
@@ -815,6 +835,11 @@ body.theme-light .co-checkout-note {
 }
 
 body.theme-light .co-guest-input {
+	background: rgba(0, 0, 0, 0.02);
+	border-color: rgba(0, 0, 0, 0.12);
+}
+
+body.theme-light .co-guest-mode-toggle {
 	background: rgba(0, 0, 0, 0.02);
 	border-color: rgba(0, 0, 0, 0.12);
 }

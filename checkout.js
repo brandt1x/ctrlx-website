@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	const promoMsg = document.getElementById('co-promo-message');
 	const promoSection = document.querySelector('.co-promo-section');
+	const guestToggleWrap = document.getElementById('co-guest-toggle-wrap');
+	const guestModeToggle = document.getElementById('co-guest-mode-toggle');
 	const guestEmailBlock = document.getElementById('co-guest-email-block');
 	const guestEmailInput = document.getElementById('co-guest-email');
 
@@ -27,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const PROMO_CUTOFF = new Date('2026-02-28T00:00:00Z');
 
 	let authToken = null;
+	let forceGuestMode = false;
 	let currentPromo = null;
 	let cartItems = [];
 	let checkoutAmountCents = 0;
@@ -206,8 +209,13 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	function renderGuestEmailVisibility() {
+		const signedIn = !!authToken;
+		if (guestToggleWrap) guestToggleWrap.hidden = !signedIn;
+		if (guestModeToggle && signedIn) {
+			guestModeToggle.textContent = forceGuestMode ? 'Use account checkout' : 'Checkout as guest instead';
+		}
 		if (!guestEmailBlock) return;
-		const isGuest = !authToken;
+		const isGuest = !authToken || forceGuestMode;
 		guestEmailBlock.hidden = !isGuest;
 		if (guestEmailInput) {
 			guestEmailInput.required = isGuest;
@@ -281,7 +289,8 @@ document.addEventListener('DOMContentLoaded', () => {
 		try {
 			showOverlay(true);
 			let guestEmail = '';
-			if (!authToken) {
+			const useGuestFlow = !authToken || forceGuestMode;
+			if (useGuestFlow) {
 				guestEmail = String(guestEmailInput?.value || '').trim().toLowerCase();
 				if (!isValidEmail(guestEmail)) {
 					throw new Error('Enter a valid email for guest checkout.');
@@ -292,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			const headers = {
 				'Content-Type': 'application/json',
 			};
-			if (authToken) {
+			if (authToken && !useGuestFlow) {
 				headers.Authorization = 'Bearer ' + authToken;
 			}
 
@@ -318,6 +327,12 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 
 	attachPromoListeners();
+	if (guestModeToggle) {
+		guestModeToggle.addEventListener('click', () => {
+			forceGuestMode = !forceGuestMode;
+			renderGuestEmailVisibility();
+		});
+	}
 
 	initializeCheckout().catch((err) => {
 		setMessage(err.message || 'Checkout initialization failed.', 'error');
