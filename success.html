@@ -84,8 +84,11 @@
 	<script src="script.js" defer></script>
 	<script src="cinematic.js" defer></script>
 	<script>
-		// All checkouts redirect to account.html. Redirect legacy success URLs.
-		window.location.replace('/account.html');
+		// Guest checkout lands here; signed-in account checkout still routes to account.html.
+		const params = new URLSearchParams(window.location.search);
+		if (params.get('guest') !== '1') {
+			window.location.replace('/account.html');
+		}
 	</script>
 </body>
 

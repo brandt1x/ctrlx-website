@@ -1064,37 +1064,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		function resetCheckoutButton() {
 			if (checkoutBtn) {
 				checkoutBtn.disabled = false;
-				checkoutBtn.textContent = 'Checkout with Stripe';
-			}
-		}
-		async function getAuthToken() {
-			if (window.__supabaseClient) {
-				const { data: { session } } = await window.__supabaseClient.auth.getSession();
-				return session?.access_token || null;
-			}
-			try {
-				if (!window.supabase && !window.supabaseJs) {
-					await new Promise((resolve, reject) => {
-						const s = document.createElement('script');
-						s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-						s.async = true;
-						s.onload = resolve;
-						s.onerror = reject;
-						document.head.appendChild(s);
-					});
-				}
-				const cfgRes = await fetch('/api/supabase-config');
-				const cfg = await cfgRes.json();
-				if (!cfg?.url || !cfg?.anonKey) return null;
-				const lib = window.supabase || window.supabaseJs;
-				const createClient = lib?.createClient || lib?.default?.createClient;
-				if (!createClient) return null;
-				const client = createClient(cfg.url, cfg.anonKey);
-				window.__supabaseClient = client;
-				const { data: { session } } = await client.auth.getSession();
-				return session?.access_token || null;
-			} catch (_) {
-				return null;
+				checkoutBtn.textContent = 'Checkout';
 			}
 		}
 		if (checkoutBtn) {
@@ -1107,13 +1077,6 @@ document.addEventListener('DOMContentLoaded', function () {
 				}
 				checkoutBtn.disabled = true;
 				checkoutBtn.textContent = 'Checking...';
-				const token = await getAuthToken();
-				if (!token) {
-					checkoutBtn.textContent = 'Checkout with Stripe';
-					checkoutBtn.disabled = false;
-					window.location.href = '/account.html?returnTo=checkout';
-					return;
-				}
 				checkoutBtn.textContent = 'Opening Checkout...';
 				window.location.href = '/checkout.html';
 			});
@@ -1396,9 +1359,11 @@ document.addEventListener('DOMContentLoaded', function () {
 				if (session) {
 					accountBtn.style.display = 'none';
 					wrapper.style.display = '';
+					document.body.classList.add('site-account-hidden');
 				} else {
 					accountBtn.style.display = '';
 					wrapper.style.display = 'none';
+					document.body.classList.remove('site-account-hidden');
 				}
 			} catch (_) { }
 		}

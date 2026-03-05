@@ -2373,7 +2373,7 @@ body.theme-light .card ul {
 	top: 0;
 	right: 0;
 	bottom: 0;
-	width: min(360px, 100%);
+	width: min(460px, calc(100vw - 24px));
 	background: linear-gradient(180deg, #020617, #050509);
 	box-shadow: -18px 0 40px rgba(0, 0, 0, 0.8);
 	transform: translateX(100%);
@@ -2383,6 +2383,11 @@ body.theme-light .card ul {
 	flex-direction: column;
 	padding: 18px 18px 24px;
 	border-left: 1px solid rgba(248, 250, 252, 0.06);
+}
+
+/* When the Account button is replaced by profile icon, keep drawer slightly more right */
+body.site-account-hidden .site-cart {
+	width: min(400px, calc(100vw - 24px));
 }
 
 .site-cart-header {

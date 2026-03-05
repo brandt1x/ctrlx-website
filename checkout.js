@@ -14,24 +14,22 @@ document.addEventListener('DOMContentLoaded', () => {
 	const itemCountEl = document.getElementById('co-item-count');
 	const overlay = document.getElementById('co-processing-overlay');
 
-	const promoInput = document.getElementById('co-promo-input');
-	const promoApplyBtn = document.getElementById('co-promo-apply');
-	const promoWrap = document.getElementById('co-promo-wrap');
 	const promoMsg = document.getElementById('co-promo-message');
 	const promoSection = document.querySelector('.co-promo-section');
+	const guestEmailBlock = document.getElementById('co-guest-email-block');
+	const guestEmailInput = document.getElementById('co-guest-email');
 
 	const CART_KEY = 'siteCart';
 	const PROMO_KEY = 'siteCartPromo';
+	const GUEST_EMAIL_KEY = 'siteGuestCheckoutEmail';
 
 	const VALID_PROMOS = ['2000!'];
 	const PROMO_CUTOFF = new Date('2026-02-28T00:00:00Z');
 
-	let stripe = null;
-	let elements = null;
 	let authToken = null;
 	let currentPromo = null;
 	let cartItems = [];
-	let paymentIntentAmount = 0;
+	let checkoutAmountCents = 0;
 
 	function fmt(price) {
 		return price % 1 === 0 ? `$${price}` : `$${price.toFixed(2)}`;
@@ -44,9 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	function setPromoMsg(text, type) {
-		if (!promoMsg) return;
-		promoMsg.textContent = text || '';
-		promoMsg.className = 'co-promo-msg' + (type === 'success' ? ' co-promo-msg--success' : type === 'error' ? ' co-promo-msg--error' : '');
+		const livePromoMsg = document.getElementById('co-promo-message');
+		if (!livePromoMsg) return;
+		livePromoMsg.textContent = text || '';
+		livePromoMsg.className = 'co-promo-msg' + (type === 'success' ? ' co-promo-msg--success' : type === 'error' ? ' co-promo-msg--error' : '');
 	}
 
 	function getCartItems() {
@@ -136,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (totalEl) totalEl.textContent = fmt(total);
 
 		setPayBtnAmount(total);
-		paymentIntentAmount = Math.round(total * 100);
+		checkoutAmountCents = Math.round(total * 100);
 
 		renderPromoState();
 	}
@@ -157,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
 					try { sessionStorage.removeItem(PROMO_KEY); } catch (_) {}
 					restorePromoInput();
 					renderSummary();
-					reinitPaymentIntent();
 				});
 			}
 		}
@@ -187,7 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
 			currentPromo = code;
 			try { sessionStorage.setItem(PROMO_KEY, code); } catch (_) {}
 			renderSummary();
-			reinitPaymentIntent();
 		} else {
 			if (VALID_PROMOS.includes(code)) {
 				if (msg) { msg.textContent = 'This promo has expired.'; msg.className = 'co-promo-msg co-promo-msg--error'; }
@@ -204,80 +201,24 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (input) input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleApplyPromo(); } });
 	}
 
-	async function reinitPaymentIntent() {
-		if (!stripe || !authToken) return;
-		const productIds = cartItems.filter(i => i && i.productId).map(i => i.productId);
-		if (!productIds.length) return;
-
-		try {
-			const intentRes = await fetch('/api/create-payment-intent', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': 'Bearer ' + authToken,
-				},
-				body: JSON.stringify({ productIds, promoCode: currentPromo }),
-			});
-			const intent = await intentRes.json().catch(() => ({}));
-			if (!intentRes.ok) {
-				setMessage(intent.error || 'Failed to update payment.', 'error');
-				return;
-			}
-
-			elements = stripe.elements({
-				clientSecret: intent.clientSecret,
-				appearance: getStripeAppearance(),
-			});
-			const pe = elements.create('payment');
-			const container = document.getElementById('payment-element');
-			if (container) container.innerHTML = '';
-			pe.mount('#payment-element');
-			if (payButton) payButton.disabled = false;
-			setMessage('');
-		} catch (err) {
-			setMessage('Failed to refresh payment. Please reload.', 'error');
-		}
+	function isValidEmail(email) {
+		return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
 	}
 
-	function getStripeAppearance() {
-		const isLight = document.documentElement.classList.contains('theme-light');
-		return {
-			theme: isLight ? 'stripe' : 'night',
-			variables: {
-				colorPrimary: '#ef4444',
-				colorBackground: isLight ? '#ffffff' : '#0d0d1a',
-				colorText: isLight ? '#111827' : '#f8fafc',
-				colorDanger: '#f43f5e',
-				borderRadius: '10px',
-				fontFamily: 'Inter, system-ui, sans-serif',
-				spacingUnit: '4px',
-			},
-			rules: {
-				'.Input': {
-					border: isLight ? '1px solid rgba(0,0,0,0.12)' : '1px solid rgba(255,255,255,0.1)',
-					boxShadow: 'none',
-					backgroundColor: isLight ? '#f9fafb' : 'rgba(255,255,255,0.03)',
-					padding: '12px 14px',
-				},
-				'.Input:focus': {
-					borderColor: '#ef4444',
-					boxShadow: '0 0 0 3px rgba(239,68,68,0.12)',
-				},
-				'.Label': {
-					fontWeight: '600',
-					fontSize: '0.85rem',
-					marginBottom: '6px',
-				},
-				'.Tab': {
-					border: isLight ? '1px solid rgba(0,0,0,0.1)' : '1px solid rgba(255,255,255,0.08)',
-					backgroundColor: isLight ? '#fff' : 'rgba(255,255,255,0.03)',
-				},
-				'.Tab--selected': {
-					borderColor: '#ef4444',
-					backgroundColor: isLight ? '#fff' : 'rgba(239,68,68,0.06)',
-				},
-			},
-		};
+	function renderGuestEmailVisibility() {
+		if (!guestEmailBlock) return;
+		const isGuest = !authToken;
+		guestEmailBlock.hidden = !isGuest;
+		if (guestEmailInput) {
+			guestEmailInput.required = isGuest;
+			guestEmailInput.disabled = !isGuest;
+		}
+		if (isGuest && guestEmailInput) {
+			try {
+				const saved = localStorage.getItem(GUEST_EMAIL_KEY);
+				if (saved && !guestEmailInput.value) guestEmailInput.value = saved;
+			} catch (_) {}
+		}
 	}
 
 	async function getAuthToken() {
@@ -307,24 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		return session?.access_token || null;
 	}
 
-	async function finalizePayment(paymentIntentId) {
-		const res = await fetch('/api/complete-payment-intent', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': 'Bearer ' + authToken,
-			},
-			body: JSON.stringify({ payment_intent_id: paymentIntentId }),
-		});
-		const data = await res.json().catch(() => ({}));
-		if (!res.ok) throw new Error(data.error || 'Payment completed, but order sync failed.');
-		try {
-			localStorage.removeItem(CART_KEY);
-			sessionStorage.removeItem(PROMO_KEY);
-		} catch (_) {}
-		window.location.href = `/account.html?success=1&session_id=${encodeURIComponent(paymentIntentId)}`;
-	}
-
 	async function initializeCheckout() {
 		cartItems = getCartItems().filter(i => i && i.productId);
 		const savedPromo = getSavedPromo();
@@ -340,72 +263,53 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 
 		authToken = await getAuthToken();
-		if (!authToken) {
-			window.location.href = '/account.html?returnTo=checkout';
-			return;
-		}
-
-		const productIds = cartItems.map(i => i.productId);
-
-		const [cfgRes, intentRes] = await Promise.all([
-			fetch('/api/stripe-config'),
-			fetch('/api/create-payment-intent', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': 'Bearer ' + authToken,
-				},
-				body: JSON.stringify({ productIds, promoCode: currentPromo }),
-			}),
-		]);
-
-		const cfg = await cfgRes.json().catch(() => ({}));
-		const intent = await intentRes.json().catch(() => ({}));
-		if (!cfgRes.ok) throw new Error(cfg.error || 'Stripe configuration error.');
-		if (!intentRes.ok) throw new Error(intent.error || 'Failed to start checkout.');
-
-		stripe = window.Stripe(cfg.publishableKey);
-		elements = stripe.elements({
-			clientSecret: intent.clientSecret,
-			appearance: getStripeAppearance(),
-		});
-
-		const paymentElement = elements.create('payment');
-		const container = document.getElementById('payment-element');
-		if (container) container.innerHTML = '';
-		paymentElement.mount('#payment-element');
-
-		paymentElement.on('ready', () => {
-			if (payButton) payButton.disabled = false;
-		});
+		renderGuestEmailVisibility();
+		if (payButton) payButton.disabled = checkoutAmountCents <= 0;
 	}
 
 	form?.addEventListener('submit', async (e) => {
 		e.preventDefault();
-		if (!stripe || !elements) return;
+		const productIds = cartItems.map((i) => i.productId).filter(Boolean);
+		if (!productIds.length || checkoutAmountCents <= 0) {
+			setMessage('Your cart is empty. Add products before checkout.', 'error');
+			return;
+		}
 
 		setPayBtnLoading(true);
 		setMessage('');
 
 		try {
 			showOverlay(true);
+			let guestEmail = '';
+			if (!authToken) {
+				guestEmail = String(guestEmailInput?.value || '').trim().toLowerCase();
+				if (!isValidEmail(guestEmail)) {
+					throw new Error('Enter a valid email for guest checkout.');
+				}
+				try { localStorage.setItem(GUEST_EMAIL_KEY, guestEmail); } catch (_) {}
+			}
 
-			const { error, paymentIntent } = await stripe.confirmPayment({
-				elements,
-				redirect: 'if_required',
+			const headers = {
+				'Content-Type': 'application/json',
+			};
+			if (authToken) {
+				headers.Authorization = 'Bearer ' + authToken;
+			}
+
+			const res = await fetch('/api/create-checkout-session', {
+				method: 'POST',
+				headers,
+				body: JSON.stringify({
+					productIds,
+					promoCode: currentPromo,
+					customerEmail: guestEmail || undefined,
+				}),
 			});
-
-			if (error) {
-				showOverlay(false);
-				throw new Error(error.message || 'Payment failed.');
+			const data = await res.json().catch(() => ({}));
+			if (!res.ok || !data.url) {
+				throw new Error(data.error || 'Failed to start checkout.');
 			}
-
-			if (!paymentIntent || paymentIntent.status !== 'succeeded') {
-				showOverlay(false);
-				throw new Error('Payment was not completed.');
-			}
-
-			await finalizePayment(paymentIntent.id);
+			window.location.href = data.url;
 		} catch (err) {
 			showOverlay(false);
 			setMessage(err.message || 'Checkout failed. Please try again.', 'error');
