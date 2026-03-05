@@ -836,8 +836,11 @@ document.addEventListener('DOMContentLoaded', function () {
 				if (Array.isArray(parsed)) {
 					items = parsed.map((item) => {
 						if (!item || typeof item !== 'object') return item;
+						if ((item.productId || '').toLowerCase() === 'vision-x') {
+							return { ...item, price: 200 };
+						}
 						if ((item.productId || '').toLowerCase() === 'aim-x') {
-							return { ...item, price: 175 };
+							return { ...item, price: 275 };
 						}
 						return item;
 					});
