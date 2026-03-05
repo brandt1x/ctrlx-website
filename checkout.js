@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	const guestModeToggle = document.getElementById('co-guest-mode-toggle');
 	const guestEmailBlock = document.getElementById('co-guest-email-block');
 	const guestEmailInput = document.getElementById('co-guest-email');
+	const paymentElementContainer = document.getElementById('payment-element');
 
 	const CART_KEY = 'siteCart';
 	const PROMO_KEY = 'siteCartPromo';
@@ -33,6 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	let currentPromo = null;
 	let cartItems = [];
 	let checkoutAmountCents = 0;
+	let stripe = null;
+	let elements = null;
+	let paymentElement = null;
 
 	function fmt(price) {
 		return price % 1 === 0 ? `$${price}` : `$${price.toFixed(2)}`;
@@ -98,6 +102,13 @@ document.addEventListener('DOMContentLoaded', () => {
 		payButton.classList.toggle('co-pay-btn--loading', loading);
 	}
 
+	function clearPaymentElement() {
+		if (paymentElementContainer) {
+			paymentElementContainer.innerHTML = '';
+		}
+		paymentElement = null;
+	}
+
 	function showOverlay(show) {
 		if (!overlay) return;
 		overlay.hidden = !show;
@@ -159,6 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
 					try { sessionStorage.removeItem(PROMO_KEY); } catch (_) {}
 					restorePromoInput();
 					renderSummary();
+					createOrRefreshPaymentElement().catch(() => {});
 				});
 			}
 		}
@@ -188,6 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			currentPromo = code;
 			try { sessionStorage.setItem(PROMO_KEY, code); } catch (_) {}
 			renderSummary();
+			createOrRefreshPaymentElement().catch(() => {});
 		} else {
 			if (VALID_PROMOS.includes(code)) {
 				if (msg) { msg.textContent = 'This promo has expired.'; msg.className = 'co-promo-msg co-promo-msg--error'; }
@@ -229,6 +242,22 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	}
 
+	function getStripeAppearance() {
+		const isLight = document.documentElement.classList.contains('theme-light');
+		return {
+			theme: isLight ? 'stripe' : 'night',
+			variables: {
+				colorPrimary: '#ef4444',
+				colorBackground: isLight ? '#ffffff' : '#0d0d1a',
+				colorText: isLight ? '#111827' : '#f8fafc',
+				colorDanger: '#f43f5e',
+				borderRadius: '10px',
+				fontFamily: 'Inter, system-ui, sans-serif',
+				spacingUnit: '4px',
+			},
+		};
+	}
+
 	async function getAuthToken() {
 		if (window.__supabaseClient) {
 			const { data: { session } } = await window.__supabaseClient.auth.getSession();
@@ -256,6 +285,86 @@ document.addEventListener('DOMContentLoaded', () => {
 		return session?.access_token || null;
 	}
 
+	async function createOrRefreshPaymentElement() {
+		const productIds = cartItems.map((i) => i.productId).filter(Boolean);
+		if (!productIds.length || checkoutAmountCents <= 0) {
+			clearPaymentElement();
+			if (payButton) payButton.disabled = true;
+			return;
+		}
+
+		const useGuestFlow = !authToken || forceGuestMode;
+		let guestEmail = '';
+		if (useGuestFlow) {
+			guestEmail = String(guestEmailInput?.value || '').trim().toLowerCase();
+			if (!isValidEmail(guestEmail)) {
+				clearPaymentElement();
+				if (payButton) payButton.disabled = true;
+				setMessage('Enter your email to load guest checkout.', 'error');
+				return;
+			}
+		}
+
+		const headers = { 'Content-Type': 'application/json' };
+		if (authToken && !useGuestFlow) {
+			headers.Authorization = 'Bearer ' + authToken;
+		}
+
+		const [cfgRes, intentRes] = await Promise.all([
+			fetch('/api/stripe-config'),
+			fetch('/api/create-payment-intent', {
+				method: 'POST',
+				headers,
+				body: JSON.stringify({
+					productIds,
+					promoCode: currentPromo,
+					customerEmail: useGuestFlow ? guestEmail : undefined,
+				}),
+			}),
+		]);
+
+		const cfg = await cfgRes.json().catch(() => ({}));
+		const intent = await intentRes.json().catch(() => ({}));
+		if (!cfgRes.ok) throw new Error(cfg.error || 'Stripe configuration error.');
+		if (!intentRes.ok) throw new Error(intent.error || 'Failed to start checkout.');
+		if (typeof window.Stripe !== 'function') {
+			throw new Error('Stripe failed to load. Refresh and try again.');
+		}
+
+		if (!stripe) {
+			stripe = window.Stripe(cfg.publishableKey);
+		}
+		elements = stripe.elements({
+			clientSecret: intent.clientSecret,
+			appearance: getStripeAppearance(),
+		});
+		clearPaymentElement();
+		paymentElement = elements.create('payment');
+		paymentElement.mount('#payment-element');
+		paymentElement.on('ready', () => {
+			if (payButton) payButton.disabled = false;
+		});
+		setMessage('');
+	}
+
+	async function finalizePayment(paymentIntentId) {
+		const res = await fetch('/api/complete-payment-intent', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': 'Bearer ' + authToken,
+			},
+			body: JSON.stringify({ payment_intent_id: paymentIntentId }),
+		});
+		const data = await res.json().catch(() => ({}));
+		if (!res.ok) throw new Error(data.error || 'Payment completed, but order sync failed.');
+		try {
+			localStorage.removeItem(CART_KEY);
+			sessionStorage.removeItem(PROMO_KEY);
+		} catch (_) {}
+		window.location.href = `/account.html?success=1&session_id=${encodeURIComponent(paymentIntentId)}`;
+	}
+
 	async function initializeCheckout() {
 		cartItems = getCartItems().filter(i => i && i.productId);
 		const savedPromo = getSavedPromo();
@@ -272,7 +381,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		authToken = await getAuthToken();
 		renderGuestEmailVisibility();
-		if (payButton) payButton.disabled = checkoutAmountCents <= 0;
+		if (payButton) payButton.disabled = true;
+		try {
+			await createOrRefreshPaymentElement();
+		} catch (err) {
+			setMessage(err.message || 'Checkout initialization failed.', 'error');
+			if (payButton) payButton.disabled = true;
+		}
 	}
 
 	form?.addEventListener('submit', async (e) => {
@@ -288,8 +403,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		try {
 			showOverlay(true);
-			let guestEmail = '';
 			const useGuestFlow = !authToken || forceGuestMode;
+			if (!stripe || !elements) {
+				await createOrRefreshPaymentElement();
+			}
+			if (!stripe || !elements) {
+				throw new Error('Payment form is not ready. Try again.');
+			}
+
+			let guestEmail = '';
 			if (useGuestFlow) {
 				guestEmail = String(guestEmailInput?.value || '').trim().toLowerCase();
 				if (!isValidEmail(guestEmail)) {
@@ -298,27 +420,38 @@ document.addEventListener('DOMContentLoaded', () => {
 				try { localStorage.setItem(GUEST_EMAIL_KEY, guestEmail); } catch (_) {}
 			}
 
-			const headers = {
-				'Content-Type': 'application/json',
-			};
-			if (authToken && !useGuestFlow) {
-				headers.Authorization = 'Bearer ' + authToken;
+			const confirmParams = {};
+			if (useGuestFlow) {
+				confirmParams.payment_method_data = {
+					billing_details: {
+						email: guestEmail,
+					},
+				};
 			}
 
-			const res = await fetch('/api/create-checkout-session', {
-				method: 'POST',
-				headers,
-				body: JSON.stringify({
-					productIds,
-					promoCode: currentPromo,
-					customerEmail: guestEmail || undefined,
-				}),
+			const { error, paymentIntent } = await stripe.confirmPayment({
+				elements,
+				redirect: 'if_required',
+				confirmParams,
 			});
-			const data = await res.json().catch(() => ({}));
-			if (!res.ok || !data.url) {
-				throw new Error(data.error || 'Failed to start checkout.');
+
+			if (error) {
+				throw new Error(error.message || 'Payment failed.');
 			}
-			window.location.href = data.url;
+			if (!paymentIntent || paymentIntent.status !== 'succeeded') {
+				throw new Error('Payment was not completed.');
+			}
+
+			try {
+				localStorage.removeItem(CART_KEY);
+				sessionStorage.removeItem(PROMO_KEY);
+			} catch (_) {}
+
+			if (useGuestFlow) {
+				window.location.href = `/success.html?guest=1&payment_intent=${encodeURIComponent(paymentIntent.id)}`;
+				return;
+			}
+			await finalizePayment(paymentIntent.id);
 		} catch (err) {
 			showOverlay(false);
 			setMessage(err.message || 'Checkout failed. Please try again.', 'error');
@@ -331,6 +464,16 @@ document.addEventListener('DOMContentLoaded', () => {
 		guestModeToggle.addEventListener('click', () => {
 			forceGuestMode = !forceGuestMode;
 			renderGuestEmailVisibility();
+			createOrRefreshPaymentElement().catch((err) => {
+				setMessage(err.message || 'Failed to refresh checkout.', 'error');
+			});
+		});
+	}
+	if (guestEmailInput) {
+		guestEmailInput.addEventListener('blur', () => {
+			createOrRefreshPaymentElement().catch((err) => {
+				setMessage(err.message || 'Failed to refresh checkout.', 'error');
+			});
 		});
 	}
 
