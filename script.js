@@ -837,7 +837,7 @@ document.addEventListener('DOMContentLoaded', function () {
 					items = parsed.map((item) => {
 						if (!item || typeof item !== 'object') return item;
 						if ((item.productId || '').toLowerCase() === 'vision-x') {
-							return { ...item, price: 200 };
+							return { ...item, price: 450 };
 						}
 						if ((item.productId || '').toLowerCase() === 'aim-x') {
 							return { ...item, price: 275 };

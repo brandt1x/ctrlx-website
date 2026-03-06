@@ -12,7 +12,7 @@ const PRODUCT_CATALOG = {
 	'siege': { name: 'Siege Zen Script', price: 20 },
 	'rust': { name: 'Rust Zen Script', price: 20 },
 	'all-scripts': { name: 'All Zen Scripts Bundle', price: 125 },
-	'vision-x': { name: 'VISION-X Computer Vision', price: 200 },
+	'vision-x': { name: 'VISION-X Computer Vision', price: 450 },
 	'vision-x-plus': { name: 'VISION+X Computer Vision', price: 750 },
 	'aim-x': { name: 'AIM-X Aim Engine', price: 275 },
 	'vision-setup': { name: 'CTRL-X All Services Setup', price: 25 },
