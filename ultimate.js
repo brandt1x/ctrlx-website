@@ -369,7 +369,18 @@
 
 	function initScrollReveal() {
 		const targets = document.querySelectorAll('.ultimate-reveal');
-		if (!targets.length || !('IntersectionObserver' in window)) {
+		if (!targets.length) return;
+
+		// On Ultimate page: reveal immediately on load (no scroll required)
+		if (document.body.classList.contains('ultimate-page')) {
+			const staggerMs = 80;
+			targets.forEach((el, i) => {
+				setTimeout(() => el.classList.add('is-visible'), i * staggerMs);
+			});
+			return;
+		}
+
+		if (!('IntersectionObserver' in window)) {
 			targets.forEach((el) => el.classList.add('is-visible'));
 			return;
 		}
