@@ -116,13 +116,12 @@ module.exports = async (req, res) => {
 				sessionPayload.customer = customer.id;
 			}
 		} else {
-			// Guest checkout: reuse existing customer by email, or force-create one in Checkout.
+			// Guest checkout: reuse existing customer by email, or let Checkout collect it.
 			const existingGuest = await stripe.customers.list({ email: effectiveEmail, limit: 1 });
 			if (existingGuest.data && existingGuest.data[0] && existingGuest.data[0].id) {
 				sessionPayload.customer = existingGuest.data[0].id;
 			} else {
 				sessionPayload.customer_creation = 'always';
-				sessionPayload.customer_email = effectiveEmail;
 			}
 		}
 

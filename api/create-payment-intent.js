@@ -82,7 +82,6 @@ module.exports = async (req, res) => {
 			currency: 'usd',
 			payment_method_types: ['card'],
 			customer: customer?.id || undefined,
-			receipt_email: effectiveEmail,
 			metadata: {
 				user_id: user ? user.id : '',
 				customer_email: effectiveEmail,

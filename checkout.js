@@ -448,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			} catch (_) {}
 
 			if (useGuestFlow) {
-				window.location.href = `/success.html?guest=1&payment_intent=${encodeURIComponent(paymentIntent.id)}`;
+				window.location.href = `/download.html?guest=1&payment_intent=${encodeURIComponent(paymentIntent.id)}`;
 				return;
 			}
 			await finalizePayment(paymentIntent.id);
