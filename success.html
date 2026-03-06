@@ -86,9 +86,11 @@
 	<script src="script.js" defer></script>
 	<script src="cinematic.js" defer></script>
 	<script>
-		// Guest checkout lands here; signed-in account checkout still routes to account.html.
 		const params = new URLSearchParams(window.location.search);
-		if (params.get('guest') !== '1') {
+		if (params.get('guest') === '1') {
+			const pi = params.get('payment_intent');
+			window.location.replace('/download.html?guest=1' + (pi ? '&payment_intent=' + encodeURIComponent(pi) : ''));
+		} else {
 			window.location.replace('/account.html');
 		}
 	</script>

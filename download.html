@@ -101,7 +101,7 @@
 			document.getElementById('year').textContent = new Date().getFullYear();
 
 			const params = new URLSearchParams(location.search);
-			const sessionId = params.get('session_id');
+			const sessionId = params.get('payment_intent') || params.get('session_id');
 
 			if (!sessionId) {
 				document.getElementById('guest-download-status').textContent = 'No purchase session found. If you just completed checkout, wait a moment and refresh.';
@@ -124,7 +124,7 @@
 				errorEl.hidden = true;
 
 				try {
-					const url = '/api/download-guest?session_id=' + encodeURIComponent(sessionId);
+					const url = '/api/download-guest?payment_intent=' + encodeURIComponent(sessionId);
 					const res = await fetch(url);
 					if (!res.ok) {
 						const data = await res.json().catch(() => ({}));
