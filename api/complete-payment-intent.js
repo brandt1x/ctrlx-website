@@ -1,6 +1,7 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require('@supabase/supabase-js');
 const { getUserFromRequest } = require('./_auth-helpers');
+const { getOrCreateLicenseKey, sendLicenseEmail } = require('./_license');
 
 module.exports = async (req, res) => {
 	if (req.method !== 'POST') {
@@ -58,6 +59,25 @@ module.exports = async (req, res) => {
 			}
 			console.error('Failed to insert purchase:', error);
 			return res.status(500).json({ error: 'Failed to record purchase' });
+		}
+
+		const hasScripts = items.some((i) => {
+			const pid = (i.product_id || '').toLowerCase();
+			return pid !== 'vision-x' && pid !== 'vision-x-plus' && pid !== 'aim-x' && pid !== 'vision-setup';
+		});
+		if (hasScripts) {
+			const customerEmail = paymentIntent.metadata?.customer_email || user.email || '';
+			const productIds = items.map((i) => i.product_id).filter(Boolean);
+			const productNames = items.map((i) => i.name).filter(Boolean);
+			const licenseKey = await getOrCreateLicenseKey({
+				paymentIntentId: paymentIntent.id,
+				userId: user.id,
+				email: customerEmail,
+				productIds,
+			});
+			if (licenseKey && customerEmail) {
+				await sendLicenseEmail(customerEmail, licenseKey, productNames);
+			}
 		}
 
 		return res.json({ ok: true, session_id: paymentIntent.id });

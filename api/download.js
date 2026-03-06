@@ -4,9 +4,12 @@ const archiver = require('archiver');
 const { getUserFromRequest, getOwnedPurchase } = require('./_auth-helpers');
 const { getPurchaseFlags } = require('./_items-utils');
 const { checkRateLimit } = require('./_rate-limit');
+const { getLicenseKey } = require('./_license');
+
+require('archiver-zip-encrypted');
 
 const SCRIPT_MAP = {
-	'control-x': { file: 'CONTROL+X.gpc', filename: 'CONTROL+X.gpc', price: 30, nameMatch: 'control+x' },
+	'control-x': { file: 'CONTROL+X.gpc', filename: 'CONTROL+X.gpc', price: 65, nameMatch: 'control+x' },
 	'2k': { file: 'Cntrl-X-2K.gpc', filename: 'Cntrl-X-2K.gpc', price: 35, nameMatch: '2k' },
 	'cod': { file: 'Cntrl-X-COD.gpc', filename: 'Cntrl-X-COD.gpc', price: 20, nameMatch: 'cod' },
 	'apex': { file: 'Cntrl-X-Apex.gpc', filename: 'Cntrl-X-Apex.gpc', price: 15, nameMatch: 'apex' },
@@ -73,6 +76,19 @@ module.exports = async (req, res) => {
 
 		const flags = getPurchaseFlags(purchase.items);
 
+		const isScriptType = type === 'siege' || type === 'all-scripts' || type === 'script';
+		let licenseKey = null;
+		if (isScriptType) {
+			licenseKey = await getLicenseKey(sessionId);
+		}
+
+		function createScriptArchive() {
+			if (licenseKey) {
+				return archiver.create('zip-encrypted', { zlib: { level: 9 }, encryptionMethod: 'aes256', password: licenseKey });
+			}
+			return archiver('zip', { zlib: { level: 9 } });
+		}
+
 		if (type === 'siege' || (type === 'script' && script === 'siege')) {
 			if (!flags.hasSiege) return res.status(403).json({ error: 'Siege not purchased' });
 			const scriptsDir = path.join(__dirname, 'scripts');
@@ -88,7 +104,7 @@ module.exports = async (req, res) => {
 			}
 			res.setHeader('Content-Type', 'application/zip');
 			res.setHeader('Content-Disposition', 'attachment; filename="Cntrl-X-R6-Siege.zip"');
-			const archive = archiver('zip', { zlib: { level: 9 } });
+			const archive = createScriptArchive();
 			archive.pipe(res);
 			for (const f of siegeFiles) {
 				archive.file(path.join(scriptsDir, f.src), { name: f.name });
@@ -146,7 +162,7 @@ module.exports = async (req, res) => {
 			}
 			res.setHeader('Content-Type', 'application/zip');
 			res.setHeader('Content-Disposition', 'attachment; filename="Cntrl-X-All-Scripts.zip"');
-			const archive = archiver('zip', { zlib: { level: 9 } });
+			const archive = createScriptArchive();
 			archive.pipe(res);
 			for (const file of BUNDLE_FILES) {
 				archive.file(path.join(scriptsDir, file), { name: file });
@@ -162,10 +178,13 @@ module.exports = async (req, res) => {
 			if (!hasPurchased(purchase.items, script)) return res.status(403).json({ error: 'Script not purchased' });
 			const scriptPath = path.join(__dirname, 'scripts', cfg.file);
 			if (!fs.existsSync(scriptPath)) return res.status(500).json({ error: 'Script file not found' });
-			const content = fs.readFileSync(scriptPath);
-			res.setHeader('Content-Type', 'application/octet-stream');
-			res.setHeader('Content-Disposition', `attachment; filename="${cfg.filename}"`);
-			res.send(content);
+			const zipName = cfg.filename.replace(/\.gpc$/i, '.zip');
+			res.setHeader('Content-Type', 'application/zip');
+			res.setHeader('Content-Disposition', `attachment; filename="${zipName}"`);
+			const archive = createScriptArchive();
+			archive.pipe(res);
+			archive.file(scriptPath, { name: cfg.filename });
+			await archive.finalize();
 			return;
 		}
 

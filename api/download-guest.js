@@ -4,6 +4,9 @@ const archiver = require('archiver');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { getPurchaseFlags } = require('./_items-utils');
 const { checkRateLimit } = require('./_rate-limit');
+const { getOrCreateLicenseKey, sendLicenseEmail } = require('./_license');
+
+require('archiver-zip-encrypted');
 
 const SCRIPT_MAP = {
 	'control-x': { file: 'CONTROL+X.gpc', filename: 'CONTROL+X.gpc' },
@@ -24,6 +27,8 @@ const BUNDLE_FILES = [
 ];
 
 const EXPIRY_MS = 24 * 60 * 60 * 1000;
+
+const APP_PRODUCT_IDS = new Set(['vision-x', 'vision-x-plus', 'aim-x', 'vision-setup']);
 
 module.exports = async (req, res) => {
 	if (req.method !== 'GET') {
@@ -69,7 +74,29 @@ module.exports = async (req, res) => {
 
 		const flags = getPurchaseFlags(items);
 		const scriptsDir = path.join(__dirname, 'scripts');
-		const archive = archiver('zip', { zlib: { level: 9 } });
+
+		const hasScripts = items.some((i) => !APP_PRODUCT_IDS.has((i.product_id || '').toLowerCase()));
+		const hasApps = flags.hasVisionX || flags.hasVisionXPlus || flags.hasAimX;
+
+		let licenseKey = null;
+		if (hasScripts) {
+			const customerEmail = paymentIntent.metadata?.customer_email || paymentIntent.receipt_email || '';
+			const productIds = items.map((i) => i.product_id).filter(Boolean);
+			const productNames = items.map((i) => i.name).filter(Boolean);
+			licenseKey = await getOrCreateLicenseKey({
+				paymentIntentId: paymentIntent.id,
+				userId: paymentIntent.metadata?.user_id || null,
+				email: customerEmail,
+				productIds,
+			});
+			if (licenseKey && customerEmail) {
+				await sendLicenseEmail(customerEmail, licenseKey, productNames);
+			}
+		}
+
+		const archive = licenseKey
+			? archiver.create('zip-encrypted', { zlib: { level: 9 }, encryptionMethod: 'aes256', password: licenseKey })
+			: archiver('zip', { zlib: { level: 9 } });
 		let fileCount = 0;
 
 		if (flags.hasAllBundle) {
@@ -81,32 +108,34 @@ module.exports = async (req, res) => {
 				}
 			}
 		} else {
-			for (const [id, cfg] of Object.entries(SCRIPT_MAP)) {
-				const flagKey = 'has' + id.charAt(0).toUpperCase() + id.slice(1).replace(/-([a-z])/g, (_, c) => c.toUpperCase());
-				if (id === 'control-x' && flags.hasControlX) {
-					const fp = path.join(scriptsDir, cfg.file);
-					if (fs.existsSync(fp)) { archive.file(fp, { name: cfg.filename }); fileCount++; }
-				} else if (id === '2k' && flags.has2K) {
-					const fp = path.join(scriptsDir, cfg.file);
-					if (fs.existsSync(fp)) { archive.file(fp, { name: cfg.filename }); fileCount++; }
-				} else if (id === 'cod' && flags.hasCOD) {
-					const fp = path.join(scriptsDir, cfg.file);
-					if (fs.existsSync(fp)) { archive.file(fp, { name: cfg.filename }); fileCount++; }
-				} else if (id === 'apex' && flags.hasApex) {
-					const fp = path.join(scriptsDir, cfg.file);
-					if (fs.existsSync(fp)) { archive.file(fp, { name: cfg.filename }); fileCount++; }
-				} else if (id === 'arc' && flags.hasArc) {
-					const fp = path.join(scriptsDir, cfg.file);
-					if (fs.existsSync(fp)) { archive.file(fp, { name: cfg.filename }); fileCount++; }
-				} else if (id === 'fortnite' && flags.hasFortnite) {
-					const fp = path.join(scriptsDir, cfg.file);
-					if (fs.existsSync(fp)) { archive.file(fp, { name: cfg.filename }); fileCount++; }
-				} else if (id === 'rust' && flags.hasRust) {
-					const fp = path.join(scriptsDir, cfg.file);
-					if (fs.existsSync(fp)) { archive.file(fp, { name: cfg.filename }); fileCount++; }
-				}
+			if (flags.hasControlX) {
+				const fp = path.join(scriptsDir, SCRIPT_MAP['control-x'].file);
+				if (fs.existsSync(fp)) { archive.file(fp, { name: SCRIPT_MAP['control-x'].filename }); fileCount++; }
 			}
-
+			if (flags.has2K) {
+				const fp = path.join(scriptsDir, SCRIPT_MAP['2k'].file);
+				if (fs.existsSync(fp)) { archive.file(fp, { name: SCRIPT_MAP['2k'].filename }); fileCount++; }
+			}
+			if (flags.hasCOD) {
+				const fp = path.join(scriptsDir, SCRIPT_MAP['cod'].file);
+				if (fs.existsSync(fp)) { archive.file(fp, { name: SCRIPT_MAP['cod'].filename }); fileCount++; }
+			}
+			if (flags.hasApex) {
+				const fp = path.join(scriptsDir, SCRIPT_MAP['apex'].file);
+				if (fs.existsSync(fp)) { archive.file(fp, { name: SCRIPT_MAP['apex'].filename }); fileCount++; }
+			}
+			if (flags.hasArc) {
+				const fp = path.join(scriptsDir, SCRIPT_MAP['arc'].file);
+				if (fs.existsSync(fp)) { archive.file(fp, { name: SCRIPT_MAP['arc'].filename }); fileCount++; }
+			}
+			if (flags.hasFortnite) {
+				const fp = path.join(scriptsDir, SCRIPT_MAP['fortnite'].file);
+				if (fs.existsSync(fp)) { archive.file(fp, { name: SCRIPT_MAP['fortnite'].filename }); fileCount++; }
+			}
+			if (flags.hasRust) {
+				const fp = path.join(scriptsDir, SCRIPT_MAP['rust'].file);
+				if (fs.existsSync(fp)) { archive.file(fp, { name: SCRIPT_MAP['rust'].filename }); fileCount++; }
+			}
 			if (flags.hasSiege) {
 				const siegeFiles = ['R6 Read.Me.txt', 'Cntrl-X R6 (Attackers).gpc', 'Cntrl-X R6 (Defenders).gpc'];
 				for (const f of siegeFiles) {

@@ -481,7 +481,7 @@
 						: '';
 					return '<div class="account-purchase-block' + (expired ? ' purchase-expired' : '') + '"><h4>Purchase ' + date + ' ' + statusLabel + '</h4><div class="success-download-list">' + links.join('') + '</div>' + expiredMeta + '</div>';
 				}).join('');
-				purchasesEl.innerHTML = html + '<p class="success-instruction">Load the .gpc file(s) into Zen Studio and flash to your CronusZen.</p>';
+				purchasesEl.innerHTML = html + '<p class="success-instruction">Your script downloads are password-protected. Check your email for your unique license key — use it to extract the ZIP with WinRAR or 7-Zip, then load the .gpc file(s) into Zen Studio and flash to your CronusZen.</p>';
 
 				purchasesEl.querySelectorAll('.success-dl-btn').forEach(btn => {
 					btn.addEventListener('click', async (e) => {
@@ -513,7 +513,7 @@
 						const blob = await res.blob();
 						const a = document.createElement('a');
 						a.href = URL.createObjectURL(blob);
-						a.download = type === 'vision-x' ? 'Vision-X-Tempo.zip' : type === 'vision-x-plus' ? 'Vision-X-Plus-Timing.zip' : type === 'aim-x' ? 'Aim-X.zip' : type === 'siege' ? 'Cntrl-X-R6-Siege.zip' : type === 'all-scripts' ? 'Cntrl-X-All-Scripts.zip' : (script || 'script') + '.gpc';
+						a.download = type === 'vision-x' ? 'Vision-X-Tempo.zip' : type === 'vision-x-plus' ? 'Vision-X-Plus-Timing.zip' : type === 'aim-x' ? 'Aim-X.zip' : type === 'siege' ? 'Cntrl-X-R6-Siege.zip' : type === 'all-scripts' ? 'Cntrl-X-All-Scripts.zip' : (script || 'script') + '.zip';
 						a.click();
 						setTimeout(() => URL.revokeObjectURL(a.href), 3000);
 					});

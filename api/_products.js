@@ -3,7 +3,7 @@
  * Never trust client-supplied prices.
  */
 const PRODUCT_CATALOG = {
-	'control-x': { name: 'CONTROL+X Zen Script', price: 30 },
+	'control-x': { name: 'CONTROL+X Zen Script', price: 65 },
 	'2k': { name: '2K Zen Script', price: 35 },
 	'cod': { name: 'COD Zen Script', price: 20 },
 	'apex': { name: 'Apex Zen Script', price: 15 },
@@ -11,7 +11,7 @@ const PRODUCT_CATALOG = {
 	'fortnite': { name: 'Fortnite Zen Script', price: 20 },
 	'siege': { name: 'Siege Zen Script', price: 20 },
 	'rust': { name: 'Rust Zen Script', price: 20 },
-	'all-scripts': { name: 'All Zen Scripts Bundle', price: 125 },
+	'all-scripts': { name: 'All Zen Scripts Bundle', price: 135 },
 	'vision-x': { name: 'VISION-X Computer Vision', price: 450 },
 	'vision-x-plus': { name: 'VISION+X Computer Vision', price: 750 },
 	'aim-x': { name: 'AIM-X Aim Engine', price: 275 },
