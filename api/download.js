@@ -6,7 +6,7 @@ const { getPurchaseFlags } = require('./_items-utils');
 const { checkRateLimit } = require('./_rate-limit');
 const { getLicenseKey } = require('./_license');
 
-require('archiver-zip-encrypted');
+archiver.registerFormat('zip-encrypted', require('archiver-zip-encrypted'));
 
 const SCRIPT_MAP = {
 	'control-x': { file: 'CONTROL+X.gpc', filename: 'CONTROL+X.gpc', price: 65, nameMatch: 'control+x' },
