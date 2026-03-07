@@ -95,7 +95,7 @@ module.exports = async (req, res) => {
 		}
 
 		const archive = licenseKey
-			? archiver.create('zip-encrypted', { zlib: { level: 9 }, encryptionMethod: 'aes256', password: licenseKey })
+			? archiver.create('zip-encrypted', { zlib: { level: 9 }, encryptionMethod: 'zip20', password: licenseKey })
 			: archiver('zip', { zlib: { level: 9 } });
 		let fileCount = 0;
 

@@ -481,7 +481,7 @@
 						: '';
 					return '<div class="account-purchase-block' + (expired ? ' purchase-expired' : '') + '"><h4>Purchase ' + date + ' ' + statusLabel + '</h4><div class="success-download-list">' + links.join('') + '</div>' + expiredMeta + '</div>';
 				}).join('');
-				purchasesEl.innerHTML = html + '<p class="success-instruction">Your script downloads are password-protected. Check your email for your unique license key — use it to extract the ZIP with WinRAR or 7-Zip, then load the .gpc file(s) into Zen Studio and flash to your CronusZen.</p>';
+				purchasesEl.innerHTML = html + '<p class="success-instruction">Your script downloads are password-protected. Check your email for your unique license key — right-click the ZIP → Extract All, enter the key when prompted, then load the .gpc file(s) into Zen Studio and flash to your CronusZen.</p>';
 
 				purchasesEl.querySelectorAll('.success-dl-btn').forEach(btn => {
 					btn.addEventListener('click', async (e) => {

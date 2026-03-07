@@ -93,7 +93,7 @@ async function sendLicenseEmail(email, licenseKey, productNames) {
 						<code style="font-size:1.3rem;letter-spacing:0.08em;color:#ef4444;font-weight:700;">${licenseKey}</code>
 					</div>
 					<p style="color:#94a3b8;font-size:0.9rem;margin:0 0 8px;"><strong style="color:#f8fafc;">Products:</strong> ${productList}</p>
-					<p style="color:#94a3b8;font-size:0.9rem;margin:0 0 8px;"><strong style="color:#f8fafc;">How to use:</strong> Open the downloaded ZIP in WinRAR or 7-Zip, enter the key above when prompted.</p>
+					<p style="color:#94a3b8;font-size:0.9rem;margin:0 0 8px;"><strong style="color:#f8fafc;">How to use:</strong> Right-click the ZIP → Extract All (or double-click). Enter the key above when Windows prompts for a password.</p>
 					<p style="color:#64748b;font-size:0.82rem;margin:24px 0 0;">This key is unique to your purchase. Do not share it. &mdash; Control-X</p>
 				</div>
 			`,
