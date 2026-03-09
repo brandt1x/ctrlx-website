@@ -3,8 +3,9 @@ const { getUserFromRequest } = require('./_auth-helpers');
 const { getProduct } = require('./_products');
 const { checkRateLimit } = require('./_rate-limit');
 
-const PROMO_CODES = ['2000!'];
-const PROMO_CUTOFF = new Date('2026-02-28T00:00:00Z');
+const PROMO_DISCOUNTS = { '2000!': 0.5, 'GOAT': 0.8 };
+const PROMO_CUTOFFS = { '2000!': new Date('2026-02-28T00:00:00Z'), 'GOAT': new Date('2026-03-10T03:59:59Z') };
+const PROMO_CODES = Object.keys(PROMO_DISCOUNTS);
 
 function isValidEmail(email) {
 	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
@@ -55,7 +56,8 @@ module.exports = async (req, res) => {
 	}
 
 	const normalizedPromo = promoCode && String(promoCode).toUpperCase().trim();
-	const isPromoValid = normalizedPromo && PROMO_CODES.includes(normalizedPromo) && new Date() < PROMO_CUTOFF;
+	const cutoff = normalizedPromo && PROMO_CUTOFFS[normalizedPromo];
+	const isPromoValid = normalizedPromo && PROMO_CODES.includes(normalizedPromo) && cutoff && new Date() < cutoff;
 	if (promoCode && !isPromoValid) {
 		if (PROMO_CODES.includes(normalizedPromo)) {
 			return res.status(400).json({ error: 'Promo has expired.' });
@@ -64,7 +66,8 @@ module.exports = async (req, res) => {
 	}
 
 	if (isPromoValid) {
-		amountCents = Math.round(amountCents * 0.5);
+		const multiplier = PROMO_DISCOUNTS[normalizedPromo] ?? 1;
+		amountCents = Math.round(amountCents * multiplier);
 	}
 	if (amountCents <= 0) {
 		return res.status(400).json({ error: 'Cart total is invalid.' });

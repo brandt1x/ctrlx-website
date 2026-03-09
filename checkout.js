@@ -26,8 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	const PROMO_KEY = 'siteCartPromo';
 	const GUEST_EMAIL_KEY = 'siteGuestCheckoutEmail';
 
-	const VALID_PROMOS = ['2000!'];
-	const PROMO_CUTOFF = new Date('2026-02-28T00:00:00Z');
+	const PROMO_DISCOUNTS = { '2000!': 0.5, 'GOAT': 0.8 };
+	const PROMO_CUTOFFS = { '2000!': new Date('2026-02-28T00:00:00Z'), 'GOAT': new Date('2026-03-10T03:59:59Z') };
+	const VALID_PROMOS = Object.keys(PROMO_DISCOUNTS);
 
 	let authToken = null;
 	let forceGuestMode = false;
@@ -87,7 +88,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	function isPromoValid(code) {
 		if (!code) return false;
-		return VALID_PROMOS.includes(code.toUpperCase().trim()) && new Date() < PROMO_CUTOFF;
+		const normalized = code.toUpperCase().trim();
+		const cutoff = PROMO_CUTOFFS[normalized];
+		return VALID_PROMOS.includes(normalized) && cutoff && new Date() < cutoff;
 	}
 
 	function setPayBtnAmount(total) {
@@ -118,8 +121,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	function renderSummary() {
 		const items = cartItems;
 		const subtotal = items.reduce((sum, i) => sum + (Number(i.price) || 0), 0);
-		const hasDiscount = !!currentPromo;
-		const discount = hasDiscount ? subtotal * 0.5 : 0;
+		const multiplier = currentPromo && PROMO_DISCOUNTS[currentPromo] != null ? PROMO_DISCOUNTS[currentPromo] : 1;
+		const hasDiscount = multiplier < 1;
+		const discount = subtotal * (1 - multiplier);
 		const total = subtotal - discount;
 
 		if (itemCountEl) {
@@ -158,9 +162,10 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (!promoSection) return;
 
 		if (currentPromo) {
+			const pct = Math.round((1 - (PROMO_DISCOUNTS[currentPromo] ?? 1)) * 100);
 			promoSection.innerHTML = `
 				<div class="co-promo-active">
-					<span class="co-promo-active-label">${currentPromo} — 50% off applied</span>
+					<span class="co-promo-active-label">${currentPromo} — ${pct}% off applied</span>
 					<button type="button" class="co-promo-remove" id="co-promo-remove-btn">Remove</button>
 				</div>`;
 			const removeBtn = document.getElementById('co-promo-remove-btn');
@@ -202,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			renderSummary();
 			createOrRefreshPaymentElement().catch(() => {});
 		} else {
-			if (VALID_PROMOS.includes(code)) {
+			if (VALID_PROMOS.includes(code.toUpperCase().trim())) {
 				if (msg) { msg.textContent = 'This promo has expired.'; msg.className = 'co-promo-msg co-promo-msg--error'; }
 			} else {
 				if (msg) { msg.textContent = 'Invalid promo code.'; msg.className = 'co-promo-msg co-promo-msg--error'; }

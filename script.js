@@ -819,9 +819,10 @@ document.addEventListener('DOMContentLoaded', function () {
 	})();
 
 	// GLOBAL CART (all pages)
-	const PROMO_CODES = ['2000!'];
+	const PROMO_DISCOUNTS = { '2000!': 0.5, 'GOAT': 0.8 };
+	const PROMO_CUTOFFS = { '2000!': new Date('2026-02-28T00:00:00Z'), 'GOAT': new Date('2026-03-10T03:59:59Z') };
+	const PROMO_CODES = Object.keys(PROMO_DISCOUNTS);
 	const PROMO_STORAGE_KEY = 'siteCartPromo';
-	const PROMO_CUTOFF = new Date('2026-02-28T00:00:00Z');
 
 	const Cart = (function () {
 		const STORAGE_KEY = 'siteCart';
@@ -901,7 +902,8 @@ document.addEventListener('DOMContentLoaded', function () {
 		function isPromoValid() {
 			const code = getPromo();
 			const normalized = code && code.toUpperCase().trim();
-			return normalized && PROMO_CODES.includes(normalized) && new Date() < PROMO_CUTOFF;
+			const cutoff = normalized && PROMO_CUTOFFS[normalized];
+			return normalized && PROMO_CODES.includes(normalized) && cutoff && new Date() < cutoff;
 		}
 
 		load();
@@ -939,9 +941,12 @@ document.addEventListener('DOMContentLoaded', function () {
 				if (promoMsgEl) promoMsgEl.textContent = '';
 				return;
 			}
+			const promoCode = Cart.getPromo();
+			const multiplier = promoCode && PROMO_DISCOUNTS[promoCode.toUpperCase().trim()] != null ? PROMO_DISCOUNTS[promoCode.toUpperCase().trim()] : 1;
+			const hasPromo = Cart.isPromoValid();
 			itemsEl.innerHTML = items.map(item => {
 				const id = item.id || '';
-				const displayPrice = Cart.isPromoValid() ? (item.price * 0.5) : item.price;
+				const displayPrice = hasPromo ? (item.price * multiplier) : item.price;
 				const priceStr = displayPrice % 1 === 0 ? displayPrice : displayPrice.toFixed(2);
 				return `<li data-id="${id}">
 					<div class="site-cart-item-main">
@@ -952,15 +957,16 @@ document.addEventListener('DOMContentLoaded', function () {
 				</li>`;
 			}).join('');
 			const total = Cart.getTotal();
-			const displayTotal = Cart.isPromoValid() ? total * 0.5 : total;
+			const displayTotal = hasPromo ? total * multiplier : total;
 			const totalStr = displayTotal % 1 === 0 ? displayTotal : displayTotal.toFixed(2);
 			totalEl.textContent = `Total: $${totalStr}`;
 			summaryEl.textContent = `You have ${items.length} item${items.length > 1 ? 's' : ''} in your cart.`;
 			document.querySelectorAll('.site-cart-count').forEach((el) => { el.textContent = String(items.length); });
 
 			if (promoMsgEl) {
-				if (Cart.isPromoValid()) {
-					promoMsgEl.textContent = 'Promo applied — 50% off';
+				if (hasPromo) {
+					const pct = Math.round((1 - multiplier) * 100);
+					promoMsgEl.textContent = 'Promo applied — ' + pct + '% off';
 					promoMsgEl.classList.remove('site-cart-promo-error');
 				} else if (Cart.getPromo()) {
 					promoMsgEl.textContent = 'Promo expired or invalid.';
@@ -1032,7 +1038,7 @@ document.addEventListener('DOMContentLoaded', function () {
 				render();
 			} else {
 				Cart.setPromo(null);
-				promoMsgEl.textContent = PROMO_CODES.includes(code) ? 'Promo has expired.' : 'Invalid promo code.';
+				promoMsgEl.textContent = (code && PROMO_CODES.includes(code.toUpperCase().trim())) ? 'Promo has expired.' : 'Invalid promo code.';
 				promoMsgEl.classList.add('site-cart-promo-error');
 			}
 		}

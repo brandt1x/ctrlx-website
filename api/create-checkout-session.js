@@ -54,11 +54,12 @@ module.exports = async (req, res) => {
 
 	let { lineItems, items } = result;
 
-	// Promo code 2000!: 50% off, valid until end of Feb 27, 2026 UTC
-	const PROMO_CODES = ['2000!'];
-	const PROMO_CUTOFF = new Date('2026-02-28T00:00:00Z');
+	const PROMO_DISCOUNTS = { '2000!': 0.5, 'GOAT': 0.8 };
+	const PROMO_CUTOFFS = { '2000!': new Date('2026-02-28T00:00:00Z'), 'GOAT': new Date('2026-03-10T03:59:59Z') };
+	const PROMO_CODES = Object.keys(PROMO_DISCOUNTS);
 	const normalizedPromo = promoCode && String(promoCode).toUpperCase().trim();
-	const isPromoValid = normalizedPromo && PROMO_CODES.includes(normalizedPromo) && new Date() < PROMO_CUTOFF;
+	const cutoff = normalizedPromo && PROMO_CUTOFFS[normalizedPromo];
+	const isPromoValid = normalizedPromo && PROMO_CODES.includes(normalizedPromo) && cutoff && new Date() < cutoff;
 	if (promoCode && !isPromoValid) {
 		if (PROMO_CODES.includes(normalizedPromo)) {
 			return res.status(400).json({ error: 'Promo has expired.' });
@@ -66,11 +67,12 @@ module.exports = async (req, res) => {
 		return res.status(400).json({ error: 'Invalid promo code.' });
 	}
 	if (isPromoValid) {
+		const multiplier = PROMO_DISCOUNTS[normalizedPromo] ?? 1;
 		lineItems = lineItems.map((li) => ({
 			...li,
 			price_data: {
 				...li.price_data,
-				unit_amount: Math.round(li.price_data.unit_amount * 0.5),
+				unit_amount: Math.round(li.price_data.unit_amount * multiplier),
 			},
 		}));
 	}
