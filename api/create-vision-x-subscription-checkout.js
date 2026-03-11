@@ -22,6 +22,40 @@ async function getOrCreateCustomerByEmail(email, name, metadata) {
 	});
 }
 
+async function getOrCreateVisionXMonthlyPrice() {
+	const envPriceId = process.env.STRIPE_VISION_X_MONTHLY_PRICE_ID;
+	if (envPriceId) return envPriceId;
+
+	const products = await stripe.products.list({
+		limit: 100,
+		active: true,
+	});
+	const existing = products.data.find((p) => p.metadata?.product_id === 'vision-x-monthly');
+	if (existing) {
+		const prices = await stripe.prices.list({
+			product: existing.id,
+			active: true,
+			limit: 10,
+		});
+		const monthly = prices.data.find(
+			(pr) => pr.recurring?.interval === 'month' && pr.unit_amount === 10000
+		);
+		if (monthly) return monthly.id;
+	}
+
+	const product = await stripe.products.create({
+		name: 'VISION-X Computer Vision — Monthly',
+		metadata: { product_id: 'vision-x-monthly' },
+	});
+	const price = await stripe.prices.create({
+		product: product.id,
+		unit_amount: 10000,
+		currency: 'usd',
+		recurring: { interval: 'month' },
+	});
+	return price.id;
+}
+
 module.exports = async (req, res) => {
 	if (req.method !== 'POST') {
 		return res.status(405).json({ error: 'Method not allowed' });
@@ -37,9 +71,14 @@ module.exports = async (req, res) => {
 		return res.status(401).json({ error: 'Sign in required to subscribe' });
 	}
 
-	const priceId = process.env.STRIPE_VISION_X_MONTHLY_PRICE_ID;
+	let priceId;
+	try {
+		priceId = await getOrCreateVisionXMonthlyPrice();
+	} catch (err) {
+		console.error('Failed to get/create Vision-X monthly price:', err);
+		return res.status(500).json({ error: 'Subscription not available. Please contact support.' });
+	}
 	if (!priceId) {
-		console.error('STRIPE_VISION_X_MONTHLY_PRICE_ID not configured');
 		return res.status(500).json({ error: 'Subscription not available. Please contact support.' });
 	}
 
