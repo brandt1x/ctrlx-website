@@ -379,13 +379,19 @@ document.addEventListener('DOMContentLoaded', () => {
 				type: 'tabs',
 				defaultCollapsed: false,
 			},
-			// Prefer card first while still showing other enabled methods (Link, Cash App, etc.).
 			paymentMethodOrder: [
 				'card',
 				'link',
 				'cashapp',
 				'us_bank_account',
 			],
+			defaultValues: {
+				billingDetails: {
+					name: '',
+					email: '',
+				},
+			},
+			wallets: { applePay: 'auto', googlePay: 'auto' },
 		});
 		paymentElement.mount('#payment-element');
 		paymentElement.on('ready', () => {
