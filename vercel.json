@@ -1,4 +1,8 @@
 {
+	"rewrites": [
+		{ "source": "/api/supabase-config", "destination": "/api/config" },
+		{ "source": "/api/stripe-config", "destination": "/api/config" }
+	],
 	"headers": [
 		{
 			"source": "/(.*)\\.css",

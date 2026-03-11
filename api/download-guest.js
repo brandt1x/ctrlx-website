@@ -2,9 +2,9 @@ const path = require('path');
 const fs = require('fs');
 const archiver = require('archiver');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const { getPurchaseFlags } = require('./_items-utils');
-const { checkRateLimit } = require('./_rate-limit');
-const { getOrCreateLicenseKey, sendLicenseEmail } = require('./_license');
+const { getPurchaseFlags } = require('../lib/items-utils');
+const { checkRateLimit } = require('../lib/rate-limit');
+const { getOrCreateLicenseKey, sendLicenseEmail } = require('../lib/license');
 
 archiver.registerFormat('zip-encrypted', require('archiver-zip-encrypted'));
 

@@ -1,7 +1,7 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require('@supabase/supabase-js');
-const { getUserFromRequest } = require('./_auth-helpers');
-const { getOrCreateLicenseKey, sendLicenseEmail } = require('./_license');
+const { getUserFromRequest } = require('../lib/auth-helpers');
+const { getOrCreateLicenseKey, sendLicenseEmail } = require('../lib/license');
 
 module.exports = async (req, res) => {
 	if (req.method !== 'POST') {

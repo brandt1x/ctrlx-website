@@ -22,4 +22,4 @@ If you see **"Failed to load config (404)"** on the account page:
    npm run dev
    ```
 
-**Do not** use `npx serve`, `python -m http.server`, or open HTML files directly. The `/api/supabase-config` route only works when running `vercel dev`.
+**Do not** use `npx serve`, `python -m http.server`, or open HTML files directly. The `/api/config` route (and rewrites for /api/supabase-config, /api/stripe-config) only works when running `vercel dev`.

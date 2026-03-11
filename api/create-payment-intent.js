@@ -1,7 +1,7 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const { getUserFromRequest } = require('./_auth-helpers');
-const { getProduct } = require('./_products');
-const { checkRateLimit } = require('./_rate-limit');
+const { getUserFromRequest } = require('../lib/auth-helpers');
+const { getProduct } = require('../lib/products');
+const { checkRateLimit } = require('../lib/rate-limit');
 
 const PROMO_DISCOUNTS = { '2000!': 0.5, 'GOAT': 0.8 };
 const PROMO_CUTOFFS = { '2000!': new Date('2026-02-28T00:00:00Z'), 'GOAT': new Date('2026-03-10T03:59:59Z') };

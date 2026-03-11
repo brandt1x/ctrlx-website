@@ -1,6 +1,6 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const { getUserFromRequest } = require('./_auth-helpers');
-const { checkRateLimit } = require('./_rate-limit');
+const { getUserFromRequest } = require('../lib/auth-helpers');
+const { checkRateLimit } = require('../lib/rate-limit');
 
 const ALLOWED_ORIGINS = [
 	'https://cntrl-x.com',

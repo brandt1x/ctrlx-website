@@ -1,5 +1,5 @@
-const { getUserFromRequest } = require('./_auth-helpers');
-const { getPurchaseFlags } = require('./_items-utils');
+const { getUserFromRequest } = require('../lib/auth-helpers');
+const { getPurchaseFlags } = require('../lib/items-utils');
 const { createClient } = require('@supabase/supabase-js');
 
 module.exports = async (req, res) => {

@@ -1,10 +1,10 @@
 const path = require('path');
 const fs = require('fs');
 const archiver = require('archiver');
-const { getUserFromRequest, getOwnedPurchase, hasActiveSubscription } = require('./_auth-helpers');
-const { getPurchaseFlags } = require('./_items-utils');
-const { checkRateLimit } = require('./_rate-limit');
-const { getLicenseKey } = require('./_license');
+const { getUserFromRequest, getOwnedPurchase, hasActiveSubscription } = require('../lib/auth-helpers');
+const { getPurchaseFlags } = require('../lib/items-utils');
+const { checkRateLimit } = require('../lib/rate-limit');
+const { getLicenseKey } = require('../lib/license');
 
 archiver.registerFormat('zip-encrypted', require('archiver-zip-encrypted'));
 
