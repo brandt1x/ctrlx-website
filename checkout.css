@@ -3,15 +3,17 @@
    ═══════════════════════════════════════════════════════ */
 
 .checkout-page {
-	padding-top: 72px;
+	padding-top: 52px;
 	padding-bottom: 48px;
 	min-height: 100vh;
 	/* Keep panels visually above the red/black gradient transition */
-	background: linear-gradient(180deg, transparent 0%, transparent 60%, rgba(5, 5, 9, 0.5) 100%);
+	background: linear-gradient(180deg, transparent 0%, transparent 74%, rgba(5, 5, 9, 0.66) 100%);
 }
 
 .checkout-wrap {
 	max-width: 960px;
+	position: relative;
+	z-index: 2;
 }
 
 /* ── Progress Steps ──────────────────────────────────── */
@@ -883,7 +885,7 @@ body.theme-light .co-badge {
 
 @media (max-width: 480px) {
 	.checkout-page {
-		padding-top: 80px;
+		padding-top: 64px;
 		padding-bottom: 20px;
 	}
 	.co-panel {

@@ -1,6 +1,36 @@
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { getUserFromRequest } = require('../lib/auth-helpers');
 const { getPurchaseFlags } = require('../lib/items-utils');
 const { createClient } = require('@supabase/supabase-js');
+
+async function syncSubscriptionsFromStripe(userId, userEmail) {
+	const supabaseUrl = process.env.SUPABASE_URL;
+	const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+	if (!supabaseUrl || !supabaseServiceKey) return;
+	const email = (userEmail || '').trim().toLowerCase();
+	if (!email) return;
+	try {
+		const customers = await stripe.customers.list({ email, limit: 1 });
+		const customer = customers.data?.[0];
+		if (!customer) return;
+		const subs = await stripe.subscriptions.list({ customer: customer.id, status: 'active', limit: 20 });
+		const supabase = createClient(supabaseUrl, supabaseServiceKey);
+		for (const sub of subs.data || []) {
+			const periodEnd = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null;
+			const productId = sub.metadata?.product_id || 'vision-x-monthly';
+			await supabase.from('subscriptions').upsert({
+				user_id: userId,
+				stripe_subscription_id: sub.id,
+				product_id: productId,
+				status: 'active',
+				current_period_end: periodEnd,
+				updated_at: new Date().toISOString(),
+			}, { onConflict: 'stripe_subscription_id' });
+		}
+	} catch (err) {
+		console.error('syncSubscriptionsFromStripe:', err);
+	}
+}
 
 module.exports = async (req, res) => {
 	if (req.method !== 'GET') {
@@ -15,6 +45,9 @@ module.exports = async (req, res) => {
 
 		const supabaseUrl = process.env.SUPABASE_URL;
 		const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+		if (req.query?.sync === '1') {
+			await syncSubscriptionsFromStripe(user.id, user.email);
+		}
 		if (!supabaseUrl || !supabaseServiceKey) {
 			console.error('my-purchases: Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
 			return res.status(500).json({ error: 'Server configuration error' });

@@ -374,7 +374,19 @@ document.addEventListener('DOMContentLoaded', () => {
 			appearance: getStripeAppearance(),
 		});
 		clearPaymentElement();
-		paymentElement = elements.create('payment');
+		paymentElement = elements.create('payment', {
+			layout: {
+				type: 'tabs',
+				defaultCollapsed: false,
+			},
+			// Prefer card first while still showing other enabled methods (Link, Cash App, etc.).
+			paymentMethodOrder: [
+				'card',
+				'link',
+				'cashapp',
+				'us_bank_account',
+			],
+		});
 		paymentElement.mount('#payment-element');
 		paymentElement.on('ready', () => {
 			if (payButton) payButton.disabled = false;
@@ -398,6 +410,24 @@ document.addEventListener('DOMContentLoaded', () => {
 			sessionStorage.removeItem(PROMO_KEY);
 		} catch (_) {}
 		window.location.href = `/account.html?success=1&session_id=${encodeURIComponent(paymentIntentId)}`;
+	}
+
+	async function finalizeSubscription(paymentIntentId) {
+		const res = await fetch('/api/complete-subscription-intent', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': 'Bearer ' + authToken,
+			},
+			body: JSON.stringify({ payment_intent_id: paymentIntentId }),
+		});
+		const data = await res.json().catch(() => ({}));
+		if (!res.ok) throw new Error(data.error || 'Subscription completed, but sync failed.');
+		try {
+			localStorage.removeItem(CART_KEY);
+			sessionStorage.removeItem(PROMO_KEY);
+		} catch (_) {}
+		window.location.href = '/account.html?subscription=1&success=1';
 	}
 
 	async function initializeCheckout() {
@@ -443,7 +473,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		try {
 			showOverlay(true);
-			const useGuestFlow = !authToken || forceGuestMode;
+			const subscriptionCart = isSubscriptionCart();
+			const useGuestFlow = !subscriptionCart && (!authToken || forceGuestMode);
 			if (!stripe || !elements) {
 				await createOrRefreshPaymentElement();
 			}
@@ -460,7 +491,10 @@ document.addEventListener('DOMContentLoaded', () => {
 				try { localStorage.setItem(GUEST_EMAIL_KEY, guestEmail); } catch (_) {}
 			}
 
-			const confirmParams = {};
+			const returnUrl = window.location.origin + window.location.pathname + '?from=redirect';
+			const confirmParams = {
+				return_url: returnUrl,
+			};
 			if (useGuestFlow) {
 				confirmParams.payment_method_data = {
 					billing_details: {
@@ -487,9 +521,8 @@ document.addEventListener('DOMContentLoaded', () => {
 				sessionStorage.removeItem(PROMO_KEY);
 			} catch (_) {}
 
-			const subscriptionCart = isSubscriptionCart();
 			if (subscriptionCart) {
-				window.location.href = '/account.html?subscription=1&success=1';
+				await finalizeSubscription(paymentIntent.id);
 				return;
 			}
 			if (useGuestFlow) {
@@ -522,8 +555,65 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
-	initializeCheckout().catch((err) => {
-		setMessage(err.message || 'Checkout initialization failed.', 'error');
-		if (payButton) payButton.disabled = true;
+	async function handleRedirectReturn() {
+		const params = new URLSearchParams(window.location.search);
+		const clientSecret = params.get('payment_intent_client_secret');
+		const redirectStatus = params.get('redirect_status');
+		if (!clientSecret || !redirectStatus) return false;
+		if (redirectStatus === 'failed') {
+			setMessage('Payment was not completed. Please try again.', 'error');
+			window.history.replaceState({}, '', window.location.pathname);
+			return true;
+		}
+		if (redirectStatus !== 'succeeded' && redirectStatus !== 'processing') return false;
+		showOverlay(true);
+		try {
+			const cfgRes = await fetch('/api/stripe-config');
+			const cfg = await cfgRes.json().catch(() => ({}));
+			if (!cfg?.publishableKey || typeof window.Stripe !== 'function') {
+				setMessage('Unable to verify payment. Please check your account.', 'error');
+				return true;
+			}
+			const stripeClient = window.Stripe(cfg.publishableKey);
+			const { paymentIntent } = await stripeClient.retrievePaymentIntent(clientSecret);
+			if (!paymentIntent || paymentIntent.status !== 'succeeded') {
+				if (paymentIntent?.status === 'processing') {
+					window.location.href = '/account.html?success=1&processing=1';
+					return true;
+				}
+				setMessage('Payment verification failed. Please check your account.', 'error');
+				return true;
+			}
+			window.history.replaceState({}, '', window.location.pathname);
+			try { localStorage.removeItem(CART_KEY); sessionStorage.removeItem(PROMO_KEY); } catch (_) {}
+			authToken = await getAuthToken();
+			if (paymentIntent.invoice) {
+				if (!authToken) {
+					window.location.href = '/account.html?subscription=1&success=1';
+					return true;
+				}
+				await finalizeSubscription(paymentIntent.id);
+				return true;
+			}
+			if (!authToken) {
+				window.location.href = `/download.html?guest=1&payment_intent=${encodeURIComponent(paymentIntent.id)}`;
+				return true;
+			}
+			await finalizePayment(paymentIntent.id);
+			return true;
+		} catch (err) {
+			setMessage(err.message || 'Could not verify payment. Please check your account.', 'error');
+			return true;
+		} finally {
+			showOverlay(false);
+		}
+	}
+
+	handleRedirectReturn().then((handled) => {
+		if (handled) return;
+		initializeCheckout().catch((err) => {
+			setMessage(err.message || 'Checkout initialization failed.', 'error');
+			if (payButton) payButton.disabled = true;
+		});
 	});
 });

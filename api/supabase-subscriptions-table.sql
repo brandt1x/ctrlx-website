@@ -5,7 +5,7 @@
 -- 1. Create a Product "VISION-X Monthly" in Stripe Dashboard.
 -- 2. Add a recurring Price $100/month, copy the Price ID (price_xxx).
 -- 3. Set STRIPE_VISION_X_MONTHLY_PRICE_ID in Vercel env.
--- 4. Add webhook events: checkout.session.completed, customer.subscription.created, customer.subscription.updated, customer.subscription.deleted.
+-- 4. Add webhook events: checkout.session.completed, customer.subscription.created, customer.subscription.updated, customer.subscription.deleted, invoice.paid.
 
 CREATE TABLE IF NOT EXISTS subscriptions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

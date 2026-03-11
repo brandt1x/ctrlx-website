@@ -76,6 +76,31 @@ module.exports = async (req, res) => {
 		return res.json({ received: true });
 	}
 
+	// Backup: when first invoice is paid, subscription becomes active — ensure we record it
+	if (event.type === 'invoice.paid') {
+		const invoice = event.data.object;
+		const subId = invoice.subscription;
+		if (!subId) return res.json({ received: true });
+		try {
+			const sub = await stripe.subscriptions.retrieve(subId);
+			if (sub.status !== 'active' && sub.status !== 'trialing') return res.json({ received: true });
+			const userId = sub.metadata?.user_id;
+			if (!userId) return res.json({ received: true });
+			const periodEnd = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null;
+			await supabase.from('subscriptions').upsert({
+				user_id: userId,
+				stripe_subscription_id: sub.id,
+				product_id: sub.metadata?.product_id || 'vision-x-monthly',
+				status: 'active',
+				current_period_end: periodEnd,
+				updated_at: new Date().toISOString(),
+			}, { onConflict: 'stripe_subscription_id' });
+		} catch (err) {
+			console.error('invoice.paid subscription upsert error:', err);
+		}
+		return res.json({ received: true });
+	}
+
 	if (event.type !== 'checkout.session.completed') {
 		return res.json({ received: true });
 	}

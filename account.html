@@ -418,22 +418,32 @@
 				return m + 'm remaining';
 			}
 
-			async function loadPurchases(showProcessing, requiredSessionId) {
+			async function loadPurchases(showProcessing, requiredSessionId, syncSubscriptions) {
 				const renderEmptyPurchases = (leadText) => {
 					purchasesEl.innerHTML =
 						'<p class="muted">' + leadText + '</p>' +
+						'<p class="muted" style="margin-top:8px;"><a href="#" id="refresh-purchases-empty">Subscription not showing? Refresh</a></p>' +
 						'<div class="success-support-btns">' +
 						'<a href="ultimate.html" class="btn">Browse Ultimate</a>' +
 						'<a href="zen-scripts.html" class="btn ghost">View Zen Scripts</a>' +
 						'<a href="services.html" class="btn ghost">Explore Services</a>' +
 						'</div>';
+					const emptyRefresh = purchasesEl.querySelector('#refresh-purchases-empty');
+					if (emptyRefresh) {
+						emptyRefresh.addEventListener('click', async (e) => {
+							e.preventDefault();
+							emptyRefresh.textContent = 'Refreshing…';
+							await loadPurchases(true, null, true);
+						});
+					}
 				};
 				const { data: { session } } = await supabase.auth.getSession();
 				if (!session?.access_token) return false;
 				if (showProcessing) {
 					purchasesEl.innerHTML = '<p class="muted">Preparing your downloads...</p>';
 				}
-				const res = await fetch('/api/my-purchases', {
+				const url = '/api/my-purchases' + (syncSubscriptions ? '?sync=1' : '');
+				const res = await fetch(url, {
 					headers: { 'Authorization': 'Bearer ' + session.access_token } });
 				const data = await res.json();
 				if (!res.ok) {
@@ -485,8 +495,17 @@
 					const blockTitle = p.isSubscription ? 'Vision-X Monthly · ' + (date || '') : 'Purchase ' + (date || '');
 					return '<div class="account-purchase-block' + (expired ? ' purchase-expired' : '') + '"><h4>' + blockTitle + ' ' + statusLabel + '</h4><div class="success-download-list">' + links.join('') + '</div>' + expiredMeta + '</div>';
 				}).join('');
-				purchasesEl.innerHTML = html + '<p class="success-instruction">Your script downloads are password-protected. Check your email for your unique license key — right-click the ZIP → Extract All, enter the key when prompted, then load the .gpc file(s) into Zen Studio and flash to your CronusZen.</p>';
+				purchasesEl.innerHTML = html + '<p class="success-instruction">Your script downloads are password-protected. Check your email for your unique license key — right-click the ZIP → Extract All, enter the key when prompted, then load the .gpc file(s) into Zen Studio and flash to your CronusZen.</p><p class="muted" style="margin-top:12px;font-size:0.9rem;"><a href="#" id="refresh-purchases-link">Subscription not showing? Refresh</a></p>';
 
+				const refreshLink = purchasesEl.querySelector('#refresh-purchases-link');
+				if (refreshLink) {
+					refreshLink.addEventListener('click', async (e) => {
+						e.preventDefault();
+						refreshLink.textContent = 'Refreshing…';
+						await loadPurchases(true, null, true);
+						refreshLink.textContent = 'Subscription not showing? Refresh';
+					});
+				}
 				purchasesEl.querySelectorAll('.success-dl-btn').forEach(btn => {
 					btn.addEventListener('click', async (e) => {
 						e.preventDefault();
@@ -547,15 +566,19 @@
 			async function init() {
 				const { data: { session } } = await supabase.auth.getSession();
 				const params = new URLSearchParams(location.search);
+				const fromSubscription = params.get('subscription') === '1' && params.get('success') === '1';
 				const fromCheckout = params.get('success') === '1' && params.get('session_id');
-				const startOnPurchases = location.hash === '#purchases' || fromCheckout;
+				const startOnPurchases = location.hash === '#purchases' || fromCheckout || fromSubscription;
 				if (session) {
 					authEl.hidden = true;
 					dashboardEl.hidden = false;
 					accountEmail.textContent = session.user?.email || '';
 					purchasesLoaded = false;
 					setDashboardView(startOnPurchases ? 'purchases' : 'account');
-					if (fromCheckout) {
+					if (fromSubscription) {
+						history.replaceState({}, '', location.pathname);
+						await loadPurchases(true, null, true);
+					} else if (fromCheckout) {
 						const sessionId = params.get('session_id');
 						history.replaceState({}, '', location.pathname);
 						let found = false;
