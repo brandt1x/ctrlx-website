@@ -2,14 +2,6 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { getUserFromRequest } = require('../lib/auth-helpers');
 const { checkRateLimit } = require('../lib/rate-limit');
 
-const ALLOWED_ORIGINS = [
-	'https://cntrl-x.com',
-	'https://www.cntrl-x.com',
-	'https://cntrl-x.vercel.app',
-	'http://localhost:3000',
-	'http://127.0.0.1:3000',
-];
-
 async function getOrCreateCustomerByEmail(email, name, metadata) {
 	const normalizedEmail = String(email || '').trim().toLowerCase();
 	if (!normalizedEmail) return null;
@@ -26,10 +18,7 @@ async function getOrCreateVisionXMonthlyPrice() {
 	const envPriceId = process.env.STRIPE_VISION_X_MONTHLY_PRICE_ID;
 	if (envPriceId) return envPriceId;
 
-	const products = await stripe.products.list({
-		limit: 100,
-		active: true,
-	});
+	const products = await stripe.products.list({ limit: 100, active: true });
 	const existing = products.data.find((p) => p.metadata?.product_id === 'vision-x-monthly');
 	if (existing) {
 		const prices = await stripe.prices.list({
@@ -83,38 +72,34 @@ module.exports = async (req, res) => {
 	}
 
 	try {
-		const origin = (req.headers.origin || req.headers.referer || '').replace(/\/$/, '');
-		const baseUrl = origin && ALLOWED_ORIGINS.includes(origin)
-			? origin
-			: (process.env.SITE_URL || 'https://cntrl-x.vercel.app').replace(/\/$/, '');
-
 		const customer = await getOrCreateCustomerByEmail(
 			user.email,
 			user.user_metadata?.full_name || user.user_metadata?.name || undefined,
 			{ user_id: user.id }
 		);
 
-		const session = await stripe.checkout.sessions.create({
-			mode: 'subscription',
-			customer: customer?.id,
-			line_items: [{ price: priceId, quantity: 1 }],
-			success_url: `${baseUrl}/account.html?subscription=1&success=1`,
-			cancel_url: `${baseUrl}/ultimate.html`,
-			metadata: {
-				user_id: user.id,
-				product_id: 'vision-x-monthly',
-			},
-			subscription_data: {
-				metadata: { user_id: user.id, product_id: 'vision-x-monthly' },
-			},
+		const subscription = await stripe.subscriptions.create({
+			customer: customer.id,
+			items: [{ price: priceId, quantity: 1 }],
+			payment_behavior: 'default_incomplete',
+			expand: ['latest_invoice.payment_intent'],
+			metadata: { user_id: user.id, product_id: 'vision-x-monthly' },
 		});
 
-		if (session.url) {
-			return res.json({ url: session.url });
+		const paymentIntent = subscription.latest_invoice?.payment_intent;
+		if (!paymentIntent || !paymentIntent.client_secret) {
+			console.error('Subscription created but no payment intent:', subscription.id);
+			return res.status(500).json({ error: 'Failed to initialize subscription payment.' });
 		}
-		res.status(500).json({ error: 'Failed to create checkout session' });
+
+		return res.json({
+			clientSecret: paymentIntent.client_secret,
+			amount: 10000,
+			currency: 'usd',
+			subscriptionId: subscription.id,
+		});
 	} catch (err) {
 		console.error(err);
-		res.status(500).json({ error: err.message || 'Checkout failed' });
+		return res.status(500).json({ error: err.message || 'Subscription checkout failed.' });
 	}
 };

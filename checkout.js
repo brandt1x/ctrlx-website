@@ -66,6 +66,9 @@ document.addEventListener('DOMContentLoaded', () => {
 				if ((item.productId || '').toLowerCase() === 'vision-x') {
 					return { ...item, price: 450 };
 				}
+				if ((item.productId || '').toLowerCase() === 'vision-x-monthly') {
+					return { ...item, price: 100 };
+				}
 				if ((item.productId || '').toLowerCase() === 'aim-x') {
 					return { ...item, price: 275 };
 				}
@@ -118,10 +121,22 @@ document.addEventListener('DOMContentLoaded', () => {
 		overlay.setAttribute('aria-hidden', String(!show));
 	}
 
+	function isSubscriptionCart() {
+		if (!cartItems.length) return false;
+		return cartItems.every((i) => (i.productId || '').toLowerCase() === 'vision-x-monthly');
+	}
+
+	function hasMixedCart() {
+		const hasSub = cartItems.some((i) => (i.productId || '').toLowerCase() === 'vision-x-monthly');
+		const hasOneTime = cartItems.some((i) => (i.productId || '').toLowerCase() !== 'vision-x-monthly');
+		return hasSub && hasOneTime;
+	}
+
 	function renderSummary() {
 		const items = cartItems;
+		const subscriptionCart = isSubscriptionCart();
 		const subtotal = items.reduce((sum, i) => sum + (Number(i.price) || 0), 0);
-		const multiplier = currentPromo && PROMO_DISCOUNTS[currentPromo] != null ? PROMO_DISCOUNTS[currentPromo] : 1;
+		const multiplier = !subscriptionCart && currentPromo && PROMO_DISCOUNTS[currentPromo] != null ? PROMO_DISCOUNTS[currentPromo] : 1;
 		const hasDiscount = multiplier < 1;
 		const discount = subtotal * (1 - multiplier);
 		const total = subtotal - discount;
@@ -150,7 +165,9 @@ document.addEventListener('DOMContentLoaded', () => {
 			discountEl.textContent = hasDiscount ? `-${fmt(discount)}` : '-$0';
 		}
 
-		if (totalEl) totalEl.textContent = fmt(total);
+		if (totalEl) {
+			totalEl.textContent = subscriptionCart ? fmt(total) + '/mo' : fmt(total);
+		}
 
 		setPayBtnAmount(total);
 		checkoutAmountCents = Math.round(total * 100);
@@ -227,13 +244,14 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	function renderGuestEmailVisibility() {
+		const subscriptionCart = isSubscriptionCart();
 		const signedIn = !!authToken;
-		if (guestToggleWrap) guestToggleWrap.hidden = !signedIn;
-		if (guestModeToggle && signedIn) {
+		if (guestToggleWrap) guestToggleWrap.hidden = subscriptionCart || !signedIn;
+		if (guestModeToggle && signedIn && !subscriptionCart) {
 			guestModeToggle.textContent = forceGuestMode ? 'Use account checkout' : 'Checkout as guest instead';
 		}
 		if (!guestEmailBlock) return;
-		const isGuest = !authToken || forceGuestMode;
+		const isGuest = !subscriptionCart && (!authToken || forceGuestMode);
 		guestEmailBlock.hidden = !isGuest;
 		if (guestEmailInput) {
 			guestEmailInput.required = isGuest;
@@ -298,8 +316,15 @@ document.addEventListener('DOMContentLoaded', () => {
 			return;
 		}
 
-		const useGuestFlow = !authToken || forceGuestMode;
+		const subscriptionCart = isSubscriptionCart();
+		const useGuestFlow = !subscriptionCart && (!authToken || forceGuestMode);
 		let guestEmail = '';
+		if (subscriptionCart && !authToken) {
+			clearPaymentElement();
+			if (payButton) payButton.disabled = true;
+			setMessage('Sign in to subscribe. Subscriptions require an account.', 'error');
+			return;
+		}
 		if (useGuestFlow) {
 			guestEmail = String(guestEmailInput?.value || '').trim().toLowerCase();
 			if (!isValidEmail(guestEmail)) {
@@ -315,16 +340,21 @@ document.addEventListener('DOMContentLoaded', () => {
 			headers.Authorization = 'Bearer ' + authToken;
 		}
 
+		const intentUrl = subscriptionCart ? '/api/create-subscription-intent' : '/api/create-payment-intent';
+		const intentBody = subscriptionCart
+			? {}
+			: {
+				productIds,
+				promoCode: currentPromo,
+				customerEmail: useGuestFlow ? guestEmail : undefined,
+			};
+
 		const [cfgRes, intentRes] = await Promise.all([
 			fetch('/api/stripe-config'),
-			fetch('/api/create-payment-intent', {
+			fetch(intentUrl, {
 				method: 'POST',
 				headers,
-				body: JSON.stringify({
-					productIds,
-					promoCode: currentPromo,
-					customerEmail: useGuestFlow ? guestEmail : undefined,
-				}),
+				body: JSON.stringify(intentBody),
 			}),
 		]);
 
@@ -384,6 +414,11 @@ document.addEventListener('DOMContentLoaded', () => {
 			return;
 		}
 
+		if (hasMixedCart()) {
+			setMessage('Cannot mix subscription and one-time purchases. Use separate checkouts.', 'error');
+			if (payButton) payButton.disabled = true;
+			return;
+		}
 		authToken = await getAuthToken();
 		renderGuestEmailVisibility();
 		if (payButton) payButton.disabled = true;
@@ -452,6 +487,11 @@ document.addEventListener('DOMContentLoaded', () => {
 				sessionStorage.removeItem(PROMO_KEY);
 			} catch (_) {}
 
+			const subscriptionCart = isSubscriptionCart();
+			if (subscriptionCart) {
+				window.location.href = '/account.html?subscription=1&success=1';
+				return;
+			}
 			if (useGuestFlow) {
 				window.location.href = `/download.html?guest=1&payment_intent=${encodeURIComponent(paymentIntent.id)}`;
 				return;

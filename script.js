@@ -1458,69 +1458,12 @@ document.addEventListener('DOMContentLoaded', function () {
 		document.body.addEventListener('click', async (e) => {
 			const btn = e.target?.closest?.('.ultimate-add-btn');
 			if (!btn) return;
-			// Vision-X Subscribe $100/mo — redirect to Stripe subscription checkout
+			// Vision-X Subscribe $100/mo — add to cart and go to custom checkout
 			if (btn.id === 'vision-x-subscribe-btn') {
 				e.preventDefault();
-				let client = window.__supabaseClient;
-				if (!client && (window.supabase || window.supabaseJs)) {
-					const cfgRes = await fetch('/api/supabase-config');
-					const cfg = await cfgRes.json().catch(() => ({}));
-					if (cfg?.url && cfg?.anonKey) {
-						const lib = window.supabase || window.supabaseJs;
-						const createClient = lib?.createClient || lib?.default?.createClient;
-						if (createClient) {
-							client = createClient(cfg.url, cfg.anonKey);
-							window.__supabaseClient = client;
-						}
-					}
-				}
-				if (!client && !window.supabase && !window.supabaseJs) {
-					await new Promise((resolve, reject) => {
-						const s = document.createElement('script');
-						s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-						s.async = true;
-						s.onload = resolve;
-						s.onerror = reject;
-						document.head.appendChild(s);
-					});
-					client = window.__supabaseClient;
-					if (!client) {
-						const cfgRes = await fetch('/api/supabase-config');
-						const cfg = await cfgRes.json().catch(() => ({}));
-						if (cfg?.url && cfg?.anonKey) {
-							const lib = window.supabase || window.supabaseJs;
-							const createClient = lib?.createClient || lib?.default?.createClient;
-							if (createClient) {
-								client = createClient(cfg.url, cfg.anonKey);
-								window.__supabaseClient = client;
-							}
-						}
-					}
-				}
-				const { data: { session } } = client ? await client.auth.getSession() : { data: { session: null } };
-				if (!session?.access_token) {
-					location.href = '/account.html?signin=1&redirect=vision-x-subscribe';
-					return;
-				}
-				btn.disabled = true;
-				btn.textContent = 'Redirecting…';
-				try {
-					const res = await fetch('/api/create-vision-x-subscription-checkout', {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
-					});
-					const data = await res.json().catch(() => ({}));
-					if (res.ok && data.url) {
-						location.href = data.url;
-						return;
-					}
-					alert(data.error || 'Subscription checkout failed. Please try again.');
-				} catch (err) {
-					alert('Network error. Please try again.');
-				} finally {
-					btn.disabled = false;
-					btn.textContent = 'Subscribe $100/mo';
-				}
+				if (!window.__addToSiteCart) return;
+				window.__addToSiteCart('vision-x-monthly', 'VISION-X Computer Vision — Monthly', '100');
+				location.href = '/checkout.html';
 				return;
 			}
 			if (!window.__addToSiteCart) return;

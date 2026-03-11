@@ -37,16 +37,42 @@ module.exports = async (req, res) => {
 	}
 	const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-	// Subscription lifecycle events
+	// Subscription lifecycle events (API-created and Checkout-created)
 	if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
 		const sub = event.data.object;
 		const status = sub.status === 'active' ? 'active' : (sub.status === 'trialing' ? 'active' : 'canceled');
 		const periodEnd = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null;
-		const { error } = await supabase
-			.from('subscriptions')
-			.update({ status, current_period_end: periodEnd, updated_at: new Date().toISOString() })
-			.eq('stripe_subscription_id', sub.id);
-		if (error) console.error('Subscription update error:', error);
+		const userId = sub.metadata?.user_id;
+		const productId = sub.metadata?.product_id || 'vision-x-monthly';
+		if (userId) {
+			await supabase.from('subscriptions').upsert({
+				user_id: userId,
+				stripe_subscription_id: sub.id,
+				product_id: productId,
+				status,
+				current_period_end: periodEnd,
+				updated_at: new Date().toISOString(),
+			}, { onConflict: 'stripe_subscription_id' });
+		} else {
+			await supabase.from('subscriptions').update({ status, current_period_end: periodEnd, updated_at: new Date().toISOString() }).eq('stripe_subscription_id', sub.id);
+		}
+		return res.json({ received: true });
+	}
+
+	if (event.type === 'customer.subscription.created') {
+		const sub = event.data.object;
+		if (sub.status !== 'active' && sub.status !== 'trialing') return res.json({ received: true });
+		const userId = sub.metadata?.user_id;
+		if (!userId) return res.json({ received: true });
+		const periodEnd = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null;
+		await supabase.from('subscriptions').upsert({
+			user_id: userId,
+			stripe_subscription_id: sub.id,
+			product_id: sub.metadata?.product_id || 'vision-x-monthly',
+			status: 'active',
+			current_period_end: periodEnd,
+			updated_at: new Date().toISOString(),
+		}, { onConflict: 'stripe_subscription_id' });
 		return res.json({ received: true });
 	}
 
