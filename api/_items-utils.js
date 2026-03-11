@@ -12,6 +12,7 @@ const PRODUCT_TO_FLAGS = {
 	rust: ['hasRust'],
 	'all-scripts': ['hasAllBundle'],
 	'vision-x': ['hasVisionX'],
+	'vision-x-monthly': ['hasVisionX'],
 	'vision-x-plus': ['hasVisionXPlus'],
 	'aim-x': ['hasAimX'],
 };

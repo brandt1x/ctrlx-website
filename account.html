@@ -452,11 +452,12 @@
 					const expired = p.isExpired;
 					const remaining = !expired && p.expiresAt ? timeRemaining(p.expiresAt) : null;
 					const links = [];
+					const isSub = !!p.isSubscription;
 					function dlBtn(label, type, script) {
 						if (expired) {
 							return '<span class="btn btn-disabled success-dl-btn-expired">Download expired</span>';
 						}
-						return '<a href="#" class="btn success-dl-btn" data-session="' + p.session_id + '" data-type="' + type + '"' + (script ? ' data-script="' + script + '"' : '') + '>' + label + '</a>';
+						return '<a href="#" class="btn success-dl-btn" data-session="' + (p.session_id || '') + '" data-subscription="' + (isSub ? '1' : '') + '" data-type="' + type + '"' + (script ? ' data-script="' + script + '"' : '') + '>' + label + '</a>';
 					}
 					if (p.hasControlX) links.push(dlBtn('Download CONTROL+X Ultimate Script (.gpc)', 'script', 'control-x'));
 					if (p.hasVisionX) links.push(dlBtn('Download Vision-X Tempo', 'vision-x', ''));
@@ -473,13 +474,16 @@
 						if (p.hasRust) links.push(dlBtn('Download Rust Script (.gpc)', 'script', 'rust'));
 					}
 					const date = p.created_at ? new Date(p.created_at).toLocaleDateString() : '';
-					const statusLabel = expired
-						? '<span class="purchase-status purchase-status-expired">Purchased • Download window expired</span>'
-						: (remaining ? '<span class="purchase-status purchase-status-active">' + remaining + '</span>' : '');
+					const statusLabel = p.isSubscription
+						? (expired ? '<span class="purchase-status purchase-status-expired">Subscription ended</span>' : '<span class="purchase-status purchase-status-active">Active subscription</span>')
+						: (expired
+							? '<span class="purchase-status purchase-status-expired">Purchased • Download window expired</span>'
+							: (remaining ? '<span class="purchase-status purchase-status-active">' + remaining + '</span>' : ''));
 					const expiredMeta = expired
 						? '<p class="purchase-expired-note">This purchase is still on your account, but the 24-hour download window has ended.</p><div class="purchase-expired-actions"><a href="contact.html" class="btn ghost">Contact Support</a></div>'
 						: '';
-					return '<div class="account-purchase-block' + (expired ? ' purchase-expired' : '') + '"><h4>Purchase ' + date + ' ' + statusLabel + '</h4><div class="success-download-list">' + links.join('') + '</div>' + expiredMeta + '</div>';
+					const blockTitle = p.isSubscription ? 'Vision-X Monthly · ' + (date || '') : 'Purchase ' + (date || '');
+					return '<div class="account-purchase-block' + (expired ? ' purchase-expired' : '') + '"><h4>' + blockTitle + ' ' + statusLabel + '</h4><div class="success-download-list">' + links.join('') + '</div>' + expiredMeta + '</div>';
 				}).join('');
 				purchasesEl.innerHTML = html + '<p class="success-instruction">Your script downloads are password-protected. Check your email for your unique license key — right-click the ZIP → Extract All, enter the key when prompted, then load the .gpc file(s) into Zen Studio and flash to your CronusZen.</p>';
 
@@ -487,17 +491,23 @@
 					btn.addEventListener('click', async (e) => {
 						e.preventDefault();
 						const sessionId = btn.dataset.session;
+						const isSubscription = btn.dataset.subscription === '1';
 						const type = btn.dataset.type;
 						const script = btn.dataset.script;
 						const { data: { session } } = await supabase.auth.getSession();
 						if (!session?.access_token) return;
-						let url = '/api/download?session_id=' + encodeURIComponent(sessionId) + '&type=';
-						if (type === 'vision-x') url += 'vision-x';
-						else if (type === 'vision-x-plus') url += 'vision-x-plus';
-						else if (type === 'aim-x') url += 'aim-x';
-						else if (type === 'siege') url += 'siege';
-						else if (type === 'all-scripts') url += 'all-scripts';
-						else url += 'script&script=' + (script || '');
+						let url;
+						if (isSubscription && type === 'vision-x') {
+							url = '/api/download?type=vision-x';
+						} else {
+							url = '/api/download?session_id=' + encodeURIComponent(sessionId || '') + '&type=';
+							if (type === 'vision-x') url += 'vision-x';
+							else if (type === 'vision-x-plus') url += 'vision-x-plus';
+							else if (type === 'aim-x') url += 'aim-x';
+							else if (type === 'siege') url += 'siege';
+							else if (type === 'all-scripts') url += 'all-scripts';
+							else url += 'script&script=' + (script || '');
+						}
 						let res;
 						try {
 							res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + session.access_token } });

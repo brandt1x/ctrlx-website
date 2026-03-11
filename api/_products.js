@@ -13,6 +13,7 @@ const PRODUCT_CATALOG = {
 	'rust': { name: 'Rust Zen Script', price: 20 },
 	'all-scripts': { name: 'All Zen Scripts Bundle', price: 135 },
 	'vision-x': { name: 'VISION-X Computer Vision', price: 450 },
+	'vision-x-monthly': { name: 'VISION-X Computer Vision — Monthly', price: 100, recurring: 'month' },
 	'vision-x-plus': { name: 'VISION+X Computer Vision', price: 750 },
 	'aim-x': { name: 'AIM-X Aim Engine', price: 275 },
 	'vision-setup': { name: 'CTRL-X All Services Setup', price: 25 },
@@ -29,6 +30,7 @@ function validateAndBuildLineItems(productIds) {
 	for (const id of productIds) {
 		const product = getProduct(id);
 		if (!product) return null;
+		if (product.recurring) return null; // Recurring products use subscription checkout, not cart
 		lineItems.push({
 			price_data: {
 				currency: 'usd',

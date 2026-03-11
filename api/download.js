@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const archiver = require('archiver');
-const { getUserFromRequest, getOwnedPurchase } = require('./_auth-helpers');
+const { getUserFromRequest, getOwnedPurchase, hasActiveSubscription } = require('./_auth-helpers');
 const { getPurchaseFlags } = require('./_items-utils');
 const { checkRateLimit } = require('./_rate-limit');
 const { getLicenseKey } = require('./_license');
@@ -54,27 +54,39 @@ module.exports = async (req, res) => {
 	const type = req.query.type || req.query.t;
 	const script = req.query.script;
 
-	if (!sessionId || !type) {
-		return res.status(400).json({ error: 'Missing session_id or type' });
+	if (!type) {
+		return res.status(400).json({ error: 'Missing type' });
 	}
 
 	const EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 	try {
-		const purchase = await getOwnedPurchase(user.id, sessionId);
-		if (!purchase) {
-			return res.status(403).json({ error: 'Purchase not found or access denied' });
-		}
+		let purchase = null;
+		let flags = { hasVisionX: false, hasVisionXPlus: false, hasAimX: false };
 
-		// Enforce 24-hour download window
-		if (purchase.created_at) {
-			const createdMs = new Date(purchase.created_at).getTime();
-			if (Date.now() > createdMs + EXPIRY_MS) {
-				return res.status(403).json({ error: 'Download expired. Downloads are available for 24 hours after purchase.' });
+		// Subscription-based download (no session_id)
+		if (!sessionId) {
+			if (type === 'vision-x') {
+				const hasSub = await hasActiveSubscription(user.id, 'vision-x-monthly');
+				if (!hasSub) return res.status(403).json({ error: 'Vision-X subscription required' });
+				flags = { hasVisionX: true };
+			} else {
+				return res.status(400).json({ error: 'session_id required for this download type' });
 			}
+		} else {
+			purchase = await getOwnedPurchase(user.id, sessionId);
+			if (!purchase) {
+				return res.status(403).json({ error: 'Purchase not found or access denied' });
+			}
+			// Enforce 24-hour download window for one-time purchases
+			if (purchase.created_at) {
+				const createdMs = new Date(purchase.created_at).getTime();
+				if (Date.now() > createdMs + EXPIRY_MS) {
+					return res.status(403).json({ error: 'Download expired. Downloads are available for 24 hours after purchase.' });
+				}
+			}
+			flags = getPurchaseFlags(purchase.items);
 		}
-
-		const flags = getPurchaseFlags(purchase.items);
 
 		const isScriptType = type === 'siege' || type === 'all-scripts' || type === 'script';
 		let licenseKey = null;

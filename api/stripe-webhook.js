@@ -29,12 +29,70 @@ module.exports = async (req, res) => {
 		return res.status(400).json({ error: `Webhook Error: ${err.message}` });
 	}
 
+	const supabaseUrl = process.env.SUPABASE_URL;
+	const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+	if (!supabaseUrl || !supabaseServiceKey) {
+		console.error('Missing Supabase env vars');
+		return res.status(500).json({ error: 'Server configuration error' });
+	}
+	const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+	// Subscription lifecycle events
+	if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
+		const sub = event.data.object;
+		const status = sub.status === 'active' ? 'active' : (sub.status === 'trialing' ? 'active' : 'canceled');
+		const periodEnd = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null;
+		const { error } = await supabase
+			.from('subscriptions')
+			.update({ status, current_period_end: periodEnd, updated_at: new Date().toISOString() })
+			.eq('stripe_subscription_id', sub.id);
+		if (error) console.error('Subscription update error:', error);
+		return res.json({ received: true });
+	}
+
 	if (event.type !== 'checkout.session.completed') {
 		return res.json({ received: true });
 	}
 
 	const session = event.data.object;
 	const userId = session.metadata?.user_id;
+
+	// Subscription checkout — record in subscriptions table
+	if (session.mode === 'subscription' && session.subscription) {
+		if (!userId) {
+			console.warn('checkout.session.completed (subscription) missing user_id');
+			return res.json({ received: true });
+		}
+		const productId = session.metadata?.product_id || 'vision-x-monthly';
+		let subObj = session.subscription;
+		if (typeof subObj === 'string') {
+			try {
+				subObj = await stripe.subscriptions.retrieve(subObj);
+			} catch (err) {
+				console.error('Failed to retrieve subscription:', err);
+				return res.status(500).json({ error: 'Failed to retrieve subscription' });
+			}
+		}
+		const periodEnd = subObj.current_period_end
+			? new Date(subObj.current_period_end * 1000).toISOString()
+			: null;
+		const { error } = await supabase.from('subscriptions').upsert({
+			user_id: userId,
+			stripe_subscription_id: subObj.id,
+			product_id: productId,
+			status: subObj.status === 'active' || subObj.status === 'trialing' ? 'active' : subObj.status,
+			current_period_end: periodEnd,
+			updated_at: new Date().toISOString(),
+		}, { onConflict: 'stripe_subscription_id' });
+		if (error) {
+			if (error.code === '23505') return res.json({ received: true });
+			console.error('Subscription insert error:', error);
+			return res.status(500).json({ error: 'Failed to record subscription' });
+		}
+		return res.json({ received: true });
+	}
+
+	// One-time payment checkout — record in purchases table
 	if (!userId) {
 		console.warn('checkout.session.completed missing user_id in metadata');
 		return res.json({ received: true });
@@ -79,14 +137,6 @@ module.exports = async (req, res) => {
 		}
 	}
 
-	const supabaseUrl = process.env.SUPABASE_URL;
-	const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-	if (!supabaseUrl || !supabaseServiceKey) {
-		console.error('Missing Supabase env vars');
-		return res.status(500).json({ error: 'Server configuration error' });
-	}
-
-	const supabase = createClient(supabaseUrl, supabaseServiceKey);
 	const { error } = await supabase.from('purchases').insert({
 		user_id: userId,
 		session_id: session.id,
@@ -95,7 +145,6 @@ module.exports = async (req, res) => {
 
 	if (error) {
 		if (error.code === '23505') {
-			// Unique violation - already inserted (idempotent)
 			return res.json({ received: true });
 		}
 		console.error('Failed to insert purchase:', error);

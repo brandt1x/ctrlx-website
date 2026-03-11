@@ -413,6 +413,27 @@ nav a.nav-ultimate::after,
 	letter-spacing: 0.08em;
 }
 
+.ultimate-product-price-alt {
+	font-size: 0.55em;
+	font-weight: 600;
+	color: var(--muted);
+	letter-spacing: 0.06em;
+	margin-left: 0.35em;
+}
+
+.ultimate-product-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: 4px;
+}
+
+.ultimate-product-actions .ultimate-add-btn {
+	width: auto;
+	flex: 1;
+	min-width: 0;
+}
+
 .ultimate-add-btn {
 	width: 100%;
 	padding: 14px 24px;

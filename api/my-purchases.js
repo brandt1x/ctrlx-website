@@ -21,11 +21,18 @@ module.exports = async (req, res) => {
 		}
 
 		const supabase = createClient(supabaseUrl, supabaseServiceKey);
-		const { data: rows, error } = await supabase
-			.from('purchases')
-			.select('session_id, items, created_at')
-			.eq('user_id', user.id)
-			.order('created_at', { ascending: false });
+		const [{ data: rows, error }, { data: subRows }] = await Promise.all([
+			supabase
+				.from('purchases')
+				.select('session_id, items, created_at')
+				.eq('user_id', user.id)
+				.order('created_at', { ascending: false }),
+			supabase
+				.from('subscriptions')
+				.select('stripe_subscription_id, product_id, status, current_period_end, created_at')
+				.eq('user_id', user.id)
+				.eq('status', 'active'),
+		]);
 
 		if (error) {
 			console.error('my-purchases: Supabase error', error.code, error.message);
@@ -49,6 +56,24 @@ module.exports = async (req, res) => {
 				...flags,
 			};
 		});
+
+		// Add active subscriptions as synthetic "purchases" for download UI
+		const SUBSCRIPTION_FLAGS = { 'vision-x-monthly': { hasVisionX: true } };
+		for (const sub of subRows || []) {
+			const flags = SUBSCRIPTION_FLAGS[sub.product_id] || {};
+			const periodEnd = sub.current_period_end ? new Date(sub.current_period_end) : null;
+			const isExpired = periodEnd ? Date.now() > periodEnd.getTime() : false;
+			purchases.unshift({
+				session_id: null,
+				subscription_id: sub.stripe_subscription_id,
+				items: [{ product_id: sub.product_id, name: 'VISION-X Computer Vision — Monthly', price: 100 }],
+				created_at: sub.created_at,
+				expiresAt: periodEnd ? periodEnd.toISOString() : null,
+				isExpired,
+				isSubscription: true,
+				...flags,
+			});
+		}
 
 		res.json({ purchases });
 	} catch (err) {

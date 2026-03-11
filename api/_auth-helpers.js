@@ -67,4 +67,24 @@ async function getOwnedPurchase(userId, sessionId) {
 	return { items, created_at: data.created_at };
 }
 
-module.exports = { getUserFromRequest, userOwnsSession, getOwnedPurchase };
+/**
+ * Check if user has an active subscription for the given product (e.g. vision-x-monthly).
+ */
+async function hasActiveSubscription(userId, productId) {
+	const supabaseUrl = process.env.SUPABASE_URL;
+	const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+	if (!supabaseUrl || !supabaseServiceKey) return false;
+
+	const supabase = createClient(supabaseUrl, supabaseServiceKey);
+	const { data, error } = await supabase
+		.from('subscriptions')
+		.select('id')
+		.eq('user_id', userId)
+		.eq('product_id', productId)
+		.eq('status', 'active')
+		.maybeSingle();
+
+	return !error && !!data;
+}
+
+module.exports = { getUserFromRequest, userOwnsSession, getOwnedPurchase, hasActiveSubscription };
