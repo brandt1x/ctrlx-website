@@ -67,7 +67,7 @@ module.exports = async (req, res) => {
 		// Subscription-based download (no session_id)
 		if (!sessionId) {
 			if (type === 'vision-x') {
-				const hasSub = await hasActiveSubscription(user.id, 'vision-x-monthly');
+				const hasSub = await hasActiveSubscription(user.id, 'vision-x-monthly', user.email);
 				if (!hasSub) return res.status(403).json({ error: 'Vision-X subscription required' });
 				flags = { hasVisionX: true };
 			} else {

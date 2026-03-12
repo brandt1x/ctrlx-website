@@ -495,7 +495,7 @@
 					const blockTitle = p.isSubscription ? 'Vision-X Monthly · ' + (date || '') : 'Purchase ' + (date || '');
 					return '<div class="account-purchase-block' + (expired ? ' purchase-expired' : '') + '"><h4>' + blockTitle + ' ' + statusLabel + '</h4><div class="success-download-list">' + links.join('') + '</div>' + expiredMeta + '</div>';
 				}).join('');
-				purchasesEl.innerHTML = html + '<p class="success-instruction">Your script downloads are password-protected. Check your email for your unique license key — right-click the ZIP → Extract All, enter the key when prompted, then load the .gpc file(s) into Zen Studio and flash to your CronusZen.</p><p class="muted" style="margin-top:12px;font-size:0.9rem;"><a href="#" id="refresh-purchases-link">Subscription not showing? Refresh</a></p>';
+				purchasesEl.innerHTML = html + '<p class="success-instruction">Your script downloads are password-protected. Check your email for your unique license key — right-click the ZIP → Extract All, enter the key when prompted, then load the .gpc file(s) into Zen Studio and flash to your CronusZen.</p><p class="muted" style="margin-top:12px;font-size:0.9rem;"><a href="#" id="refresh-purchases-link" class="success-refresh-link" style="color:#ef4444;text-decoration:underline;">Subscription not showing? Refresh</a></p>';
 
 				const refreshLink = purchasesEl.querySelector('#refresh-purchases-link');
 				if (refreshLink) {
