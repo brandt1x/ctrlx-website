@@ -3,6 +3,35 @@ const { getUserFromRequest } = require('../lib/auth-helpers');
 const { getPurchaseFlags } = require('../lib/items-utils');
 const { createClient } = require('@supabase/supabase-js');
 
+async function persistSubscriptionRecord(supabase, row) {
+	const { error } = await supabase.from('subscriptions').upsert(row, {
+		onConflict: 'stripe_subscription_id',
+	});
+	if (!error || error.code === '23505') return null;
+
+	const { data: existing, error: existingError } = await supabase
+		.from('subscriptions')
+		.select('id')
+		.eq('user_id', row.user_id)
+		.eq('product_id', row.product_id)
+		.limit(1)
+		.maybeSingle();
+	if (existingError || !existing?.id) {
+		return error;
+	}
+
+	const { error: updateError } = await supabase
+		.from('subscriptions')
+		.update({
+			stripe_subscription_id: row.stripe_subscription_id,
+			status: row.status,
+			current_period_end: row.current_period_end,
+			updated_at: row.updated_at,
+		})
+		.eq('id', existing.id);
+	return updateError || null;
+}
+
 async function syncSubscriptionsFromStripe(userId, userEmail) {
 	const supabaseUrl = process.env.SUPABASE_URL;
 	const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -10,22 +39,39 @@ async function syncSubscriptionsFromStripe(userId, userEmail) {
 	const email = (userEmail || '').trim().toLowerCase();
 	if (!email) return;
 	try {
-		const customers = await stripe.customers.list({ email, limit: 1 });
-		const customer = customers.data?.[0];
-		if (!customer) return;
-		const subs = await stripe.subscriptions.list({ customer: customer.id, status: 'active', limit: 20 });
 		const supabase = createClient(supabaseUrl, supabaseServiceKey);
-		for (const sub of subs.data || []) {
-			const periodEnd = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null;
-			const productId = sub.metadata?.product_id || 'vision-x-monthly';
-			await supabase.from('subscriptions').upsert({
-				user_id: userId,
-				stripe_subscription_id: sub.id,
-				product_id: productId,
-				status: 'active',
-				current_period_end: periodEnd,
-				updated_at: new Date().toISOString(),
-			}, { onConflict: 'stripe_subscription_id' });
+		const customers = await stripe.customers.list({ email, limit: 10 });
+		const seenSubscriptions = new Set();
+		for (const customer of customers.data || []) {
+			const subs = await stripe.subscriptions.list({
+				customer: customer.id,
+				status: 'all',
+				limit: 100,
+				expand: ['data.latest_invoice.payment_intent'],
+			});
+			for (const sub of subs.data || []) {
+				if (!sub?.id || seenSubscriptions.has(sub.id)) continue;
+				seenSubscriptions.add(sub.id);
+
+				const paymentIntentStatus = sub.latest_invoice?.payment_intent?.status || '';
+				const shouldGrantAccess =
+					sub.status === 'active' ||
+					sub.status === 'trialing' ||
+					sub.status === 'past_due' ||
+					paymentIntentStatus === 'succeeded';
+				if (!shouldGrantAccess) continue;
+
+				const periodEnd = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null;
+				const productId = sub.metadata?.product_id || 'vision-x-monthly';
+				await persistSubscriptionRecord(supabase, {
+					user_id: userId,
+					stripe_subscription_id: sub.id,
+					product_id: productId,
+					status: 'active',
+					current_period_end: periodEnd,
+					updated_at: new Date().toISOString(),
+				});
+			}
 		}
 	} catch (err) {
 		console.error('syncSubscriptionsFromStripe:', err);
@@ -54,7 +100,7 @@ module.exports = async (req, res) => {
 		}
 
 		const supabase = createClient(supabaseUrl, supabaseServiceKey);
-		const [{ data: rows, error }, { data: subRows }] = await Promise.all([
+		const [{ data: rows, error }, subQuery] = await Promise.all([
 			supabase
 				.from('purchases')
 				.select('session_id, items, created_at')
@@ -66,10 +112,21 @@ module.exports = async (req, res) => {
 				.eq('user_id', user.id)
 				.eq('status', 'active'),
 		]);
+		let subRows = subQuery?.data || [];
 
 		if (error) {
 			console.error('my-purchases: Supabase error', error.code, error.message);
 			return res.status(500).json({ error: 'Failed to load purchases' });
+		}
+
+		if ((!subRows || subRows.length === 0) && user.email) {
+			await syncSubscriptionsFromStripe(user.id, user.email);
+			const { data: refreshedSubs } = await supabase
+				.from('subscriptions')
+				.select('stripe_subscription_id, product_id, status, current_period_end, created_at')
+				.eq('user_id', user.id)
+				.eq('status', 'active');
+			subRows = refreshedSubs || [];
 		}
 
 		const EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours

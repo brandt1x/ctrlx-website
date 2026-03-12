@@ -381,6 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			},
 			paymentMethodOrder: [
 				'card',
+				'link',
 				'cashapp',
 				'us_bank_account',
 			],

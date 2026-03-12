@@ -31,6 +31,13 @@ async function persistSubscriptionRecord(supabase, row) {
 	return updateError || null;
 }
 
+function normalizeStatus(subscriptionStatus, paymentIntentStatus) {
+	if (paymentIntentStatus === 'succeeded') return 'active';
+	if (subscriptionStatus === 'active' || subscriptionStatus === 'trialing') return 'active';
+	if (subscriptionStatus === 'past_due') return 'active';
+	return subscriptionStatus;
+}
+
 module.exports = async (req, res) => {
 	if (req.method !== 'POST') {
 		return res.status(405).json({ error: 'Method not allowed' });
@@ -61,9 +68,16 @@ module.exports = async (req, res) => {
 			return res.status(400).json({ error: 'No subscription found for this invoice' });
 		}
 
-		const subscription = await stripe.subscriptions.retrieve(subId);
+		const subscription = await stripe.subscriptions.retrieve(subId, {
+			expand: ['customer'],
+		});
 		const subUserId = subscription.metadata?.user_id || '';
-		if (!subUserId || subUserId !== user.id) {
+		const customerEmail = typeof subscription.customer === 'object'
+			? String(subscription.customer?.email || '').trim().toLowerCase()
+			: '';
+		const userEmail = String(user.email || '').trim().toLowerCase();
+		const ownsByEmail = !!customerEmail && !!userEmail && customerEmail === userEmail;
+		if ((!subUserId || subUserId !== user.id) && !ownsByEmail) {
 			return res.status(403).json({ error: 'Subscription does not belong to current user' });
 		}
 
@@ -76,9 +90,7 @@ module.exports = async (req, res) => {
 		const periodEnd = subscription.current_period_end
 			? new Date(subscription.current_period_end * 1000).toISOString()
 			: null;
-		const status = subscription.status === 'active' || subscription.status === 'trialing'
-			? 'active'
-			: subscription.status;
+		const status = normalizeStatus(subscription.status, paymentIntent.status);
 
 		const row = {
 			user_id: user.id,

@@ -295,8 +295,26 @@ body {
 .co-payment-element-scroll {
 	width: 100%;
 	max-width: 100%;
-	overflow: visible;
-	padding-bottom: 0;
+	overflow-x: auto;
+	overflow-y: visible;
+	padding-bottom: 10px;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(248, 113, 113, 0.55) rgba(255, 255, 255, 0.05);
+}
+
+.co-payment-element-scroll::-webkit-scrollbar {
+	height: 10px;
+}
+
+.co-payment-element-scroll::-webkit-scrollbar-track {
+	background: rgba(255, 255, 255, 0.05);
+	border-radius: 999px;
+}
+
+.co-payment-element-scroll::-webkit-scrollbar-thumb {
+	background: rgba(248, 113, 113, 0.55);
+	border-radius: 999px;
 }
 
 #payment-element {
@@ -305,7 +323,7 @@ body {
 	overflow: visible;
 	width: 100%;
 	max-width: 100%;
-	min-width: 0;
+	min-width: 980px;
 }
 
 /* Stripe renders inside an iframe — keep the iframe wrapper from clipping tab overflow */
@@ -976,6 +994,6 @@ body.theme-light .co-badge {
 		padding-inline: 0;
 	}
 	#payment-element {
-		min-width: 0;
+		min-width: 760px;
 	}
 }
