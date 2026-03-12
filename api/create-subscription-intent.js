@@ -84,6 +84,7 @@ module.exports = async (req, res) => {
 			payment_behavior: 'default_incomplete',
 			payment_settings: {
 				save_default_payment_method: 'on_subscription',
+				payment_method_types: ['card', 'link', 'cashapp', 'us_bank_account'],
 			},
 			expand: ['latest_invoice.payment_intent'],
 			metadata: { user_id: user.id, product_id: 'vision-x-monthly' },

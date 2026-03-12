@@ -83,9 +83,7 @@ module.exports = async (req, res) => {
 		const paymentIntent = await stripe.paymentIntents.create({
 			amount: amountCents,
 			currency: 'usd',
-			automatic_payment_methods: {
-				enabled: true,
-			},
+			payment_method_types: ['card', 'link', 'cashapp', 'us_bank_account'],
 			customer: customer?.id || undefined,
 			metadata: {
 				user_id: user ? user.id : '',
