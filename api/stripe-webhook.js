@@ -2,6 +2,35 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require('@supabase/supabase-js');
 const getRawBody = require('raw-body');
 
+async function persistSubscriptionRecord(supabase, row) {
+	const { error } = await supabase.from('subscriptions').upsert(row, {
+		onConflict: 'stripe_subscription_id',
+	});
+	if (!error || error.code === '23505') return null;
+
+	const { data: existing, error: existingError } = await supabase
+		.from('subscriptions')
+		.select('id')
+		.eq('user_id', row.user_id)
+		.eq('product_id', row.product_id)
+		.limit(1)
+		.maybeSingle();
+	if (existingError || !existing?.id) {
+		return error;
+	}
+
+	const { error: updateError } = await supabase
+		.from('subscriptions')
+		.update({
+			stripe_subscription_id: row.stripe_subscription_id,
+			status: row.status,
+			current_period_end: row.current_period_end,
+			updated_at: row.updated_at,
+		})
+		.eq('id', existing.id);
+	return updateError || null;
+}
+
 module.exports = async (req, res) => {
 	if (req.method !== 'POST') {
 		return res.status(405).json({ error: 'Method not allowed' });
@@ -45,14 +74,14 @@ module.exports = async (req, res) => {
 		const userId = sub.metadata?.user_id;
 		const productId = sub.metadata?.product_id || 'vision-x-monthly';
 		if (userId) {
-			await supabase.from('subscriptions').upsert({
+			await persistSubscriptionRecord(supabase, {
 				user_id: userId,
 				stripe_subscription_id: sub.id,
 				product_id: productId,
 				status,
 				current_period_end: periodEnd,
 				updated_at: new Date().toISOString(),
-			}, { onConflict: 'stripe_subscription_id' });
+			});
 		} else {
 			await supabase.from('subscriptions').update({ status, current_period_end: periodEnd, updated_at: new Date().toISOString() }).eq('stripe_subscription_id', sub.id);
 		}
@@ -65,14 +94,14 @@ module.exports = async (req, res) => {
 		const userId = sub.metadata?.user_id;
 		if (!userId) return res.json({ received: true });
 		const periodEnd = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null;
-		await supabase.from('subscriptions').upsert({
+		await persistSubscriptionRecord(supabase, {
 			user_id: userId,
 			stripe_subscription_id: sub.id,
 			product_id: sub.metadata?.product_id || 'vision-x-monthly',
 			status: 'active',
 			current_period_end: periodEnd,
 			updated_at: new Date().toISOString(),
-		}, { onConflict: 'stripe_subscription_id' });
+		});
 		return res.json({ received: true });
 	}
 
@@ -87,14 +116,14 @@ module.exports = async (req, res) => {
 			const userId = sub.metadata?.user_id;
 			if (!userId) return res.json({ received: true });
 			const periodEnd = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null;
-			await supabase.from('subscriptions').upsert({
+			await persistSubscriptionRecord(supabase, {
 				user_id: userId,
 				stripe_subscription_id: sub.id,
 				product_id: sub.metadata?.product_id || 'vision-x-monthly',
 				status: 'active',
 				current_period_end: periodEnd,
 				updated_at: new Date().toISOString(),
-			}, { onConflict: 'stripe_subscription_id' });
+			});
 		} catch (err) {
 			console.error('invoice.paid subscription upsert error:', err);
 		}
@@ -127,14 +156,14 @@ module.exports = async (req, res) => {
 		const periodEnd = subObj.current_period_end
 			? new Date(subObj.current_period_end * 1000).toISOString()
 			: null;
-		const { error } = await supabase.from('subscriptions').upsert({
+		const error = await persistSubscriptionRecord(supabase, {
 			user_id: userId,
 			stripe_subscription_id: subObj.id,
 			product_id: productId,
 			status: subObj.status === 'active' || subObj.status === 'trialing' ? 'active' : subObj.status,
 			current_period_end: periodEnd,
 			updated_at: new Date().toISOString(),
-		}, { onConflict: 'stripe_subscription_id' });
+		});
 		if (error) {
 			if (error.code === '23505') return res.json({ received: true });
 			console.error('Subscription insert error:', error);

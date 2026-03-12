@@ -2,6 +2,35 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require('@supabase/supabase-js');
 const { getUserFromRequest } = require('../lib/auth-helpers');
 
+async function persistSubscriptionRecord(supabase, row) {
+	const { error } = await supabase.from('subscriptions').upsert(row, {
+		onConflict: 'stripe_subscription_id',
+	});
+	if (!error || error.code === '23505') return null;
+
+	const { data: existing, error: existingError } = await supabase
+		.from('subscriptions')
+		.select('id')
+		.eq('user_id', row.user_id)
+		.eq('product_id', row.product_id)
+		.limit(1)
+		.maybeSingle();
+	if (existingError || !existing?.id) {
+		return error;
+	}
+
+	const { error: updateError } = await supabase
+		.from('subscriptions')
+		.update({
+			stripe_subscription_id: row.stripe_subscription_id,
+			status: row.status,
+			current_period_end: row.current_period_end,
+			updated_at: row.updated_at,
+		})
+		.eq('id', existing.id);
+	return updateError || null;
+}
+
 module.exports = async (req, res) => {
 	if (req.method !== 'POST') {
 		return res.status(405).json({ error: 'Method not allowed' });
@@ -51,14 +80,15 @@ module.exports = async (req, res) => {
 			? 'active'
 			: subscription.status;
 
-		const { error } = await supabase.from('subscriptions').upsert({
+		const row = {
 			user_id: user.id,
 			stripe_subscription_id: subscription.id,
 			product_id: subscription.metadata?.product_id || 'vision-x-monthly',
 			status,
 			current_period_end: periodEnd,
 			updated_at: new Date().toISOString(),
-		}, { onConflict: 'stripe_subscription_id' });
+		};
+		const error = await persistSubscriptionRecord(supabase, row);
 
 		if (error) {
 			console.error('Failed to upsert subscription:', error);
