@@ -300,7 +300,7 @@ body {
 	position: absolute;
 	left: 0;
 	right: 0;
-	top: 90px;
+	top: 58px;
 	height: 14px;
 	overflow-x: auto;
 	overflow-y: hidden;
@@ -1019,7 +1019,7 @@ body.theme-light .co-badge {
 		padding-inline: 0;
 	}
 	.co-payment-method-scrollbar {
-		top: 84px;
+		top: 54px;
 	}
 	#payment-element {
 		min-width: 860px;
