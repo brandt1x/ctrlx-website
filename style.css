@@ -3729,13 +3729,18 @@ body.theme-light .account-hub-purchase-item {
 	text-decoration: none;
 }
 
-.success-refresh-link {
+.success-refresh-link,
+a.success-refresh-link,
+a.success-refresh-link:link,
+a.success-refresh-link:visited {
 	color: var(--accent) !important;
 	text-decoration: underline;
 	text-decoration-color: rgba(239, 68, 68, 0.5);
 }
 
-.success-refresh-link:hover {
+.success-refresh-link:hover,
+a.success-refresh-link:hover,
+a.success-refresh-link:focus {
 	color: #fca5a5 !important;
 	text-decoration-color: rgba(252, 165, 165, 0.7);
 }

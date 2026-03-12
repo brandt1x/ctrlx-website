@@ -35,9 +35,10 @@ async function persistSubscriptionRecord(supabase, row) {
 async function syncSubscriptionsFromStripe(userId, userEmail) {
 	const supabaseUrl = process.env.SUPABASE_URL;
 	const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-	if (!supabaseUrl || !supabaseServiceKey) return;
+	if (!supabaseUrl || !supabaseServiceKey) return [];
 	const email = (userEmail || '').trim().toLowerCase();
-	if (!email) return;
+	if (!email) return [];
+	const records = [];
 	try {
 		const supabase = createClient(supabaseUrl, supabaseServiceKey);
 		const customers = await stripe.customers.list({ email, limit: 10 });
@@ -63,19 +64,23 @@ async function syncSubscriptionsFromStripe(userId, userEmail) {
 
 				const periodEnd = sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null;
 				const productId = sub.metadata?.product_id || 'vision-x-monthly';
-				await persistSubscriptionRecord(supabase, {
+				const record = {
 					user_id: userId,
 					stripe_subscription_id: sub.id,
 					product_id: productId,
 					status: 'active',
 					current_period_end: periodEnd,
 					updated_at: new Date().toISOString(),
-				});
+					created_at: sub.created ? new Date(sub.created * 1000).toISOString() : new Date().toISOString(),
+				};
+				await persistSubscriptionRecord(supabase, record);
+				records.push(record);
 			}
 		}
 	} catch (err) {
 		console.error('syncSubscriptionsFromStripe:', err);
 	}
+	return records;
 }
 
 module.exports = async (req, res) => {
@@ -91,8 +96,9 @@ module.exports = async (req, res) => {
 
 		const supabaseUrl = process.env.SUPABASE_URL;
 		const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+		let stripeSubRows = [];
 		if (req.query?.sync === '1') {
-			await syncSubscriptionsFromStripe(user.id, user.email);
+			stripeSubRows = await syncSubscriptionsFromStripe(user.id, user.email);
 		}
 		if (!supabaseUrl || !supabaseServiceKey) {
 			console.error('my-purchases: Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
@@ -120,13 +126,20 @@ module.exports = async (req, res) => {
 		}
 
 		if ((!subRows || subRows.length === 0) && user.email) {
-			await syncSubscriptionsFromStripe(user.id, user.email);
+			stripeSubRows = await syncSubscriptionsFromStripe(user.id, user.email);
 			const { data: refreshedSubs } = await supabase
 				.from('subscriptions')
 				.select('stripe_subscription_id, product_id, status, current_period_end, created_at')
 				.eq('user_id', user.id)
 				.eq('status', 'active');
 			subRows = refreshedSubs || [];
+		}
+		const mergedSubRows = [...(subRows || [])];
+		const seenSubIds = new Set(mergedSubRows.map((sub) => sub.stripe_subscription_id));
+		for (const stripeSub of stripeSubRows || []) {
+			if (!stripeSub?.stripe_subscription_id || seenSubIds.has(stripeSub.stripe_subscription_id)) continue;
+			mergedSubRows.push(stripeSub);
+			seenSubIds.add(stripeSub.stripe_subscription_id);
 		}
 
 		const EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -149,7 +162,7 @@ module.exports = async (req, res) => {
 
 		// Add active subscriptions as synthetic "purchases" for download UI
 		const SUBSCRIPTION_FLAGS = { 'vision-x-monthly': { hasVisionX: true } };
-		for (const sub of subRows || []) {
+		for (const sub of mergedSubRows || []) {
 			const flags = SUBSCRIPTION_FLAGS[sub.product_id] || {};
 			const periodEnd = sub.current_period_end ? new Date(sub.current_period_end) : null;
 			const isExpired = periodEnd ? Date.now() > periodEnd.getTime() : false;

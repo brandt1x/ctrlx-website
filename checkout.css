@@ -292,29 +292,54 @@ body {
 
 /* ── Payment Element & Skeleton ──────────────────────── */
 
+.co-payment-element-shell {
+	position: relative;
+}
+
+.co-payment-method-scrollbar {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 154px;
+	height: 14px;
+	overflow-x: auto;
+	overflow-y: hidden;
+	z-index: 3;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(248, 113, 113, 0.7) rgba(255, 255, 255, 0.05);
+	-webkit-overflow-scrolling: touch;
+}
+
+.co-payment-method-scrollbar::-webkit-scrollbar {
+	height: 10px;
+}
+
+.co-payment-method-scrollbar::-webkit-scrollbar-track {
+	background: rgba(255, 255, 255, 0.05);
+	border-radius: 999px;
+}
+
+.co-payment-method-scrollbar::-webkit-scrollbar-thumb {
+	background: rgba(248, 113, 113, 0.7);
+	border-radius: 999px;
+}
+
+.co-payment-method-scrollbar-track {
+	height: 1px;
+}
+
 .co-payment-element-scroll {
 	width: 100%;
 	max-width: 100%;
 	overflow-x: auto;
 	overflow-y: visible;
-	padding-bottom: 10px;
+	padding-bottom: 0;
 	-webkit-overflow-scrolling: touch;
-	scrollbar-width: thin;
-	scrollbar-color: rgba(248, 113, 113, 0.55) rgba(255, 255, 255, 0.05);
+	scrollbar-width: none;
 }
 
 .co-payment-element-scroll::-webkit-scrollbar {
-	height: 10px;
-}
-
-.co-payment-element-scroll::-webkit-scrollbar-track {
-	background: rgba(255, 255, 255, 0.05);
-	border-radius: 999px;
-}
-
-.co-payment-element-scroll::-webkit-scrollbar-thumb {
-	background: rgba(248, 113, 113, 0.55);
-	border-radius: 999px;
+	display: none;
 }
 
 #payment-element {
@@ -323,7 +348,7 @@ body {
 	overflow: visible;
 	width: 100%;
 	max-width: 100%;
-	min-width: 980px;
+	min-width: 1120px;
 }
 
 /* Stripe renders inside an iframe — keep the iframe wrapper from clipping tab overflow */
@@ -993,7 +1018,10 @@ body.theme-light .co-badge {
 		margin-inline: 0;
 		padding-inline: 0;
 	}
+	.co-payment-method-scrollbar {
+		top: 144px;
+	}
 	#payment-element {
-		min-width: 760px;
+		min-width: 860px;
 	}
 }

@@ -20,7 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
 	const guestModeToggle = document.getElementById('co-guest-mode-toggle');
 	const guestEmailBlock = document.getElementById('co-guest-email-block');
 	const guestEmailInput = document.getElementById('co-guest-email');
+	const paymentElementScroll = document.getElementById('co-payment-element-scroll');
 	const paymentElementContainer = document.getElementById('payment-element');
+	const paymentMethodScrollbar = document.getElementById('co-payment-method-scrollbar');
+	const paymentMethodScrollbarTrack = document.getElementById('co-payment-method-scrollbar-track');
 
 	const CART_KEY = 'siteCart';
 	const PROMO_KEY = 'siteCartPromo';
@@ -38,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	let stripe = null;
 	let elements = null;
 	let paymentElement = null;
+	let syncingPaymentScroll = false;
 
 	function fmt(price) {
 		return price % 1 === 0 ? `$${price}` : `$${price.toFixed(2)}`;
@@ -113,6 +117,22 @@ document.addEventListener('DOMContentLoaded', () => {
 			paymentElementContainer.innerHTML = '';
 		}
 		paymentElement = null;
+		syncPaymentMethodScrollbar();
+	}
+
+	function syncPaymentMethodScrollbar() {
+		if (!paymentElementScroll || !paymentMethodScrollbar || !paymentMethodScrollbarTrack || !paymentElementContainer) return;
+		const scrollWidth = Math.max(paymentElementScroll.scrollWidth, paymentElementContainer.scrollWidth, paymentElementContainer.offsetWidth);
+		const clientWidth = paymentElementScroll.clientWidth;
+		const needsScroll = scrollWidth - clientWidth > 4;
+		paymentMethodScrollbar.hidden = !needsScroll;
+		paymentMethodScrollbarTrack.style.width = `${Math.max(scrollWidth, clientWidth)}px`;
+		if (!needsScroll) {
+			paymentElementScroll.scrollLeft = 0;
+			paymentMethodScrollbar.scrollLeft = 0;
+			return;
+		}
+		paymentMethodScrollbar.scrollLeft = paymentElementScroll.scrollLeft;
 	}
 
 	function showOverlay(show) {
@@ -396,9 +416,27 @@ document.addEventListener('DOMContentLoaded', () => {
 		paymentElement.mount('#payment-element');
 		paymentElement.on('ready', () => {
 			if (payButton) payButton.disabled = false;
+			requestAnimationFrame(syncPaymentMethodScrollbar);
+			setTimeout(syncPaymentMethodScrollbar, 250);
 		});
 		setMessage('');
 	}
+
+	paymentElementScroll?.addEventListener('scroll', () => {
+		if (!paymentMethodScrollbar || syncingPaymentScroll) return;
+		syncingPaymentScroll = true;
+		paymentMethodScrollbar.scrollLeft = paymentElementScroll.scrollLeft;
+		syncingPaymentScroll = false;
+	});
+
+	paymentMethodScrollbar?.addEventListener('scroll', () => {
+		if (!paymentElementScroll || syncingPaymentScroll) return;
+		syncingPaymentScroll = true;
+		paymentElementScroll.scrollLeft = paymentMethodScrollbar.scrollLeft;
+		syncingPaymentScroll = false;
+	});
+
+	window.addEventListener('resize', syncPaymentMethodScrollbar);
 
 	async function finalizePayment(paymentIntentId) {
 		const res = await fetch('/api/complete-payment-intent', {
