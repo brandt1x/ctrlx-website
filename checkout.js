@@ -428,7 +428,9 @@ document.addEventListener('DOMContentLoaded', () => {
 			body: JSON.stringify({ payment_intent_id: paymentIntentId }),
 		});
 		const data = await res.json().catch(() => ({}));
-		if (!res.ok) throw new Error(data.error || 'Subscription completed, but sync failed.');
+		if (!res.ok) {
+			console.warn('Subscription sync fallback:', data.error || res.status);
+		}
 		try {
 			localStorage.removeItem(CART_KEY);
 			sessionStorage.removeItem(PROMO_KEY);
