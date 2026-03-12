@@ -2,16 +2,25 @@
    CHECKOUT — Control-X Premium Checkout
    ═══════════════════════════════════════════════════════ */
 
+.checkout-page,
+body {
+	overflow-x: hidden;
+}
+
 .checkout-page {
 	padding-top: 40px;
-	padding-bottom: 48px;
+	padding-bottom: 72px;
 	min-height: 100vh;
-	background: linear-gradient(180deg, transparent 0%, transparent 82%, rgba(5, 5, 9, 0.66) 100%);
+	background:
+		radial-gradient(circle at 68% 58%, rgba(185, 28, 28, 0.2) 0%, rgba(185, 28, 28, 0.08) 18%, transparent 42%),
+		linear-gradient(180deg, rgba(7, 7, 14, 0.94) 0%, rgba(7, 7, 14, 0.98) 52%, #050509 100%);
 }
 
 .checkout-wrap {
-	width: min(1360px, calc(100vw - 24px));
+	box-sizing: border-box;
+	width: min(1360px, 100%);
 	max-width: 1360px;
+	margin: 0 auto;
 	position: relative;
 	z-index: 2;
 }
@@ -133,6 +142,9 @@
 
 .co-panel--summary {
 	animation-delay: 0.2s;
+	width: 100%;
+	max-width: 100%;
+	overflow: hidden;
 }
 
 .co-panel::before {
@@ -279,11 +291,13 @@
 .co-payment-element-scroll {
 	width: 100%;
 	max-width: 100%;
-	overflow-x: auto;
+	overflow-x: scroll;
 	overflow-y: hidden;
 	padding-bottom: 8px;
 	-webkit-overflow-scrolling: touch;
 	scrollbar-gutter: stable both-edges;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(248, 113, 113, 0.55) rgba(255, 255, 255, 0.05);
 }
 
 .co-payment-element-scroll::-webkit-scrollbar {
@@ -306,7 +320,7 @@
 	overflow: visible;
 	width: 100%;
 	max-width: 100%;
-	min-width: 760px;
+	min-width: 880px;
 }
 
 /* Stripe renders inside an iframe — keep the iframe wrapper from clipping tab overflow */
@@ -547,7 +561,7 @@
 
 .co-item {
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
 	justify-content: space-between;
 	gap: 10px;
 	padding: 10px 12px;
@@ -564,9 +578,10 @@
 
 .co-item-info {
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
 	gap: 10px;
 	min-width: 0;
+	flex: 1 1 auto;
 }
 
 .co-item-dot {
@@ -582,9 +597,11 @@
 	font-size: 0.88rem;
 	font-weight: 500;
 	color: var(--text);
-	white-space: nowrap;
+	white-space: normal;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	line-height: 1.35;
+	word-break: break-word;
 }
 
 .co-item-price {
@@ -592,6 +609,7 @@
 	font-weight: 700;
 	color: var(--text);
 	white-space: nowrap;
+	flex-shrink: 0;
 }
 
 /* ── Promo Code ──────────────────────────────────────── */
@@ -902,7 +920,7 @@ body.theme-light .co-badge {
 
 @media (max-width: 1180px) {
 	.checkout-wrap {
-		width: min(1120px, calc(100vw - 24px));
+		width: min(1120px, 100%);
 		max-width: 1120px;
 	}
 
@@ -963,6 +981,6 @@ body.theme-light .co-badge {
 		padding-inline: 4px;
 	}
 	#payment-element {
-		min-width: 620px;
+		min-width: 720px;
 	}
 }
