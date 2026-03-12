@@ -10,7 +10,7 @@
 }
 
 .checkout-wrap {
-	max-width: 960px;
+	max-width: 1180px;
 	position: relative;
 	z-index: 2;
 }
@@ -104,8 +104,8 @@
 
 .co-grid {
 	display: grid;
-	grid-template-columns: 1.15fr 0.85fr;
-	gap: 24px;
+	grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.82fr);
+	gap: 28px;
 	align-items: start;
 }
 
@@ -115,9 +115,10 @@
 	background: linear-gradient(180deg, rgba(17, 17, 28, 0.85), rgba(8, 8, 16, 0.92));
 	border: 1px solid rgba(248, 113, 113, 0.12);
 	border-radius: 14px;
-	padding: 22px;
+	padding: 24px;
 	position: relative;
 	overflow: visible;
+	min-width: 0;
 	box-shadow:
 		0 12px 40px rgba(0, 0, 0, 0.4),
 		0 0 0 1px rgba(255, 255, 255, 0.03) inset;
@@ -273,14 +274,27 @@
 
 /* ── Payment Element & Skeleton ──────────────────────── */
 
+.co-payment-element-scroll {
+	width: 100%;
+	max-width: 100%;
+	overflow-x: auto;
+	overflow-y: visible;
+	padding-bottom: 4px;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-gutter: stable both-edges;
+}
+
 #payment-element {
 	margin-bottom: 16px;
 	min-height: 140px;
 	overflow: visible;
+	width: 100%;
+	max-width: 100%;
 }
 
 /* Stripe renders inside an iframe — keep the iframe wrapper from clipping tab overflow */
 #payment-element iframe {
+	max-width: 100%;
 	overflow: visible !important;
 }
 
@@ -870,6 +884,10 @@ body.theme-light .co-badge {
 /* ── Responsive ──────────────────────────────────────── */
 
 @media (max-width: 900px) {
+	.checkout-wrap {
+		max-width: 1000px;
+	}
+
 	.co-grid {
 		grid-template-columns: 1fr;
 	}
@@ -877,7 +895,7 @@ body.theme-light .co-badge {
 		order: -1;
 	}
 	.co-panel {
-		padding: 18px;
+		padding: 20px;
 	}
 	.co-progress {
 		margin-bottom: 16px;
@@ -918,5 +936,12 @@ body.theme-light .co-badge {
 	}
 	.co-grid {
 		gap: 16px;
+	}
+	.co-payment-element-scroll {
+		margin-inline: -2px;
+		padding-inline: 2px;
+	}
+	#payment-element {
+		min-width: 540px;
 	}
 }
