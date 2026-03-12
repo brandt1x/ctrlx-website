@@ -3729,6 +3729,17 @@ body.theme-light .account-hub-purchase-item {
 	text-decoration: none;
 }
 
+.success-refresh-link {
+	color: var(--accent) !important;
+	text-decoration: underline;
+	text-decoration-color: rgba(239, 68, 68, 0.5);
+}
+
+.success-refresh-link:hover {
+	color: #fca5a5 !important;
+	text-decoration-color: rgba(252, 165, 165, 0.7);
+}
+
 .success-support-text a:hover {
 	text-decoration: underline;
 }

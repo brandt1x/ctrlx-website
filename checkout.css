@@ -190,11 +190,12 @@ body {
 	color: var(--accent);
 	display: flex;
 	align-items: center;
-	gap: 6px;
+	gap: 0;
 	margin: 0;
-	flex: 0 1 auto;
+	flex: 1 1 auto;
 	min-width: 0;
 	white-space: nowrap;
+	justify-content: flex-start;
 }
 
 .co-panel-title-text {
@@ -286,7 +287,7 @@ body {
 
 .co-panel--summary .co-badge {
 	display: inline-flex;
-	margin-left: 0;
+	margin-left: auto;
 }
 
 /* ── Payment Element & Skeleton ──────────────────────── */
@@ -294,27 +295,8 @@ body {
 .co-payment-element-scroll {
 	width: 100%;
 	max-width: 100%;
-	overflow-x: scroll;
-	overflow-y: hidden;
-	padding-bottom: 8px;
-	-webkit-overflow-scrolling: touch;
-	scrollbar-gutter: stable both-edges;
-	scrollbar-width: thin;
-	scrollbar-color: rgba(248, 113, 113, 0.55) rgba(255, 255, 255, 0.05);
-}
-
-.co-payment-element-scroll::-webkit-scrollbar {
-	height: 10px;
-}
-
-.co-payment-element-scroll::-webkit-scrollbar-track {
-	background: rgba(255, 255, 255, 0.05);
-	border-radius: 999px;
-}
-
-.co-payment-element-scroll::-webkit-scrollbar-thumb {
-	background: rgba(248, 113, 113, 0.55);
-	border-radius: 999px;
+	overflow: visible;
+	padding-bottom: 0;
 }
 
 #payment-element {
@@ -323,7 +305,7 @@ body {
 	overflow: visible;
 	width: 100%;
 	max-width: 100%;
-	min-width: 880px;
+	min-width: 0;
 }
 
 /* Stripe renders inside an iframe — keep the iframe wrapper from clipping tab overflow */
@@ -990,10 +972,10 @@ body.theme-light .co-badge {
 		gap: 16px;
 	}
 	.co-payment-element-scroll {
-		margin-inline: -4px;
-		padding-inline: 4px;
+		margin-inline: 0;
+		padding-inline: 0;
 	}
 	#payment-element {
-		min-width: 720px;
+		min-width: 0;
 	}
 }

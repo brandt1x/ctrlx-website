@@ -422,7 +422,7 @@
 				const renderEmptyPurchases = (leadText) => {
 					purchasesEl.innerHTML =
 						'<p class="muted">' + leadText + '</p>' +
-						'<p class="muted" style="margin-top:8px;"><a href="#" id="refresh-purchases-empty">Subscription not showing? Refresh</a></p>' +
+						'<p class="muted" style="margin-top:8px;"><a href="#" id="refresh-purchases-empty" class="success-refresh-link">Subscription not showing? Refresh</a></p>' +
 						'<div class="success-support-btns">' +
 						'<a href="ultimate.html" class="btn">Browse Ultimate</a>' +
 						'<a href="zen-scripts.html" class="btn ghost">View Zen Scripts</a>' +
@@ -568,7 +568,20 @@
 				const params = new URLSearchParams(location.search);
 				const fromSubscription = params.get('subscription') === '1' && params.get('success') === '1';
 				const fromCheckout = params.get('success') === '1' && params.get('session_id');
+				const subscriptionPaymentIntentId = params.get('payment_intent');
 				const startOnPurchases = location.hash === '#purchases' || fromCheckout || fromSubscription;
+				async function recoverSubscription(paymentIntentId) {
+					if (!paymentIntentId || !session?.access_token) return false;
+					const rr = await fetch('/api/complete-subscription-intent', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': 'Bearer ' + session.access_token,
+						},
+						body: JSON.stringify({ payment_intent_id: paymentIntentId }),
+					});
+					return rr.ok;
+				}
 				if (session) {
 					authEl.hidden = true;
 					dashboardEl.hidden = false;
@@ -577,7 +590,15 @@
 					setDashboardView(startOnPurchases ? 'purchases' : 'account');
 					if (fromSubscription) {
 						history.replaceState({}, '', location.pathname);
-						await loadPurchases(true, null, true);
+						let found = false;
+						for (let i = 0; i < 8; i++) {
+							if (subscriptionPaymentIntentId) {
+								await recoverSubscription(subscriptionPaymentIntentId);
+							}
+							found = await loadPurchases(i > 0, null, true);
+							if (found) break;
+							await new Promise(r => setTimeout(r, 1500));
+						}
 					} else if (fromCheckout) {
 						const sessionId = params.get('session_id');
 						history.replaceState({}, '', location.pathname);

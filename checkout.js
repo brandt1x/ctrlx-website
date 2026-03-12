@@ -381,9 +381,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			},
 			paymentMethodOrder: [
 				'card',
-				'us_bank_account',
 				'cashapp',
-				'link',
+				'us_bank_account',
 			],
 			defaultValues: {
 				billingDetails: {
@@ -435,7 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			localStorage.removeItem(CART_KEY);
 			sessionStorage.removeItem(PROMO_KEY);
 		} catch (_) {}
-		window.location.href = '/account.html?subscription=1&success=1';
+		window.location.href = `/account.html?subscription=1&success=1&payment_intent=${encodeURIComponent(paymentIntentId)}`;
 	}
 
 	async function initializeCheckout() {
@@ -597,7 +596,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			authToken = await getAuthToken();
 			if (paymentIntent.invoice) {
 				if (!authToken) {
-					window.location.href = '/account.html?subscription=1&success=1';
+					window.location.href = `/account.html?subscription=1&success=1&payment_intent=${encodeURIComponent(paymentIntent.id)}`;
 					return true;
 				}
 				await finalizeSubscription(paymentIntent.id);
