@@ -1,0 +1,1847 @@
+// Populate current year and add UI behaviors
+document.addEventListener('DOMContentLoaded', function () {
+	// Mobile hamburger menu
+	(function setupMobileMenu() {
+		const toggle = document.querySelector('.mobile-menu-toggle');
+		const headerRight = document.querySelector('.header-right');
+		if (!toggle || !headerRight) return;
+		toggle.addEventListener('click', function () {
+			const open = headerRight.classList.toggle('mobile-open');
+			toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+		});
+		headerRight.querySelectorAll('a').forEach(function (link) {
+			link.addEventListener('click', function () {
+				headerRight.classList.remove('mobile-open');
+				toggle.setAttribute('aria-expanded', 'false');
+			});
+		});
+	})();
+
+	const yearEl = document.getElementById('year');
+	if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+	// Add stagger index for each card for CSS delay
+	const cards = document.querySelectorAll('.card');
+	cards.forEach((c, i) => c.style.setProperty('--i', i));
+
+	// ─── MOTION SYSTEM ───────────────────────────────────────────────
+	const Motion = (function () {
+		const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const finePointer = window.matchMedia && window.matchMedia('(pointer:fine)').matches;
+		const flags = { heroV2: true, cardsV2: true, parallaxV2: true, immersiveTier: true };
+		// Load overrides from localStorage (e.g. localStorage.setItem('motion.flags','{"heroV2":false}'))
+		try {
+			var stored = window.localStorage && localStorage.getItem('motion.flags');
+			if (stored) {
+				var ov = JSON.parse(stored);
+				Object.keys(ov).forEach(function (k) { if (k in flags) flags[k] = !!ov[k]; });
+			}
+		} catch (_) { }
+
+		function detectTier() {
+			if (reduced) return 'low';
+			const conn = navigator.connection;
+			if (conn?.saveData) return 'low';
+			const effType = conn?.effectiveType;
+			if (effType === 'slow-2g' || effType === '2g') return 'low';
+			const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+			if (isMobile) return 'low';
+			const cores = navigator.hardwareConcurrency || 2;
+			const mem = navigator.deviceMemory ?? 4;
+			if (cores <= 2 || mem <= 2) return 'low';
+			if (cores <= 4 || mem <= 4) return 'balanced';
+			return 'immersive';
+		}
+		const tier = detectTier();
+		document.body.dataset.motionTier = tier;
+
+		// Unified RAF scheduler — one loop for all effects
+		const _cbs = new Map();
+		let _id = 0;
+		let _on = false;
+		let _lastTick = 0;
+		function _tick(t) {
+			if (tier === 'low' && t - _lastTick < 33) {
+				if (_cbs.size) { _id = requestAnimationFrame(_tick); } else { _on = false; }
+				return;
+			}
+			_lastTick = t;
+			for (const [, fn] of _cbs) fn(t);
+			if (_cbs.size) { _id = requestAnimationFrame(_tick); } else { _on = false; }
+		}
+		function registerRAF(key, fn) {
+			_cbs.set(key, fn);
+			if (!_on) { _on = true; _id = requestAnimationFrame(_tick); }
+		}
+		function unregisterRAF(key) {
+			_cbs.delete(key);
+			if (!_cbs.size && _on) { cancelAnimationFrame(_id); _on = false; }
+		}
+
+		// Unified IntersectionObserver factory
+		function observe(els, cb, opts) {
+			opts = opts || {};
+			if (!els || !els.length) return null;
+			if (!('IntersectionObserver' in window)) {
+				els.forEach(function (el) { cb(el, true); });
+				return null;
+			}
+			let thresh = opts.threshold || 0.15;
+			if (tier === 'low' && thresh < 0.2) thresh = 0.2;
+			const io = new IntersectionObserver(function (entries) {
+				entries.forEach(function (e) {
+					if (e.isIntersecting) {
+						cb(e.target, true);
+						if (!opts.persistent) io.unobserve(e.target);
+					} else if (opts.persistent) {
+						cb(e.target, false);
+					}
+				});
+			}, { threshold: thresh, rootMargin: opts.rootMargin || '0px 0px -50px 0px' });
+			els.forEach(function (el) { io.observe(el); });
+			return io;
+		}
+
+		return { reduced, finePointer, flags, tier, registerRAF, unregisterRAF, observe };
+	})();
+	window.__Motion = Motion; // expose for cinematic.js
+
+	// ─── Unified reveal system (replaces 3 separate reveal IIFEs) ───
+	(function initReveals() {
+		// 1. Section reveals with staggered children
+		const sections = document.querySelectorAll('[data-scroll-section]');
+		Motion.observe(sections, function (section) {
+			section.classList.add('scroll-visible');
+			const children = section.querySelectorAll('[data-scroll-item]');
+			const staggerMs = section.classList.contains('how') ? 100 : 12;
+			children.forEach(function (child, i) {
+				setTimeout(function () { child.classList.add('scroll-visible'); }, i * staggerMs);
+			});
+		}, { threshold: 0.12 });
+
+		// 2. Standalone element reveals
+		const standalones = document.querySelectorAll('.card, .hero, .hero-sequence, .page-hero, .how, .faq, .contact, .cart, .services h3, .section-accent');
+		if (standalones.length) {
+			standalones.forEach(function (el) { el.classList.add('js-reveal'); });
+			Motion.observe(standalones, function (el) {
+				el.classList.add('js-reveal-visible');
+			}, { threshold: 0.18 });
+		}
+
+		// 3. Headline cinematic reveals
+		const headlines = document.querySelectorAll('main h2, main h3, .card h4, .how-step h4, .site-cart-header h2, .page-title, .page-kicker, .section-accent');
+		if (headlines.length) {
+			headlines.forEach(function (h) { h.classList.add('headline-reveal'); });
+			Motion.observe(headlines, function (h) {
+				h.classList.add('headline-live');
+			}, { threshold: 0.25, rootMargin: '0px 0px -25px 0px' });
+		}
+	})();
+
+	// ─── Page hero entrance (services, zen-scripts, contact) ───
+	(function initPageHeroSequence() {
+		const pageHero = document.querySelector('.page-hero');
+		if (!pageHero) return;
+		if (Motion.observe) {
+			Motion.observe([pageHero], function () {
+				pageHero.classList.add('page-hero-entered');
+			}, { threshold: 0.1 });
+		}
+		setTimeout(function () {
+			const rect = pageHero.getBoundingClientRect();
+			if (rect.top < window.innerHeight * 0.9) {
+				pageHero.classList.add('page-hero-entered');
+			}
+		}, 100);
+	})();
+
+	// ─── Hero V2: entrance sequence + pointer parallax ───
+	(function initHeroSequence() {
+		if (!Motion.flags.heroV2) return;
+		const hero = document.querySelector('.hero-sequence');
+		if (!hero) return;
+		const aurora = hero.querySelector('.hero-aurora');
+
+		// Detect if the load overlay will play (mirrors setupSiteLoadAnimation conditions)
+		let overlayWillPlay = false;
+		if (!document.body.classList.contains('ultimate-page') && !Motion.reduced) {
+			const nav = performance.getEntriesByType?.('navigation')?.[0];
+			const navType = nav?.type || (performance.navigation?.type === 1 ? 'reload' : 'navigate');
+			const ref = document.referrer || '';
+			let sameOrigin = false;
+			if (ref) {
+				try { sameOrigin = new URL(ref).origin === window.location.origin; }
+				catch (_) { sameOrigin = ref.startsWith(window.location.origin || ''); }
+			}
+			overlayWillPlay = !(navType === 'navigate' && sameOrigin);
+		}
+		// Hero entrance starts as load overlay is fading, or immediately for internal nav
+		setTimeout(function () { hero.classList.add('hero-entered'); }, overlayWillPlay ? 1750 : 200);
+
+		// Pointer-driven parallax
+		if (!Motion.reduced && Motion.finePointer) {
+			const layer = hero.querySelector('.hero-parallax-layer');
+			if (layer) {
+				let mx = 0, my = 0, cx = 0, cy = 0;
+				hero.addEventListener('mousemove', function (e) {
+					const rect = hero.getBoundingClientRect();
+					mx = (e.clientX - rect.left) / rect.width - 0.5;
+					my = (e.clientY - rect.top) / rect.height - 0.5;
+					if (aurora) {
+						const px = ((e.clientX - rect.left) / rect.width * 100).toFixed(2) + '%';
+						const py = ((e.clientY - rect.top) / rect.height * 100).toFixed(2) + '%';
+						aurora.style.setProperty('--hx', px);
+						aurora.style.setProperty('--hy', py);
+					}
+				}, { passive: true });
+				hero.addEventListener('mouseleave', function () { mx = 0; my = 0; });
+
+				Motion.registerRAF('heroParallax', function () {
+					cx += (mx - cx) * 0.08;
+					cy += (my - cy) * 0.08;
+					layer.style.transform = 'translate(' + (cx * 30).toFixed(1) + 'px,' + (cy * 20).toFixed(1) + 'px) scale(1.06)';
+				});
+			}
+		}
+	})();
+
+	// Subtle nav choreography (staggered reveal + hover rhythm)
+	(function setupNavChoreography() {
+		const navLinks = document.querySelectorAll('.header-right nav a, .header-right a.nav-ultimate');
+		if (!navLinks.length) return;
+		navLinks.forEach((link, idx) => {
+			link.style.setProperty('--nav-delay', (idx * 0.045).toFixed(2) + 's');
+		});
+		requestAnimationFrame(() => document.body.classList.add('nav-choreo-ready'));
+	})();
+
+	// Ensure add-to-cart helper exists even on pages without cart UI
+	if (!window.__addToSiteCart) {
+		window.__addToSiteCart = function (name, rawPrice) {
+			let priceNum = 0;
+			if (typeof rawPrice === 'number') {
+				priceNum = rawPrice;
+			} else if (typeof rawPrice === 'string') {
+				const match = rawPrice.replace(/[^0-9.]/g, '');
+				priceNum = parseFloat(match || '0') || 0;
+			}
+			Cart.addItem(name || 'Item', priceNum);
+		};
+	}
+
+	// ─── Motion card system: depth-shine + stagger indices ───
+	(function initMotionCards() {
+		if (!Motion.flags.cardsV2) return;
+
+		// Extend stagger indices beyond .card to how-steps, faq items, zen-products, page-hero
+		const staggerGroups = [
+			'.cards .card', '.zen-grid .card', '.how-steps .how-step',
+			'.faq-vertical details', '.how-chips .how-chip',
+			'.page-hero [data-scroll-item]'
+		];
+		staggerGroups.forEach(function (sel) {
+			document.querySelectorAll(sel).forEach(function (el, i) {
+				el.style.setProperty('--stagger-i', i);
+			});
+		});
+
+		// Depth-shine removed from content blocks – animations now on letters only
+	})();
+
+	// (Enhanced scroll reveal merged into unified reveal system above)
+
+	// THEME TOGGLE (dark red/black ↔ light)
+	(function setupThemeToggle() {
+		const STORAGE_KEY = 'theme';
+		const body = document.body;
+		const root = document.documentElement;
+		const toggle = document.getElementById('theme-toggle');
+
+		// Apply stored preference if present (html class set in head for early logo; sync body + root)
+		const stored = window.localStorage ? localStorage.getItem(STORAGE_KEY) : null;
+		if (stored === 'light') {
+			body.classList.add('theme-light');
+			root.classList.add('theme-light');
+		}
+
+		function syncToggleIcon() {
+			if (!toggle) return;
+			const isLight = body.classList.contains('theme-light');
+			toggle.setAttribute('aria-label', isLight ? 'Switch to dark mode' : 'Switch to light mode');
+		}
+
+		syncToggleIcon();
+
+		if (toggle) {
+			toggle.addEventListener('click', () => {
+				const isLight = body.classList.toggle('theme-light');
+				root.classList.toggle('theme-light', isLight);
+				if (window.localStorage) {
+					localStorage.setItem(STORAGE_KEY, isLight ? 'light' : 'dark');
+				}
+				syncToggleIcon();
+			});
+		}
+	})();
+
+	// Site load animation – only on first load or refresh, not when navigating via links
+	(function setupSiteLoadAnimation() {
+		const root = document.documentElement;
+		const releasePreloadGate = () => root.classList.remove('site-preload');
+		const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const nav = performance.getEntriesByType?.('navigation')?.[0];
+		const navType = nav?.type || (performance.navigation?.type === 1 ? 'reload' : 'navigate');
+		const referrer = document.referrer || '';
+		let sameOrigin = false;
+		if (referrer) {
+			try {
+				sameOrigin = new URL(referrer).origin === window.location.origin;
+			} catch {
+				sameOrigin = referrer.startsWith(window.location.origin || '');
+			}
+		}
+
+		if (document.body.classList.contains('ultimate-page')) {
+			if (prefersReduced) {
+				releasePreloadGate();
+				return;
+			}
+			if (navType === 'navigate' && sameOrigin) {
+				releasePreloadGate();
+				return;
+			}
+			const isLight = document.body.classList.contains('theme-light');
+			const mode = isLight ? 'light' : (sessionStorage.getItem('ultimateTransitionMode') || 'dark');
+			const overlay = document.createElement('div');
+			overlay.className = 'ultimate-loading-overlay ultimate-mode-' + mode;
+			overlay.setAttribute('aria-hidden', 'true');
+			const sparks = Array.from({ length: 24 }, (_, i) =>
+				`<span class="ultimate-loading-spark" style="--spark-delay:${(i * 0.06).toFixed(2)}s;--spark-x:${(Math.random() * 100).toFixed(1)}%;--spark-size:${(2 + Math.random() * 5).toFixed(1)}px;"></span>`
+			).join('');
+			overlay.innerHTML = `
+				<div class="ultimate-loading-layers">
+					<div class="ultimate-loading-beam"></div>
+					<div class="ultimate-loading-grid"></div>
+					<div class="ultimate-loading-nebula"></div>
+					<div class="ultimate-loading-sparks">${sparks}</div>
+				</div>
+				<div class="ultimate-loading-center">
+					<div class="ultimate-loading-logo">
+						<span class="ultimate-logo-layer base">CTRLX</span>
+						<span class="ultimate-logo-layer glitch g1">CTRLX</span>
+						<span class="ultimate-logo-layer glitch g2">CTRLX</span>
+						<span class="ultimate-logo-morph">ULTIMATE</span>
+					</div>
+					<div class="ultimate-loading-rings">
+						<div class="ultimate-loading-ring"></div>
+						<div class="ultimate-loading-ring"></div>
+						<div class="ultimate-loading-ring"></div>
+					</div>
+					<div class="ultimate-loading-title">ULTIMATE</div>
+					<div class="ultimate-loading-subtitle">${mode === 'light' ? 'Luminous Sequence • CONTROL+X' : mode === 'cosmic' ? 'Cosmic Surge • CONTROL+X' : 'Neural Sequence • VISION-X'}</div>
+				</div>
+			`;
+			document.body.insertBefore(overlay, document.body.firstChild);
+			requestAnimationFrame(() => overlay.classList.add('active'));
+			let loadFired = document.readyState === 'complete';
+			let minTimePassed = false;
+			const minDisplayMs = 800;
+			const fadeMs = 400;
+			const finish = () => {
+				if (!loadFired || !minTimePassed) return;
+				overlay.classList.remove('active');
+				setTimeout(() => {
+					overlay.remove();
+					releasePreloadGate();
+				}, fadeMs);
+			};
+			window.addEventListener('load', () => { loadFired = true; finish(); }, { once: true });
+			setTimeout(() => { minTimePassed = true; finish(); }, minDisplayMs);
+			return;
+		}
+
+		if (prefersReduced) {
+			releasePreloadGate();
+			return;
+		}
+		if (navType === 'navigate' && sameOrigin) {
+			releasePreloadGate();
+			return; // Came from our site via link – skip
+		}
+
+		const isLight = document.body.classList.contains('theme-light');
+		const streaks = Array.from({ length: 12 }, (_, i) =>
+			`<div class="site-load-streak" style="--delay:${(i * 0.08).toFixed(2)}s;--y:${(Math.random() * 100).toFixed(1)}%;--angle:${-15 + Math.random() * 30}deg;"></div>`
+		).join('');
+		const stars = Array.from({ length: 30 }, (_, i) =>
+			`<span class="site-load-star" style="--delay:${(i * 0.03).toFixed(2)}s;--x:${(50 + Math.random() * 50).toFixed(1)}%;--y:${(Math.random() * 100).toFixed(1)}%;--dur:${(1 + Math.random() * 0.6).toFixed(2)}s;"></span>`
+		).join('');
+
+		const overlay = document.createElement('div');
+		overlay.id = 'site-load-overlay';
+		overlay.className = 'site-load-overlay' + (isLight ? ' site-load-mode-light' : '');
+		overlay.setAttribute('aria-hidden', 'true');
+		overlay.innerHTML = `
+			<div class="site-load-layers">
+				<div class="site-load-warp"></div>
+				<div class="site-load-tunnel"></div>
+				<div class="site-load-streaks">${streaks}</div>
+				<div class="site-load-stars">${stars}</div>
+			</div>
+			<div class="site-load-center">
+				<div class="site-load-pulse"></div>
+				<div class="site-load-title">Control-X</div>
+				<div class="site-load-subtitle">Precision Scripts</div>
+			</div>
+			<div class="site-load-hyperspace">
+				<div class="site-load-zoom-line"></div>
+				<div class="site-load-hyperspace-streaks"></div>
+			</div>
+		`;
+		document.body.insertBefore(overlay, document.body.firstChild);
+		releasePreloadGate();
+
+		// After initial animation: rapid line generation + zoom. Wait for window.load before finishing.
+		let loadFired = document.readyState === 'complete';
+		let hyperspaceStarted = false;
+		const finishOverlay = () => {
+			if (!loadFired || !hyperspaceStarted) return;
+			overlay.classList.add('site-load-done');
+			setTimeout(() => overlay.remove(), 650);
+		};
+		window.addEventListener('load', () => { loadFired = true; finishOverlay(); }, { once: true });
+
+		setTimeout(() => {
+			overlay.classList.add('site-load-hyperspace-active');
+			overlay.querySelector('.site-load-center')?.classList.add('site-load-center-out');
+
+			const container = overlay.querySelector('.site-load-hyperspace-streaks');
+			const cx = 50, cy = 50;
+			const colors = ['red', 'coral', 'darkred', 'brightred'];
+			let count = 0;
+			const spawn = () => {
+				const frag = document.createDocumentFragment();
+				for (let i = 0; i < 18; i++) {
+					const r = 25 + Math.sqrt(Math.random()) * 50;
+					const theta = Math.random() * Math.PI * 2;
+					const x = cx + Math.cos(theta) * r;
+					const y = cy + Math.sin(theta) * r;
+					const dx = cx - x, dy = cy - y;
+					const dist = Math.hypot(dx, dy) || 1;
+					const angleTowardCenter = Math.atan2(dy, dx) * 180 / Math.PI - 90;
+					const spread = (Math.random() - 0.5) * 24;
+					const angle = angleTowardCenter + spread;
+					const len = 70 + dist * 0.5 + Math.random() * 90;
+					const color = colors[count % 4];
+					const el = document.createElement('div');
+					el.className = `site-load-hyperspace-streak site-load-hs-${color}`;
+					el.style.cssText = `--x:${x}%;--y:${y}%;--angle:${angle}deg;--len:${Math.max(60, Math.min(len, 280))}px;--delay:0s;`;
+					frag.appendChild(el);
+					count++;
+				}
+				container.appendChild(frag);
+			};
+			spawn();
+			const interval = setInterval(spawn, 30);
+			setTimeout(() => clearInterval(interval), 480);
+			hyperspaceStarted = true;
+			// Require at least 450ms of hyperspace before finishing
+			setTimeout(finishOverlay, 450);
+		}, 1200);
+	})();
+
+	// Toggle loaded state to trigger CSS entrance animations
+	setTimeout(() => document.body.classList.add('is-loaded'), 60);
+
+	const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	const hasFinePointer = window.matchMedia && window.matchMedia('(pointer:fine)').matches;
+
+	if (!prefersReducedMotion) {
+		document.body.classList.add('cinematic-enabled');
+		document.body.classList.add('insane-mode');
+	}
+
+	// Cursor halo for premium desktop feel (unified RAF)
+	(function setupCursorHalo() {
+		if (prefersReducedMotion || !hasFinePointer || Motion.tier === 'low' || document.body.classList.contains('ultimate-page')) return;
+		const halo = document.createElement('div');
+		halo.className = 'cursor-halo';
+		document.body.appendChild(halo);
+		let targetX = 0;
+		let targetY = 0;
+		let currentX = 0;
+		let currentY = 0;
+		let registered = false;
+
+		function tick() {
+			currentX += (targetX - currentX) * 0.18;
+			currentY += (targetY - currentY) * 0.18;
+			halo.style.transform = `translate(${currentX}px, ${currentY}px) translate(-50%, -50%)`;
+		}
+
+		window.addEventListener('mousemove', (e) => {
+			targetX = e.clientX;
+			targetY = e.clientY;
+			halo.classList.add('active');
+			if (!registered) {
+				registered = true;
+				Motion.registerRAF('cursorHalo', tick);
+			}
+		}, { passive: true });
+
+		window.addEventListener('mousedown', () => halo.classList.add('pressed'));
+		window.addEventListener('mouseup', () => halo.classList.remove('pressed'));
+		window.addEventListener('mouseleave', () => {
+			halo.classList.remove('active');
+			if (registered) {
+				registered = false;
+				Motion.unregisterRAF('cursorHalo');
+			}
+		});
+	})();
+
+	// Spotlight feedback on interactive elements (throttled via RAF)
+	(function setupInteractiveSpotlight() {
+		if (prefersReducedMotion || !hasFinePointer || Motion.tier !== 'immersive') return;
+		const targets = document.querySelectorAll('nav a, .btn, .select-btn, .contact-link');
+		if (!targets.length) return;
+		targets.forEach((el) => el.classList.add('interactive-spot'));
+		let lastEv = null;
+		let scheduled = false;
+		function apply() {
+			scheduled = false;
+			if (!lastEv) return;
+			const el = lastEv.target.closest('.interactive-spot');
+			if (el) {
+				const rect = el.getBoundingClientRect();
+				const x = ((lastEv.clientX - rect.left) / rect.width) * 100;
+				const y = ((lastEv.clientY - rect.top) / rect.height) * 100;
+				el.style.setProperty('--mx', `${x.toFixed(2)}%`);
+				el.style.setProperty('--my', `${y.toFixed(2)}%`);
+				el.classList.add('is-hot');
+			}
+		}
+		document.addEventListener('mousemove', (e) => {
+			lastEv = e;
+			if (!scheduled) {
+				scheduled = true;
+				requestAnimationFrame(apply);
+			}
+		}, { passive: true });
+		targets.forEach((el) => {
+			el.addEventListener('mouseleave', () => el.classList.remove('is-hot'));
+		});
+	})();
+
+	// Premium magnetic feel on key controls (throttled via RAF)
+	(function setupMagneticControls() {
+		if (prefersReducedMotion || !hasFinePointer || Motion.tier !== 'immersive') return;
+		const targets = document.querySelectorAll('nav a, .btn, .select-btn, .cart-toggle, .theme-toggle, .site-cart-close, .site-cart-item-remove, .contact-link');
+		if (!targets.length) return;
+		targets.forEach((el) => el.classList.add('magnetic'));
+		let lastEv = null;
+		let scheduled = false;
+		function apply() {
+			scheduled = false;
+			if (!lastEv) return;
+			const el = lastEv.target.closest('.magnetic');
+			if (el) {
+				const rect = el.getBoundingClientRect();
+				const px = (lastEv.clientX - rect.left) / rect.width - 0.5;
+				const py = (lastEv.clientY - rect.top) / rect.height - 0.5;
+				const max = el.classList.contains('btn') ? 5 : 4;
+				el.style.setProperty('--mag-x', `${(px * max).toFixed(2)}px`);
+				el.style.setProperty('--mag-y', `${(py * max).toFixed(2)}px`);
+			}
+		}
+		document.addEventListener('mousemove', (e) => {
+			lastEv = e;
+			if (!scheduled) {
+				scheduled = true;
+				requestAnimationFrame(apply);
+			}
+		}, { passive: true });
+		targets.forEach((el) => {
+			el.addEventListener('mouseleave', () => {
+				el.style.setProperty('--mag-x', '0px');
+				el.style.setProperty('--mag-y', '0px');
+			});
+		});
+	})();
+
+	// Click shockwaves on nav/buttons/switches for insane feel
+	(function setupClickBursts() {
+		if (prefersReducedMotion || !hasFinePointer) return;
+		const targets = document.querySelectorAll('nav a, .btn, .select-btn, .theme-toggle, .cart-toggle');
+		if (!targets.length) return;
+
+		targets.forEach((el) => {
+			el.addEventListener('click', (e) => {
+				const rect = el.getBoundingClientRect();
+				const burst = document.createElement('span');
+				burst.className = 'click-burst';
+				if (document.body.classList.contains('theme-light')) {
+					burst.classList.add('click-burst-light');
+				}
+				const x = e.clientX - rect.left;
+				const y = e.clientY - rect.top;
+				burst.style.left = `${x}px`;
+				burst.style.top = `${y}px`;
+				el.appendChild(burst);
+				setTimeout(() => burst.remove(), 520);
+			});
+		});
+	})();
+
+	// Per-letter cursor glow on key text (like ULTIMATE mode)
+	(function setupGlobalLetterGlow() {
+		if (prefersReducedMotion || !hasFinePointer || Motion.tier !== 'immersive') return;
+		if (document.body.classList.contains('ultimate-page')) return;
+
+		const selectors = 'main h2, main h3, .card h4, .how-step h4, .hero h2, .page-title, .page-kicker, .page-lead, .section-accent, .price strong, nav a, .btn:not(.card-action-btn), .contact-info h4, .how-intro h4, .how-intro-label, .how-chip, .site-footer small';
+		const targets = document.querySelectorAll(selectors);
+		if (!targets.length) return;
+
+		const runWhenIdle = (fn) => {
+			if (typeof requestIdleCallback !== 'undefined') {
+				requestIdleCallback(fn, { timeout: 500 });
+			} else {
+				setTimeout(fn, 0);
+			}
+		};
+
+		function splitLetters(node) {
+			if (node.dataset.glowReady === '1') return;
+			const text = node.textContent || '';
+			if (!text.trim()) return;
+			const frag = document.createDocumentFragment();
+			const words = text.split(/(\s+)/);
+
+			const useCompactSpaces = node.classList.contains('page-kicker');
+			for (let i = 0; i < words.length; i++) {
+				const word = words[i];
+				if (/^\s+$/.test(word)) {
+					if (useCompactSpaces) {
+						frag.appendChild(document.createTextNode('\u00A0'));
+					} else {
+						for (let j = 0; j < word.length; j++) {
+							const sp = document.createElement('span');
+							sp.className = 'glow-letter glow-letter-space';
+							sp.textContent = '\u00A0';
+							frag.appendChild(sp);
+						}
+					}
+				} else {
+					const wordSpan = document.createElement('span');
+					wordSpan.className = 'glow-word';
+					for (let j = 0; j < word.length; j++) {
+						const span = document.createElement('span');
+						span.className = 'glow-letter';
+						span.textContent = word[j];
+						wordSpan.appendChild(span);
+					}
+					frag.appendChild(wordSpan);
+				}
+			}
+			node.textContent = '';
+			if (useCompactSpaces) {
+				const wrapper = document.createElement('span');
+				wrapper.className = 'page-kicker-text';
+				wrapper.appendChild(frag);
+				node.appendChild(wrapper);
+			} else {
+				node.appendChild(frag);
+			}
+			node.dataset.glowReady = '1';
+		}
+
+		let layoutInvalidTS = 0;
+		window.addEventListener('scroll', () => { layoutInvalidTS = Date.now(); }, { passive: true });
+		window.addEventListener('resize', () => { layoutInvalidTS = Date.now(); });
+
+		const activeGlowNodes = new Set();
+		function paintGlowNodes() {
+			activeGlowNodes.forEach((node) => {
+				if (node._glowPaint) node._glowPaint();
+			});
+		}
+
+		runWhenIdle(() => {
+		targets.forEach((node) => {
+			splitLetters(node);
+			const letters = Array.from(node.querySelectorAll('.glow-letter'));
+			if (!letters.length) return;
+
+			let mx = 0;
+			let my = 0;
+			const radius = 88;
+			let cache = null;
+			let cacheTS = 0;
+
+			function refreshCache() {
+				cache = [];
+				for (let i = 0; i < letters.length; i++) {
+					const letter = letters[i];
+					if (letter.classList.contains('glow-letter-space')) { cache.push(null); continue; }
+					const rect = letter.getBoundingClientRect();
+					cache.push({ cx: rect.left + rect.width * 0.5, cy: rect.top + rect.height * 0.5 });
+				}
+				cacheTS = Date.now();
+			}
+
+			function paint() {
+				if (!cache || layoutInvalidTS > cacheTS) refreshCache();
+				for (let i = 0; i < letters.length; i++) {
+					const letter = letters[i];
+					if (letter.classList.contains('glow-letter-space')) continue;
+					const c = cache[i];
+					if (!c) continue;
+					const dist = Math.hypot(mx - c.cx, my - c.cy);
+					const glow = Math.max(0, 1 - dist / radius);
+					letter.style.setProperty('--g', glow.toFixed(3));
+				}
+			}
+			node._glowPaint = paint;
+
+			node.addEventListener('mouseenter', () => {
+				node.classList.add('glow-active');
+				activeGlowNodes.add(node);
+				if (activeGlowNodes.size === 1) Motion.registerRAF('globalLetterGlow', paintGlowNodes);
+			});
+			node.addEventListener('mouseleave', () => {
+				node.classList.remove('glow-active');
+				for (let i = 0; i < letters.length; i++) {
+					letters[i].style.setProperty('--g', '0');
+				}
+				activeGlowNodes.delete(node);
+				if (activeGlowNodes.size === 0) Motion.unregisterRAF('globalLetterGlow');
+			});
+			node.addEventListener('mousemove', (e) => {
+				mx = e.clientX;
+				my = e.clientY;
+			}, { passive: true });
+		});
+		});
+	})();
+
+	// Letter-by-letter hover color fade for body text
+	(function setupTextHoverFade() {
+		if (prefersReducedMotion || !hasFinePointer || Motion.tier !== 'immersive') return;
+		if (document.body.classList.contains('ultimate-page')) return;
+
+		const selectors = '.hero p, .hero-sequence p, .page-lead, .card p, .card li, .how-step p, .how-intro p, .contact-info p, .contact-link span, .zen-product p, .zen-product .price, .price, .services > .muted';
+		const targets = document.querySelectorAll(selectors);
+		if (!targets.length) return;
+
+		const faqSelectors = '.faq details summary, .faq details p';
+		const faqTargets = document.querySelectorAll(faqSelectors);
+		faqTargets.forEach((el) => el.classList.add('text-hover-fade'));
+
+		function splitIntoLetters(node) {
+			if (node.dataset.fadeLettersReady === '1') return;
+			const text = node.textContent || '';
+			if (!text.trim()) return;
+			const frag = document.createDocumentFragment();
+			const words = text.split(/(\s+)/);
+			for (let i = 0; i < words.length; i++) {
+				const word = words[i];
+				if (/^\s+$/.test(word)) {
+					frag.appendChild(document.createTextNode(word));
+				} else {
+					const wordSpan = document.createElement('span');
+					wordSpan.className = 'text-fade-word';
+					const prevLen = (frag.textContent || '').length;
+					for (let j = 0; j < word.length; j++) {
+						const span = document.createElement('span');
+						span.className = 'text-fade-letter';
+						span.textContent = word[j];
+						span.style.setProperty('--letter-index', String(prevLen + j));
+						wordSpan.appendChild(span);
+					}
+					frag.appendChild(wordSpan);
+				}
+			}
+			node.textContent = '';
+			node.appendChild(frag);
+			node.dataset.fadeLettersReady = '1';
+		}
+
+		targets.forEach((el) => {
+			el.classList.add('text-hover-fade');
+			splitIntoLetters(el);
+		});
+	})();
+
+	// (Headline reveal merged into unified reveal system above)
+
+	// Cinematic internal page hop (non-ultimate links)
+	(function setupPageHopTransition() {
+		if (prefersReducedMotion) return;
+		const links = document.querySelectorAll('a[href]');
+		if (!links.length) return;
+		let active = false;
+		function isInternalHtml(href) {
+			if (!href) return false;
+			if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return false;
+			try {
+				const url = new URL(href, window.location.href);
+				return url.origin === window.location.origin && /\.html($|#|\?)/i.test(url.pathname + url.search + url.hash);
+			} catch {
+				return false;
+			}
+		}
+		links.forEach((link) => {
+			link.addEventListener('click', (e) => {
+				const href = link.getAttribute('href') || '';
+				if (!isInternalHtml(href)) return;
+				if (/ultimate\.html/i.test(href)) return;
+				if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+				if (active) return;
+				active = true;
+				e.preventDefault();
+				const targetUrl = new URL(href, window.location.href).href;
+				const path = new URL(targetUrl).pathname;
+				const isHome = /\/index\.html$|\/$/.test(path) || path.endsWith('/index.html');
+				const title = isHome ? 'HOME' : ((link.textContent || 'Entering').trim() || 'Entering');
+				const overlay = document.createElement('div');
+				overlay.className = 'page-hop-overlay';
+				if (document.body.classList.contains('theme-light')) {
+					overlay.classList.add('theme-light-hop');
+				}
+				overlay.innerHTML = `<div class="page-hop-core"><div class="page-hop-title">${title}</div></div>`;
+				document.body.appendChild(overlay);
+				requestAnimationFrame(() => overlay.classList.add('active'));
+				setTimeout(() => {
+					window.location.href = targetUrl;
+				}, 520);
+			});
+		});
+	})();
+
+	// GLOBAL CART (all pages)
+	const PROMO_RULES = {
+		'2000!': { type: 'percent', value: 0.5, cutoff: new Date('2026-02-28T00:00:00Z') },
+		'GOAT': { type: 'percent', value: 0.8, cutoff: new Date('2026-03-10T03:59:59Z') },
+		'BUNDLEXP': {
+			type: 'fixed',
+			value: 485,
+			cutoff: new Date('2026-03-23T03:59:59Z'),
+			requiredProductIds: ['aim-x', 'vision-x-plus', '2k'],
+		},
+	};
+	const PROMO_CODES = Object.keys(PROMO_RULES);
+	const PROMO_STORAGE_KEY = 'siteCartPromo';
+
+	function getPromoRule(code) {
+		const normalized = code && String(code).toUpperCase().trim();
+		return normalized ? PROMO_RULES[normalized] || null : null;
+	}
+
+	function matchesRequiredBundle(rule, items) {
+		if (!rule?.requiredProductIds?.length) return true;
+		const cartIds = (items || []).map((item) => String(item?.productId || '').toLowerCase()).sort();
+		const requiredIds = rule.requiredProductIds.slice().sort();
+		if (cartIds.length !== requiredIds.length) return false;
+		return requiredIds.every((id, index) => cartIds[index] === id);
+	}
+
+	function getPromoEvaluation(code, items, subtotal) {
+		const normalized = code && String(code).toUpperCase().trim();
+		const rule = getPromoRule(normalized);
+		if (!normalized || !rule) return { valid: false, error: 'Invalid promo code.' };
+		if (!(rule.cutoff instanceof Date) || new Date() >= rule.cutoff) {
+			return { valid: false, error: 'Promo has expired.' };
+		}
+		if (!matchesRequiredBundle(rule, items)) {
+			return { valid: false, error: 'BUNDLEXP requires VISION+X, AIM-X, and 2K Zen Script in the same cart.' };
+		}
+
+		const rawDiscount = rule.type === 'fixed'
+			? rule.value
+			: subtotal * (1 - (rule.value ?? 1));
+		const discountAmount = Math.max(0, Math.min(subtotal, rawDiscount));
+		const message = rule.type === 'fixed'
+			? `$${discountAmount.toFixed(0)} off bundle applied`
+			: `${Math.round((1 - (rule.value ?? 1)) * 100)}% off applied`;
+
+		return {
+			valid: true,
+			code: normalized,
+			rule,
+			discountAmount,
+			message,
+		};
+	}
+
+	const Cart = (function () {
+		const STORAGE_KEY = 'siteCart';
+		let items = [];
+
+		function load() {
+			try {
+				if (!window.localStorage) return;
+				const raw = localStorage.getItem(STORAGE_KEY);
+				if (!raw) return;
+				const parsed = JSON.parse(raw);
+				if (Array.isArray(parsed)) {
+					items = parsed.map((item) => {
+						if (!item || typeof item !== 'object') return item;
+						if ((item.productId || '').toLowerCase() === 'vision-x') {
+							return { ...item, price: 450 };
+						}
+						if ((item.productId || '').toLowerCase() === 'aim-x') {
+							return { ...item, price: 275 };
+						}
+						return item;
+					});
+					save();
+				}
+			} catch (e) { }
+		}
+
+		function save() {
+			try {
+				if (!window.localStorage) return;
+				localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+			} catch (e) { }
+		}
+
+		function addItem(productId, name, price) {
+			const value = typeof price === 'number' && !Number.isNaN(price) ? price : 0;
+			const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+			items.push({ id, productId, name, price: value });
+			save();
+		}
+
+		function clear() {
+			items = [];
+			save();
+			setPromo(null);
+		}
+
+		function remove(id) {
+			items = items.filter(item => item.id !== id);
+			save();
+		}
+
+		function getItems() {
+			return items.slice();
+		}
+
+		function getTotal() {
+			return items.reduce((sum, item) => sum + (item.price || 0), 0);
+		}
+
+		function setPromo(code) {
+			try {
+				if (window.sessionStorage) {
+					if (code) sessionStorage.setItem(PROMO_STORAGE_KEY, code);
+					else sessionStorage.removeItem(PROMO_STORAGE_KEY);
+				}
+			} catch (e) { }
+		}
+
+		function getPromo() {
+			try {
+				if (window.sessionStorage) return sessionStorage.getItem(PROMO_STORAGE_KEY) || null;
+			} catch (e) { }
+			return null;
+		}
+
+		function isPromoValid() {
+			const items = getItems();
+			const subtotal = getTotal();
+			return getPromoEvaluation(getPromo(), items, subtotal).valid;
+		}
+
+		load();
+
+		return { addItem, clear, remove, getItems, getTotal, setPromo, getPromo, isPromoValid };
+	})();
+
+	(function setupCartUI() {
+		const body = document.body;
+		const toggle = document.getElementById('site-cart-toggle');
+		const closeBtn = document.getElementById('site-cart-close');
+		const backdrop = document.getElementById('site-cart-backdrop');
+		const itemsEl = document.getElementById('site-cart-items');
+		const totalEl = document.getElementById('site-cart-total');
+		const summaryEl = document.getElementById('site-cart-summary');
+		const clearBtn = document.getElementById('site-cart-clear');
+
+		if (!toggle || !itemsEl || !totalEl || !summaryEl || !clearBtn || !backdrop) return;
+
+		document.querySelectorAll('.cart-toggle-mobile').forEach((btn) => {
+			btn.addEventListener('click', () => toggle?.click());
+		});
+
+		function render() {
+			const items = Cart.getItems();
+			const promoMsgEl = document.getElementById('site-cart-promo-message');
+			const promoBlock = document.querySelector('.site-cart-promo');
+			if (promoBlock) promoBlock.style.display = items.length ? 'block' : 'none';
+
+			if (!items.length) {
+				itemsEl.innerHTML = '';
+				summaryEl.textContent = 'No items in your cart yet.';
+				totalEl.textContent = 'Total: $0';
+				document.querySelectorAll('.site-cart-count').forEach((el) => { el.textContent = '0'; });
+				if (promoMsgEl) promoMsgEl.textContent = '';
+				return;
+			}
+			const promoCode = Cart.getPromo();
+			const total = Cart.getTotal();
+			const promoEval = getPromoEvaluation(promoCode, items, total);
+			const hasPromo = promoEval.valid;
+			itemsEl.innerHTML = items.map(item => {
+				const id = item.id || '';
+				const displayPrice = item.price;
+				const priceStr = displayPrice % 1 === 0 ? displayPrice : displayPrice.toFixed(2);
+				return `<li data-id="${id}">
+					<div class="site-cart-item-main">
+						<span class="site-cart-item-name">${item.name}</span>
+						<span class="site-cart-item-price">$${priceStr}</span>
+					</div>
+					<button class="site-cart-item-remove" type="button" data-id="${id}" aria-label="Remove item">🗑️</button>
+				</li>`;
+			}).join('');
+			const displayTotal = hasPromo ? total - promoEval.discountAmount : total;
+			const totalStr = displayTotal % 1 === 0 ? displayTotal : displayTotal.toFixed(2);
+			totalEl.textContent = `Total: $${totalStr}`;
+			summaryEl.textContent = `You have ${items.length} item${items.length > 1 ? 's' : ''} in your cart.`;
+			document.querySelectorAll('.site-cart-count').forEach((el) => { el.textContent = String(items.length); });
+
+			if (promoMsgEl) {
+				if (hasPromo) {
+					promoMsgEl.textContent = 'Promo applied — ' + promoEval.message;
+					promoMsgEl.classList.remove('site-cart-promo-error');
+				} else if (Cart.getPromo()) {
+					promoMsgEl.textContent = promoEval.error || 'Promo expired or invalid.';
+					promoMsgEl.classList.add('site-cart-promo-error');
+				} else {
+					promoMsgEl.textContent = '';
+				}
+			}
+
+			// animate items in
+			requestAnimationFrame(() => {
+				const lis = itemsEl.querySelectorAll('li');
+				lis.forEach((li, index) => {
+					setTimeout(() => {
+						li.classList.add('site-cart-item-visible');
+					}, index * 40);
+				});
+			});
+		}
+
+		function openCart() {
+			body.classList.add('site-cart-open');
+			const cartEl = document.getElementById('site-cart');
+			if (cartEl) cartEl.setAttribute('aria-hidden', 'false');
+			backdrop.setAttribute('aria-hidden', 'false');
+		}
+
+		function closeCart() {
+			body.classList.remove('site-cart-open');
+			const cartEl = document.getElementById('site-cart');
+			if (cartEl) cartEl.setAttribute('aria-hidden', 'true');
+			backdrop.setAttribute('aria-hidden', 'true');
+		}
+
+		toggle.addEventListener('click', () => {
+			if (body.classList.contains('site-cart-open')) {
+				closeCart();
+			} else {
+				openCart();
+			}
+		});
+
+		if (closeBtn) {
+			closeBtn.addEventListener('click', closeCart);
+		}
+
+		backdrop.addEventListener('click', closeCart);
+
+		clearBtn.addEventListener('click', () => {
+			Cart.clear();
+			render();
+		});
+
+		function applyPromo() {
+			const promoInput = document.getElementById('site-cart-promo-input');
+			const promoMsgEl = document.getElementById('site-cart-promo-message');
+			if (!promoInput || !promoMsgEl) return;
+			const code = (promoInput.value || '').trim().toUpperCase();
+			if (!code) {
+				Cart.setPromo(null);
+				render();
+				return;
+			}
+			const promoEval = getPromoEvaluation(code, Cart.getItems(), Cart.getTotal());
+			if (promoEval.valid) {
+				Cart.setPromo(promoEval.code);
+				promoInput.value = '';
+				promoMsgEl.classList.remove('site-cart-promo-error');
+				render();
+			} else {
+				Cart.setPromo(null);
+				promoMsgEl.textContent = promoEval.error || 'Invalid promo code.';
+				promoMsgEl.classList.add('site-cart-promo-error');
+			}
+		}
+
+		const promoInput = document.getElementById('site-cart-promo-input');
+		const promoApplyBtn = document.getElementById('site-cart-promo-apply');
+		if (promoApplyBtn) promoApplyBtn.addEventListener('click', applyPromo);
+		if (promoInput) {
+			promoInput.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					applyPromo();
+				}
+			});
+		}
+
+		itemsEl.addEventListener('click', (e) => {
+			const target = e.target;
+			if (!(target instanceof HTMLElement)) return;
+			if (target.classList.contains('site-cart-item-remove')) {
+				const id = target.getAttribute('data-id');
+				if (!id) return;
+				Cart.remove(id);
+				render();
+			}
+		});
+
+		const checkoutBtn = document.getElementById('site-cart-checkout');
+		function resetCheckoutButton() {
+			if (checkoutBtn) {
+				checkoutBtn.disabled = false;
+				checkoutBtn.textContent = 'Checkout';
+			}
+		}
+		if (checkoutBtn) {
+			checkoutBtn.addEventListener('click', async () => {
+				const items = Cart.getItems();
+				const productIds = items.map(i => i.productId).filter(Boolean);
+				if (!productIds.length) {
+					alert('Your cart is empty or contains invalid items. Please add products from the catalog.');
+					return;
+				}
+				checkoutBtn.disabled = true;
+				checkoutBtn.textContent = 'Checking...';
+				checkoutBtn.textContent = 'Opening Checkout...';
+				window.location.href = '/checkout.html';
+			});
+			window.addEventListener('pageshow', resetCheckoutButton);
+		}
+
+		render();
+
+		// Expose helper used by other setup blocks. Requires productId for checkout.
+		window.__addToSiteCart = function (productId, name, rawPrice) {
+			let priceNum = 0;
+			if (typeof rawPrice === 'number') {
+				priceNum = rawPrice;
+			} else if (typeof rawPrice === 'string') {
+				const match = rawPrice.replace(/[^0-9.]/g, '');
+				priceNum = parseFloat(match || '0') || 0;
+			}
+			Cart.addItem(productId || '', name || 'Item', priceNum);
+			render();
+		};
+	})();
+
+	// ─── Profile menu: session-aware account hub ────────────────────────────────
+	(function setupProfileMenu() {
+		const accountBtn = document.querySelector('.account-interface-btn');
+		if (!accountBtn) return;
+		const headerActions = accountBtn.parentElement;
+		if (!headerActions) return;
+
+		const wrapper = document.createElement('div');
+		wrapper.className = 'profile-menu';
+		wrapper.style.display = 'none';
+		wrapper.innerHTML =
+			'<button class="profile-trigger" type="button" aria-label="Profile menu" aria-expanded="false">' +
+				'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+					'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-3.3 3.6-6 8-6s8 2.7 8 6"/>' +
+				'</svg>' +
+			'</button>' +
+			'<div class="profile-dropdown" hidden>' +
+				'<button type="button" class="profile-dropdown-item" data-action="account">Account Overview</button>' +
+				'<button type="button" class="profile-dropdown-item" data-action="purchases">View Purchases</button>' +
+				'<button type="button" class="profile-dropdown-item" data-action="downloads">Open Downloads</button>' +
+				'<button type="button" class="profile-dropdown-item profile-dropdown-divider" data-action="support">Contact Support</button>' +
+				'<button type="button" class="profile-dropdown-item" data-action="discord">Join Discord</button>' +
+				'<button type="button" class="profile-dropdown-item profile-signout-btn" data-action="signout">Sign out</button>' +
+			'</div>';
+		headerActions.appendChild(wrapper);
+
+		const hub = document.createElement('div');
+		hub.className = 'account-hub';
+		hub.hidden = true;
+		hub.innerHTML =
+			'<div class="account-hub-backdrop" data-close="1"></div>' +
+			'<section class="account-hub-panel" role="dialog" aria-modal="true" aria-label="Account">' +
+				'<header class="account-hub-header">' +
+					'<h3 class="account-hub-title">Your Account</h3>' +
+					'<button class="account-hub-close" type="button" aria-label="Close">×</button>' +
+				'</header>' +
+				'<div class="account-hub-tabs">' +
+					'<button type="button" class="account-hub-tab active" data-hub-tab="account">Account</button>' +
+					'<button type="button" class="account-hub-tab" data-hub-tab="purchases">View Purchases</button>' +
+				'</div>' +
+				'<div class="account-hub-body">' +
+					'<div class="account-hub-view" data-hub-view="account">' +
+						'<p class="account-hub-email"></p>' +
+						'<p class="account-hub-copy">Manage your scripts, secure downloads, and account access from one command center.</p>' +
+						'<div class="account-hub-actions">' +
+							'<a class="btn ghost" href="/account.html">Open Full Account Page</a>' +
+						'</div>' +
+					'</div>' +
+					'<div class="account-hub-view" data-hub-view="purchases" hidden>' +
+						'<div class="account-hub-purchases"><p class="muted">Loading purchases...</p></div>' +
+					'</div>' +
+				'</div>' +
+			'</section>';
+		document.body.appendChild(hub);
+
+		const trigger = wrapper.querySelector('.profile-trigger');
+		const dropdown = wrapper.querySelector('.profile-dropdown');
+		let dropdownBackdrop = null;
+
+		function closeDropdown() {
+			dropdown.hidden = true;
+			trigger.setAttribute('aria-expanded', 'false');
+			if (dropdownBackdrop && dropdownBackdrop.parentNode) {
+				dropdownBackdrop.remove();
+				dropdownBackdrop = null;
+			}
+		}
+		function openDropdown() {
+			dropdown.hidden = false;
+			trigger.setAttribute('aria-expanded', 'true');
+			if (!dropdownBackdrop) {
+				dropdownBackdrop = document.createElement('div');
+				dropdownBackdrop.className = 'profile-dropdown-backdrop';
+				dropdownBackdrop.setAttribute('data-profile-dropdown-backdrop', '1');
+				dropdownBackdrop.addEventListener('click', closeDropdown);
+				document.body.appendChild(dropdownBackdrop);
+			}
+		}
+
+		const tabs = hub.querySelectorAll('.account-hub-tab');
+		const views = hub.querySelectorAll('.account-hub-view');
+		const purchasesEl = hub.querySelector('.account-hub-purchases');
+		const emailEl = hub.querySelector('.account-hub-email');
+
+		function setHubTab(tabName) {
+			tabs.forEach((t) => t.classList.toggle('active', t.dataset.hubTab === tabName));
+			views.forEach((v) => { v.hidden = v.dataset.hubView !== tabName; });
+		}
+		function openHub(tabName) {
+			setHubTab(tabName || 'account');
+			hub.hidden = false;
+			document.body.classList.add('account-hub-open');
+		}
+		function closeHub() {
+			hub.hidden = true;
+			document.body.classList.remove('account-hub-open');
+		}
+
+		trigger.addEventListener('click', (e) => {
+			e.stopPropagation();
+			if (dropdown.hidden) {
+				openDropdown();
+			} else {
+				closeDropdown();
+			}
+		});
+		document.addEventListener('pointerdown', (e) => {
+			if (dropdown.hidden) return;
+			const target = e.target;
+			if (target instanceof Node && wrapper.contains(target)) return;
+			closeDropdown();
+		}, true);
+		document.addEventListener('click', () => {
+			if (!dropdown.hidden) closeDropdown();
+		});
+		wrapper.addEventListener('click', (e) => e.stopPropagation());
+		hub.addEventListener('click', (e) => {
+			const target = e.target;
+			if (!(target instanceof HTMLElement)) return;
+			if (target.dataset.close === '1' || target.classList.contains('account-hub-close')) {
+				closeHub();
+				return;
+			}
+			const tabBtn = target.closest('.account-hub-tab');
+			if (tabBtn && tabBtn.dataset.hubTab) {
+				e.preventDefault();
+				setHubTab(tabBtn.dataset.hubTab);
+				if (tabBtn.dataset.hubTab === 'purchases') {
+					ensureClient().then((c) => c && loadPurchasesIntoHub(c));
+				}
+			}
+		});
+		window.addEventListener('blur', closeDropdown);
+		window.addEventListener('scroll', () => {
+			if (!dropdown.hidden) closeDropdown();
+		}, { passive: true });
+		window.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape') {
+				if (!dropdown.hidden) closeDropdown();
+				else closeHub();
+			}
+		});
+
+		async function loadPurchasesIntoHub(client) {
+			const renderHubEmpty = (leadText) => {
+				purchasesEl.innerHTML =
+					'<p class="muted">' + leadText + '</p>' +
+					'<div class="account-hub-actions">' +
+					'<a class="btn ghost" href="/ultimate.html">Browse Ultimate</a>' +
+					'<a class="btn ghost" href="/zen-scripts.html">View Zen Scripts</a>' +
+					'<a class="btn ghost" href="/services.html">Explore Services</a>' +
+					'</div>';
+			};
+			purchasesEl.innerHTML = '<p class="muted">Loading purchases...</p>';
+			try {
+				const { data: { session } } = await client.auth.getSession();
+				if (!session?.access_token) {
+					renderHubEmpty('Sign in to view purchases.');
+					return;
+				}
+				const res = await fetch('/api/my-purchases', { headers: { 'Authorization': 'Bearer ' + session.access_token } });
+				const data = await res.json();
+				if (!res.ok) {
+					renderHubEmpty('You have no purchases available to show right now.');
+					return;
+				}
+				const purchases = data.purchases || [];
+				if (!purchases.length) {
+					renderHubEmpty('You have no purchases yet. Start with one of our top products below.');
+					return;
+				}
+				const items = purchases.map((p) => {
+					const date = p.created_at ? new Date(p.created_at).toLocaleDateString() : 'Unknown date';
+					const badge = p.isExpired
+						? '<span class="purchase-status purchase-status-expired">Purchased • Window expired</span>'
+						: '<span class="purchase-status purchase-status-active">Active</span>';
+					return '<div class="account-hub-purchase-item"><strong>Purchase ' + date + '</strong>' + badge + '</div>';
+				}).join('');
+				purchasesEl.innerHTML = items + '<div class="account-hub-actions"><a class="btn ghost" href="/account.html#purchases">Open detailed downloads</a></div>';
+			} catch (_) {
+				renderHubEmpty('You have no purchases available to show right now.');
+			}
+		}
+
+		async function ensureClient() {
+			let client = window.__supabaseClient;
+			if (client) return client;
+			if (!window.supabase && !window.supabaseJs) {
+				await new Promise((resolve, reject) => {
+					const s = document.createElement('script');
+					s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+					s.async = true;
+					s.onload = resolve;
+					s.onerror = reject;
+					document.head.appendChild(s);
+				});
+			}
+			// Re-check in case account.html or another script created it during await
+			if (window.__supabaseClient) return window.__supabaseClient;
+			const cfgRes = await fetch('/api/supabase-config');
+			const cfg = await cfgRes.json();
+			if (!cfg?.url || !cfg?.anonKey) return null;
+			if (window.__supabaseClient) return window.__supabaseClient;
+			const lib = window.supabase || window.supabaseJs;
+			const createClient = lib?.createClient || lib?.default?.createClient;
+			if (!createClient) return null;
+			client = createClient(cfg.url, cfg.anonKey);
+			window.__supabaseClient = client;
+			return client;
+		}
+
+		wrapper.querySelectorAll('.profile-dropdown-item').forEach((btn) => {
+			btn.addEventListener('click', async () => {
+				const action = btn.dataset.action;
+				closeDropdown();
+				if (action === 'downloads') {
+					window.location.href = '/account.html#purchases';
+					return;
+				}
+				if (action === 'support') {
+					window.location.href = '/contact.html';
+					return;
+				}
+				if (action === 'discord') {
+					window.open('https://discord.gg/q9KWFd9xxH', '_blank', 'noopener');
+					return;
+				}
+				const client = await ensureClient();
+				if (!client) {
+					window.location.href = '/account.html';
+					return;
+				}
+				if (action === 'signout') {
+					await client.auth.signOut();
+					window.location.href = '/account.html';
+					return;
+				}
+				const { data: { session } } = await client.auth.getSession();
+				if (!session) {
+					window.location.href = '/account.html';
+					return;
+				}
+				emailEl.textContent = 'Signed in as ' + (session.user?.email || 'your account');
+				if (action === 'purchases') {
+					await loadPurchasesIntoHub(client);
+					openHub('purchases');
+				} else {
+					openHub('account');
+				}
+			});
+		});
+
+		async function checkSession() {
+			try {
+				const client = await ensureClient();
+				if (!client) return;
+				const { data: { session } } = await client.auth.getSession();
+				if (session) {
+					accountBtn.style.display = 'none';
+					wrapper.style.display = '';
+					document.body.classList.add('site-account-hidden');
+				} else {
+					accountBtn.style.display = '';
+					wrapper.style.display = 'none';
+					document.body.classList.remove('site-account-hidden');
+				}
+			} catch (_) { }
+		}
+		checkSession();
+	})();
+
+	// Hide-on-scroll navbar: velocity-aware for smoother reveal
+	(function setupNavHide() {
+		const header = document.querySelector('.site-header');
+		if (!header) return;
+		header.classList.remove('hide');
+		let lastY = window.scrollY;
+		let lastT = Date.now();
+		let ticking = false;
+		const delta = 6;
+		const velocityThreshold = 0.4; // px/ms — ignore slow scrolls
+		const navLinks = document.querySelectorAll('.header-right nav a');
+		navLinks.forEach(link => {
+			link.addEventListener('click', () => { header.classList.remove('hide'); });
+		});
+		window.addEventListener('pageshow', () => { header.classList.remove('hide'); });
+		function onScroll() {
+			const y = window.scrollY;
+			const now = Date.now();
+			if (!ticking) {
+				window.requestAnimationFrame(() => {
+					const dy = y - lastY;
+					const dt = Math.max(now - lastT, 1);
+					const velocity = Math.abs(dy) / dt;
+					if (Math.abs(dy) > delta) {
+						if (dy > 0 && y > 80 && velocity > velocityThreshold) {
+							header.classList.add('hide');
+						} else if (dy < 0) {
+							header.classList.remove('hide');
+						}
+						lastY = y;
+						lastT = now;
+					}
+					ticking = false;
+				});
+				ticking = true;
+			}
+		}
+		window.addEventListener('scroll', onScroll, { passive: true });
+	})();
+
+	// Main services "select" buttons cart (services.html)
+	(function setupServicesCart() {
+		const selectButtons = document.querySelectorAll('.select-btn[data-service]');
+		if (!selectButtons.length || !window.__addToSiteCart) return;
+
+		selectButtons.forEach(btn => {
+			btn.addEventListener('click', () => {
+				const productId = btn.getAttribute('data-product-id') || '';
+				const service = btn.getAttribute('data-service') || 'Service';
+				const price = btn.getAttribute('data-price') || '0';
+				window.__addToSiteCart(productId, service, price);
+				const cartToggle = document.getElementById('site-cart-toggle');
+				if (cartToggle) {
+					cartToggle.classList.add('cart-toggle-pulse');
+					setTimeout(() => cartToggle.classList.remove('cart-toggle-pulse'), 320);
+				}
+			});
+		});
+	})();
+
+	// Zen scripts add-to-cart hooks (zen-scripts.html)
+	; (function setupZenAddToCart() {
+		const zenSection = document.getElementById('zen-scripts-page');
+		if (!zenSection || !window.__addToSiteCart) return;
+		const buttons = zenSection.querySelectorAll('.zen-add-btn');
+		if (!buttons.length) return;
+
+		buttons.forEach(btn => {
+			btn.addEventListener('click', () => {
+				const productId = btn.getAttribute('data-product-id') || '';
+				const name = btn.getAttribute('data-name') || 'Zen Script';
+				const price = btn.getAttribute('data-price') || '0';
+				window.__addToSiteCart(productId, name, price);
+			});
+		});
+	})();
+
+	// Ultimate page add-to-cart (ultimate.html) — event delegation so it works regardless of overlays/timing
+	(function setupUltimateAddToCart() {
+		document.body.addEventListener('click', async (e) => {
+			const btn = e.target?.closest?.('.ultimate-add-btn');
+			if (!btn) return;
+			// Vision-X Subscribe $100/mo — add to cart and go to custom checkout
+			if (btn.id === 'vision-x-subscribe-btn') {
+				e.preventDefault();
+				if (!window.__addToSiteCart) return;
+				window.__addToSiteCart('vision-x-monthly', 'VISION-X Computer Vision — Monthly', '100');
+				location.href = '/checkout.html';
+				return;
+			}
+			if (!window.__addToSiteCart) return;
+			const productId = btn.getAttribute('data-product-id') || '';
+			const name = btn.getAttribute('data-name') || 'Product';
+			const price = btn.getAttribute('data-price') || '0';
+			window.__addToSiteCart(productId, name, price);
+			const cartToggle = document.getElementById('site-cart-toggle');
+			if (cartToggle) {
+				cartToggle.classList.add('cart-toggle-pulse');
+				setTimeout(() => cartToggle.classList.remove('cart-toggle-pulse'), 320);
+			}
+		});
+	})();
+
+	// Hero "CTRL-X Vision Setup" add-to-cart (index.html)
+	; (function setupHeroAdd() {
+		if (!window.__addToSiteCart) return;
+		const btn = document.querySelector('.hero-add-btn');
+		if (!btn) return;
+		btn.addEventListener('click', () => {
+			const productId = btn.getAttribute('data-product-id') || '';
+			const name = btn.getAttribute('data-name') || 'CTRL-X All Services Setup';
+			const price = btn.getAttribute('data-price') || '0';
+			window.__addToSiteCart(productId, name, price);
+			const cartToggle = document.getElementById('site-cart-toggle');
+			if (cartToggle) {
+				cartToggle.click();
+			}
+		});
+	})();
+
+	// FAQ accordion behavior
+	; (function setupFaqAccordion() {
+		const groups = document.querySelectorAll('.faq details');
+		if (!groups.length) return;
+		groups.forEach(d => {
+			d.addEventListener('toggle', () => {
+				if (!d.open) return;
+				groups.forEach(other => {
+					if (other !== d) other.open = false;
+				});
+			});
+		});
+	})();
+
+	// Smooth scroll for in-page anchors
+	; (function setupSmoothScroll() {
+		const links = document.querySelectorAll('a[href^="#"]');
+		if (!links.length) return;
+		links.forEach(link => {
+			link.addEventListener('click', (e) => {
+				const href = link.getAttribute('href');
+				if (!href) return;
+				const target = document.querySelector(href);
+				if (!target) return;
+				e.preventDefault();
+				target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			});
+		});
+	})();
+
+	// Highlight active nav link
+	; (function highlightNav() {
+		const path = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+		const navLinks = document.querySelectorAll('.header-right nav a');
+		if (!navLinks.length) return;
+		navLinks.forEach(link => {
+			const href = (link.getAttribute('href') || '').toLowerCase();
+			if (!href) return;
+			if (path === href || (path === '' && href === 'index.html')) {
+				link.classList.add('nav-active');
+			}
+		});
+	})();
+
+	// Letter-by-letter cursor glow on ULTIMATE nav links
+	; (function setupUltimateNavLetters() {
+		const links = document.querySelectorAll('.nav-ultimate');
+		if (!links.length) return;
+		if (Motion.tier !== 'immersive' || prefersReducedMotion || !hasFinePointer) return;
+
+		const runWhenIdle = (fn) => {
+			if (typeof requestIdleCallback !== 'undefined') {
+				requestIdleCallback(fn, { timeout: 500 });
+			} else {
+				setTimeout(fn, 0);
+			}
+		};
+
+		let layoutInvalidTS = 0;
+		window.addEventListener('scroll', () => { layoutInvalidTS = Date.now(); }, { passive: true });
+		window.addEventListener('resize', () => { layoutInvalidTS = Date.now(); });
+
+		const activeNavGlowLinks = new Set();
+		function paintNavGlowLinks() {
+			activeNavGlowLinks.forEach((link) => {
+				if (link._navGlowPaint) link._navGlowPaint();
+			});
+		}
+
+		runWhenIdle(() => {
+		links.forEach((link) => {
+			if (link.dataset.lettersReady === '1') return;
+			const text = link.textContent || '';
+			link.textContent = '';
+			const frag = document.createDocumentFragment();
+			for (let i = 0; i < text.length; i++) {
+				const ch = text[i];
+				const span = document.createElement('span');
+				span.className = ch === ' ' ? 'nav-ultimate-letter nav-ultimate-letter-space' : 'nav-ultimate-letter';
+				span.textContent = ch === ' ' ? '\u00A0' : ch;
+				frag.appendChild(span);
+			}
+			link.appendChild(frag);
+			link.dataset.lettersReady = '1';
+			const letters = Array.from(link.querySelectorAll('.nav-ultimate-letter'));
+			let mx = 0;
+			let my = 0;
+			const radius = 90;
+			let cache = null;
+			let cacheTS = 0;
+
+			function refreshCache() {
+				cache = [];
+				for (let i = 0; i < letters.length; i++) {
+					const letter = letters[i];
+					if (letter.classList.contains('nav-ultimate-letter-space')) { cache.push(null); continue; }
+					const rect = letter.getBoundingClientRect();
+					cache.push({ cx: rect.left + rect.width * 0.5, cy: rect.top + rect.height * 0.5 });
+				}
+				cacheTS = Date.now();
+			}
+
+			function paint() {
+				if (!cache || layoutInvalidTS > cacheTS) refreshCache();
+				for (let i = 0; i < letters.length; i++) {
+					const letter = letters[i];
+					if (letter.classList.contains('nav-ultimate-letter-space')) continue;
+					const c = cache[i];
+					if (!c) continue;
+					const dist = Math.hypot(mx - c.cx, my - c.cy);
+					const glow = Math.max(0, 1 - dist / radius);
+					letter.style.setProperty('--glow', glow.toFixed(3));
+				}
+			}
+			link._navGlowPaint = paint;
+
+			link.addEventListener('mouseenter', () => {
+				activeNavGlowLinks.add(link);
+				if (activeNavGlowLinks.size === 1) Motion.registerRAF('navLetterGlow', paintNavGlowLinks);
+			});
+			link.addEventListener('mouseleave', () => {
+				for (let i = 0; i < letters.length; i++) {
+					letters[i].style.setProperty('--glow', '0');
+				}
+				activeNavGlowLinks.delete(link);
+				if (activeNavGlowLinks.size === 0) Motion.unregisterRAF('navLetterGlow');
+			});
+			link.addEventListener('mousemove', (e) => {
+				mx = e.clientX;
+				my = e.clientY;
+			});
+		});
+		});
+	})();
+
+	// Cinematic transition when opening ULTIMATE page
+	; (function setupUltimateTransition() {
+		const links = document.querySelectorAll('a[href="ultimate.html"]');
+		if (!links.length) return;
+		const currentPath = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+		let navigating = false;
+		const MODE_KEY = 'ultimateTransitionMode';
+
+		function nextMode() {
+			const prev = sessionStorage.getItem(MODE_KEY) || 'dark';
+			const next = prev === 'dark' ? 'cosmic' : 'dark';
+			sessionStorage.setItem(MODE_KEY, next);
+			return next;
+		}
+
+		function startTransition(href) {
+			if (navigating) return;
+			navigating = true;
+			const isLight = document.body.classList.contains('theme-light');
+			const mode = isLight ? 'light' : nextMode();
+			const overlay = document.createElement('div');
+			overlay.className = 'ultimate-loading-overlay';
+			overlay.classList.add(`ultimate-mode-${mode}`);
+			const sparks = Array.from({ length: 24 }, (_, i) =>
+				`<span class="ultimate-loading-spark" style="--spark-delay:${(i * 0.06).toFixed(2)}s;--spark-x:${(Math.random() * 100).toFixed(1)}%;--spark-size:${(2 + Math.random() * 5).toFixed(1)}px;"></span>`
+			).join('');
+			overlay.innerHTML = `
+				<div class="ultimate-loading-layers">
+					<div class="ultimate-loading-beam"></div>
+					<div class="ultimate-loading-grid"></div>
+					<div class="ultimate-loading-nebula"></div>
+					<div class="ultimate-loading-sparks">${sparks}</div>
+				</div>
+				<div class="ultimate-loading-center">
+					<div class="ultimate-loading-logo">
+						<span class="ultimate-logo-layer base">CTRLX</span>
+						<span class="ultimate-logo-layer glitch g1">CTRLX</span>
+						<span class="ultimate-logo-layer glitch g2">CTRLX</span>
+						<span class="ultimate-logo-morph">ULTIMATE</span>
+					</div>
+					<div class="ultimate-loading-rings">
+						<div class="ultimate-loading-ring"></div>
+						<div class="ultimate-loading-ring"></div>
+						<div class="ultimate-loading-ring"></div>
+					</div>
+					<div class="ultimate-loading-title">ULTIMATE</div>
+					<div class="ultimate-loading-subtitle">${mode === 'light' ? 'Luminous Sequence • CONTROL+X' : mode === 'cosmic' ? 'Cosmic Surge • CONTROL+X' : 'Neural Sequence • VISION-X'}</div>
+				</div>
+			`;
+			document.body.appendChild(overlay);
+			requestAnimationFrame(() => overlay.classList.add('active'));
+			const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+			setTimeout(() => {
+				window.location.href = href;
+			}, prefersReduced ? 260 : 1280);
+		}
+
+		links.forEach((link) => {
+			link.addEventListener('click', (e) => {
+				if (currentPath === 'ultimate.html') return;
+				if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+				e.preventDefault();
+				startTransition(link.href);
+			});
+		});
+	})();
+
+	// Contact form handling with EmailJS
+	(function setupContactForm() {
+		const form = document.getElementById('contact-form');
+		const formMsg = document.getElementById('form-msg');
+		const clearBtn = document.getElementById('clear-btn');
+		const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+
+		if (!form || !formMsg) return;
+
+		// Pre-fill form based on URL params
+		const urlParams = new URLSearchParams(window.location.search);
+		const serviceParam = urlParams.get('service');
+		const gameParam = urlParams.get('game');
+		const detailsField = form.querySelector('#details');
+		if (detailsField && serviceParam === 'boosting') {
+			detailsField.value = 'Game: \nBudget: \nDesired Rep/Rank: \nCurrent Rep/Rank: ';
+		} else if (detailsField && serviceParam === 'cheats' && gameParam) {
+			const gameName = decodeURIComponent(gameParam).replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+			detailsField.value = `Game: ${gameName}\nCheat Inquiry: \nPlatform/OS: `;
+		}
+
+		// Initialize EmailJS (replace with your Public Key)
+		if (typeof emailjs !== 'undefined') {
+			emailjs.init('5JZIOhB9nTFZZfiVc'); // Replace with your EmailJS Public Key
+		}
+
+		// Helper function to show messages
+		function showMessage(text, isError = false) {
+			if (!formMsg) return;
+			formMsg.textContent = text;
+			formMsg.className = 'form-msg' + (isError ? ' error' : '');
+		}
+
+		if (form) {
+			form.addEventListener('submit', async (e) => {
+				e.preventDefault();
+
+				// Basic validation
+				const name = form.querySelector('#name')?.value.trim();
+				const email = form.querySelector('#email')?.value.trim();
+				const details = form.querySelector('#details')?.value.trim();
+
+				if (!name || !email || !details) {
+					showMessage('Please fill in all fields.', true);
+					return;
+				}
+
+				// Check if EmailJS is loaded
+				if (typeof emailjs === 'undefined') {
+					showMessage('Email service is not available. Please try again later.', true);
+					return;
+				}
+
+				// Disable submit button during submission
+				if (submitBtn) submitBtn.disabled = true;
+				showMessage('Sending request...');
+
+				try {
+					// Send email using EmailJS
+					// Template expects: name, email, reply_to, message
+					await emailjs.send(
+						'service_4xnu2is',  // Your EmailJS Service ID
+						'template_12vxe02', // Your EmailJS Template ID
+						{
+							name: name,
+							email: email,
+							reply_to: email,
+							message: details
+						}
+					);
+
+					showMessage('Request sent successfully! We will contact you shortly.');
+					form.reset();
+
+					// Reset cart selection if present
+					const cartContent = document.getElementById('cart-content');
+					if (cartContent) cartContent.textContent = 'No service selected.';
+					const checkoutBtn = document.getElementById('checkout-btn');
+					if (checkoutBtn) checkoutBtn.disabled = true;
+				} catch (error) {
+					console.error('EmailJS error:', error);
+					showMessage('Failed to send request. Please try again or contact us directly.', true);
+				} finally {
+					if (submitBtn) submitBtn.disabled = false;
+				}
+			});
+		}
+
+		if (clearBtn) {
+			clearBtn.addEventListener('click', () => {
+				if (form) form.reset();
+				if (formMsg) {
+					formMsg.textContent = '';
+					formMsg.className = 'form-msg';
+				}
+			});
+		}
+	})();
+});
+

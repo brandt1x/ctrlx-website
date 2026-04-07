@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<script>(function(){if(typeof localStorage!=='undefined'&&localStorage.getItem('theme')==='light')document.documentElement.classList.add('theme-light');})();</script>
+	<script>document.documentElement.classList.add('site-preload');window.addEventListener('load',()=>document.documentElement.classList.remove('site-preload'),{once:true});setTimeout(()=>document.documentElement.classList.remove('site-preload'),4000);</script>
+	<title>Download Your Purchase — Control-X</title>
+	<meta name="description" content="Download your Control-X purchase. One-time download—save your files." />
+	<meta name="robots" content="noindex,follow" />
+	<link rel="canonical" href="https://cntrl-x.com/download.html" />
+	<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" as="style">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+	<link rel="preload" href="style.css" as="style">
+	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="ultimate.css">
+	<link rel="preload" href="images/logo.new.png" as="image">
+	<link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+	<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
+	<script defer src="/_vercel/insights/script.js"></script>
+</head>
+
+<body class="success-page">
+	<canvas id="site-canvas-bg" class="site-canvas-bg" aria-hidden="true"></canvas>
+	<div class="site-vignette" aria-hidden="true"></div>
+
+	<header class="site-header">
+		<div class="container header-inner">
+			<a href="index.html" class="logo-link">
+				<img src="images/logo.new.png" alt="CTRLX Logo" class="logo-image logo-dark" width="656" height="204" fetchpriority="high" decoding="async" />
+				<img src="images/whitelogo.new.png" alt="CTRLX Logo" class="logo-image logo-light" width="982" height="302" loading="lazy" decoding="async" />
+			</a>
+			<button class="mobile-menu-toggle" type="button" aria-label="Toggle menu" aria-expanded="false">
+				<span class="hamburger-line"></span>
+				<span class="hamburger-line"></span>
+				<span class="hamburger-line"></span>
+			</button>
+			<div class="header-right">
+				<nav class="nav-left">
+					<a href="index.html">Home</a>
+					<a href="services.html">Services</a>
+					<a href="zen-scripts.html">Zen Scripts</a>
+					<a href="cheats.html">PC Cheats</a>
+				</nav>
+				<a href="ultimate.html" class="nav-ultimate nav-center-link">ULTIMATE</a>
+				<div class="header-actions">
+					<a href="account.html" class="btn account-interface-btn">Account</a>
+					<a href="contact.html" class="btn">Contact</a>
+					<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light mode">
+						<span class="theme-toggle-switch">
+							<span class="theme-icon theme-icon-dark">&#9789;</span>
+							<span class="theme-icon theme-icon-light">&#9728;</span>
+						</span>
+					</button>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<main class="success-main">
+		<div class="success-card ultimate-product ultimate-tilt">
+			<div class="ultimate-product-glow"></div>
+			<div class="ultimate-product-content">
+				<h2 class="success-title">Thank you for your purchase!</h2>
+				<p class="success-subtitle">Your payment was successful. Download your scripts below.</p>
+
+				<div id="guest-download-area" class="success-downloads">
+					<p id="guest-download-status" class="muted">Preparing your download...</p>
+					<button id="guest-download-btn" class="btn" type="button" disabled style="margin-top: 1rem;">Download Now</button>
+					<p id="guest-download-license-note" class="muted" style="margin-top: 1rem; font-size: 0.9rem; max-width: 420px; color: #ef4444;">
+						<strong>Your license key has been sent to your email.</strong> Use it to extract the ZIP (right-click → Extract All, then enter the key when prompted).
+					</p>
+					<p id="guest-download-warning" class="guest-download-warning muted" style="margin-top: 0.75rem; font-size: 0.9rem; max-width: 420px;">
+						<strong>One-time download.</strong> Save your files—this link cannot be used again. Available for 24 hours.
+					</p>
+				</div>
+
+				<div id="guest-download-error" class="account-error" hidden style="margin-top: 1rem;"></div>
+
+				<div class="success-slide-box" style="margin-top: 2rem;">
+					<p class="success-support-text">Need help? <a href="contact.html">Contact support</a> or <a href="https://discord.gg/q9KWFd9xxH" target="_blank" rel="noopener">join our Discord</a>.</p>
+					<div class="success-support-btns">
+						<a href="zen-scripts.html" class="btn ghost">Browse More Scripts</a>
+						<a href="index.html" class="btn ghost">Back to Home</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<footer class="site-footer">
+		<div class="container">
+			<small>© <span id="year"></span> Control-X — All lawful services.</small>
+		</div>
+	</footer>
+
+	<script src="script.js" defer></script>
+	<script src="cinematic.js" defer></script>
+	<script>
+		(function() {
+			document.getElementById('year').textContent = new Date().getFullYear();
+
+			const params = new URLSearchParams(location.search);
+			const sessionId = params.get('payment_intent') || params.get('session_id');
+
+			if (!sessionId) {
+				document.getElementById('guest-download-status').textContent = 'No purchase session found. If you just completed checkout, wait a moment and refresh.';
+				document.getElementById('guest-download-btn').hidden = true;
+				document.getElementById('guest-download-warning').hidden = true;
+				return;
+			}
+
+			const statusEl = document.getElementById('guest-download-status');
+			const btnEl = document.getElementById('guest-download-btn');
+			const warningEl = document.getElementById('guest-download-warning');
+			const errorEl = document.getElementById('guest-download-error');
+
+			statusEl.textContent = 'Click below to download your purchase.';
+			btnEl.disabled = false;
+
+			btnEl.addEventListener('click', async () => {
+				btnEl.disabled = true;
+				btnEl.textContent = 'Downloading...';
+				errorEl.hidden = true;
+
+				try {
+					const url = '/api/download-guest?payment_intent=' + encodeURIComponent(sessionId);
+					const res = await fetch(url);
+					if (!res.ok) {
+						const data = await res.json().catch(() => ({}));
+						throw new Error(data.error || 'Download failed');
+					}
+					const blob = await res.blob();
+					const a = document.createElement('a');
+					a.href = URL.createObjectURL(blob);
+					a.download = 'Cntrl-X-Purchase.zip';
+					a.click();
+					URL.revokeObjectURL(a.href);
+					statusEl.textContent = 'Download started. Save your files—this link cannot be used again.';
+					btnEl.textContent = 'Download used';
+					btnEl.disabled = true;
+					warningEl.innerHTML = '<strong>Download complete.</strong> Load the .gpc file(s) into Zen Studio and flash to your CronusZen.';
+				} catch (err) {
+					errorEl.textContent = err.message || 'Download failed. Please try again.';
+					errorEl.hidden = false;
+					btnEl.disabled = false;
+					btnEl.textContent = 'Download Now';
+				}
+			});
+		})();
+	</script>
+</body>
+
+</html>

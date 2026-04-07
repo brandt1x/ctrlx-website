@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:;">
+  <title>AIM-X</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/theme.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Tab Navigation -->
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="general">General</button>
+      <button class="tab-btn" data-tab="targeting">Targeting</button>
+      <button class="tab-btn" data-tab="behavior">Behavior</button>
+      <button class="tab-btn" data-tab="settings">Settings</button>
+      <button class="tab-btn" data-tab="advanced">Advanced</button>
+      <button class="tab-btn" data-tab="hotkeys">Hotkeys</button>
+      <button class="tab-btn" data-tab="debug">Debug</button>
+      <button class="simulate-btn" id="simulateBtn">
+        <span class="simulate-label">Start</span>
+        <span class="simulate-indicator"></span>
+      </button>
+    </nav>
+
+    <!-- General Tab -->
+    <section class="tab-content active" id="tab-general">
+      <header class="brand-header">
+        <img src="assets/logo.svg" alt="CTRLX" class="logo">
+        <div class="brand-text">
+          <h1>AIM-X</h1>
+          <p>Part of Control-X · Elite targeting system for precision and consistency</p>
+        </div>
+        <div class="account-compact">
+          <label>Account ID</label>
+          <input type="text" id="accountId" value="" placeholder="Account ID" readonly>
+          <span class="version">v<span id="version">1.0.0</span></span>
+        </div>
+      </header>
+      <div class="panel feature-panel">
+        <h2>Product Features</h2>
+        <ul class="feature-list">
+          <li>Enhanced target tracking</li>
+          <li>Sticky aim response</li>
+          <li>Accuracy optimization</li>
+          <li>Precision lock-on</li>
+          <li>All aim-based games</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h2>Profiles</h2>
+        <div class="profile-row">
+          <select id="profileSelect" class="select-styled">
+            <option>Default</option>
+            <option>FPS (Aggressive)</option>
+            <option>Basketball (2K)</option>
+            <option>Custom 1</option>
+          </select>
+          <div class="action-row">
+            <button class="action-btn" id="saveProfile">Save</button>
+            <button class="action-btn" id="loadProfile">Load</button>
+            <button class="action-btn" id="exportProfile">Export</button>
+            <button class="action-btn" id="importProfile">Import</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Targeting Tab -->
+    <section class="tab-content" id="tab-targeting">
+      <div class="aimx-bar">
+        <span class="status-label">Targeting Engine</span>
+        <span class="status-msg">Elite targeting system built for competitive play</span>
+      </div>
+      <div class="panel aimx-panel">
+        <div class="aimx-row main">
+          <h2>AIM-X Engine</h2>
+          <label class="checkbox-label">
+            <input type="checkbox" id="aimEnabled" checked>
+            <span class="checkmark"></span> Enabled
+          </label>
+          <div class="aimx-controls">
+            <div class="field-inline">
+              <label>Target Tracking</label>
+              <div class="spinner-input">
+                <input type="number" id="targetTracking" value="85" min="0" max="100" step="5">
+                <div class="spinner-btns"><button type="button" class="spinner-up">▲</button><button type="button" class="spinner-down">▼</button></div>
+              </div>
+            </div>
+            <div class="field-inline">
+              <label>Sticky Aim</label>
+              <div class="spinner-input">
+                <input type="number" id="stickyAim" value="70" min="0" max="100" step="5">
+                <div class="spinner-btns"><button type="button" class="spinner-up">▲</button><button type="button" class="spinner-down">▼</button></div>
+              </div>
+            </div>
+            <div class="field-inline">
+              <label>Accuracy</label>
+              <div class="spinner-input">
+                <input type="number" id="accuracy" value="90" min="0" max="100" step="5">
+                <div class="spinner-btns"><button type="button" class="spinner-up">▲</button><button type="button" class="spinner-down">▼</button></div>
+              </div>
+            </div>
+            <div class="field-inline">
+              <label>Lock-on Strength</label>
+              <div class="spinner-input">
+                <input type="number" id="lockOn" value="75" min="0" max="100" step="5">
+                <div class="spinner-btns"><button type="button" class="spinner-up">▲</button><button type="button" class="spinner-down">▼</button></div>
+              </div>
+            </div>
+            <div class="field-inline">
+              <label>Pull Strength</label>
+              <div class="spinner-input">
+                <input type="number" id="pullStrength" value="60" min="0" max="100" step="5">
+                <div class="spinner-btns"><button type="button" class="spinner-up">▲</button><button type="button" class="spinner-down">▼</button></div>
+              </div>
+            </div>
+            <div class="field-inline">
+              <label>Snap Speed</label>
+              <div class="spinner-input">
+                <input type="number" id="snapSpeed" value="80" min="0" max="100" step="5">
+                <div class="spinner-btns"><button type="button" class="spinner-up">▲</button><button type="button" class="spinner-down">▼</button></div>
+              </div>
+            </div>
+          </div>
+          <div class="checkbox-inline">
+            <label class="checkbox-label"><input type="checkbox" id="enhancedTracking" checked><span class="checkmark"></span> Enhanced Tracking</label>
+            <label class="checkbox-label"><input type="checkbox" id="stickyResponse" checked><span class="checkmark"></span> Sticky Response</label>
+            <label class="checkbox-label"><input type="checkbox" id="precisionLock" checked><span class="checkmark"></span> Precision Lock-on</label>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>Target Priority & Selection</h2>
+        <div class="settings-grid">
+          <div class="field-block">
+            <label>Target Priority</label>
+            <select id="targetPriority" class="select-styled">
+              <option>Closest to crosshair</option>
+              <option>Closest distance</option>
+              <option>Headshot preferred</option>
+              <option>Torso preferred</option>
+              <option>Lowest health</option>
+              <option>Manual</option>
+            </select>
+          </div>
+          <div class="field-block">
+            <label>Selection Mode</label>
+            <select id="selectionMode" class="select-styled">
+              <option>Auto</option>
+              <option>Manual (hold)</option>
+              <option>Toggle</option>
+              <option>Cycle</option>
+            </select>
+          </div>
+          <div class="field-block">
+            <label>Aim Bone / Hitbox</label>
+            <select id="aimBone" class="select-styled">
+              <option>Head</option>
+              <option>Neck</option>
+              <option>Upper torso</option>
+              <option>Center mass</option>
+              <option>Lower torso</option>
+              <option>Center of screen</option>
+              <option>Dynamic (closest)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Behavior Tab -->
+    <section class="tab-content" id="tab-behavior">
+      <div class="settings-grid">
+        <div class="panel settings-panel">
+          <h2>Activation</h2>
+          <div class="field-block">
+            <label>Activation Mode</label>
+            <select id="activationMode" class="select-styled">
+              <option>Hold</option>
+              <option>Toggle</option>
+              <option>Always on</option>
+              <option>ADS only</option>
+              <option>Fire only</option>
+            </select>
+          </div>
+          <div class="field-block">
+            <label>Require ADS</label>
+            <label class="checkbox-label"><input type="checkbox" id="requireAds"><span class="checkmark"></span> Only when aiming</label>
+          </div>
+        </div>
+        <div class="panel settings-panel">
+          <h2>Lock Behavior</h2>
+          <div class="field-block">
+            <label>Break Lock</label>
+            <select id="breakLock" class="select-styled">
+              <option>On lost sight</option>
+              <option>On target death</option>
+              <option>Manual</option>
+              <option>Never (until out of range)</option>
+            </select>
+          </div>
+          <div class="field-block">
+            <label>Lock Duration (ms)</label>
+            <div class="spinner-input">
+              <input type="number" id="lockDuration" value="0" min="0" max="5000" step="100" placeholder="0 = infinite">
+              <div class="spinner-btns"><button type="button" class="spinner-up">▲</button><button type="button" class="spinner-down">▼</button></div>
+            </div>
+          </div>
+          <div class="field-block">
+            <label class="checkbox-label"><input type="checkbox" id="breakOnObstacle" checked><span class="checkmark"></span> Break on obstacle</label>
+          </div>
+        </div>
+        <div class="panel settings-panel">
+          <h2>Team & Safety</h2>
+          <div class="field-block">
+            <label class="checkbox-label"><input type="checkbox" id="ignoreAllies" checked><span class="checkmark"></span> Ignore allies</label>
+          </div>
+          <div class="field-block">
+            <label class="checkbox-label"><input type="checkbox" id="ignoreTeammates" checked><span class="checkmark"></span> Ignore teammates</label>
+          </div>
+          <div class="field-block">
+            <label class="checkbox-label"><input type="checkbox" id="friendlyFireAvoid"><span class="checkmark"></span> Avoid friendly fire</label>
+          </div>
+          <div class="field-block">
+            <label class="checkbox-label"><input type="checkbox" id="ignoreDowned"><span class="checkmark"></span> Ignore downed</label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Settings Tab -->
+    <section class="tab-content" id="tab-settings">
+      <div class="settings-grid">
+        <div class="panel settings-panel">
+          <h2>Game</h2>
+          <div class="field-block">
+            <label>Target Game</label>
+            <select id="targetGame" class="select-styled">
+              <option>All aim-based games</option>
+              <option>2K / NBA 2K</option>
+              <option>FPS (Generic)</option>
+              <option>Call of Duty</option>
+              <option>Fortnite</option>
+              <option>Apex Legends</option>
+              <option>Valorant</option>
+              <option>Overwatch</option>
+              <option>Custom</option>
+            </select>
+          </div>
+        </div>
+        <div class="panel settings-panel">
+          <h2>Sensitivity</h2>
+          <div class="field-block">
+            <label>Horizontal</label>
+            <div class="spinner-input">
+              <input type="number" id="sensHorizontal" value="50" min="0" max="100" step="1">
+              <div class="spinner-btns"><button type="button" class="spinner-up">▲</button><button type="button" class="spinner-down">▼</button></div>
+            </div>
+          </div>
+          <div class="field-block">
+            <label>Vertical</label>
+            <div class="spinner-input">
+              <input type="number" id="sensVertical" value="50" min="0" max="100" step="1">
+              <div class="spinner-btns"><button type="button" class="spinner-up">▲</button><button type="button" class="spinner-down">▼</button></div>
+            </div>
+          </div>
+          <div class="field-block">
+            <label>ADS Multiplier</label>
+            <div class="spinner-input">
+              <input type="number" id="adsMultiplier" value="100" min="0" max="200" step="5">
+              <div class="spinner-btns"><button type="button" class="spinner-up">▲</button><button type="button" class="spinner-down">▼</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel settings-panel">
+          <h2>FOV & Range</h2>
+          <div class="field-block">
+            <label>Detection FOV (°)</label>
+            <div class="spinner-input">
+              <input type="number" id="detectionFov" value="60" min="10" max="120" step="5">
+              <div class="spinner-btns"><button type="button" class="spinner-up">▲</button><button type="button" class="spinner-down">▼</button></div>
+            </div>
+          </div>
+          <div class="field-block">
+            <label>Lock Range</label>
+            <div class="spinner-input">
+              <input type="number" id="lockRange" value="100" min="0" max="200" step="5">
+              <div class="spinner-btns"><button type="button" class="spinner-up">▲</button><button type="button" class="spinner-down">▼</button></div>
+            </div>
+          </div>
+          <div class="field-block">
+            <label>Hitbox Size</label>
+            <div class="spinner-input">
+              <input type="number" id="hitboxSize" value="100" min="50" max="200" step="5">
+              <div class="spinner-btns"><button type="button" class="spinner-up">▲</button><button type="button" class="spinner-down">▼</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Advanced Tab -->
+    <section class="tab-content" id="tab-advanced">
+      <div class="settings-grid">
+        <div class="panel settings-panel">
+          <h2>Smoothing & Prediction</h2>
+          <div class="field-block">
+            <label>Smoothing</label>
+            <div class="spinner-input">
+              <input type="number" id="smoothing" value="30" min="0" max="100" step="5">
+              <div class="spinner-btns"><button type="button" class="spinner-up">▲</button><button type="button" class="spinner-down">▼</button></div>
+            </div>
+          </div>
+          <div class="field-block">
+            <label>Prediction</label>
+            <div class="spinner-input">
+              <input type="number" id="prediction" value="20" min="0" max="100" step="5">
+              <div class="spinner-btns"><button type="button" class="spinner-up">▲</button><button type="button" class="spinner-down">▼</button></div>
+            </div>
+          </div>
+          <div class="field-block">
+            <label class="checkbox-label"><input type="checkbox" id="recoilCompensation"><span class="checkmark"></span> Recoil compensation</label>
+          </div>
+        </div>
+        <div class="panel settings-panel">
+          <h2>Performance</h2>
+          <div class="field-block">
+            <label>Update Rate (Hz)</label>
+            <select id="updateRate" class="select-styled">
+              <option>60</option>
+              <option>120</option>
+              <option>144</option>
+              <option>240</option>
+              <option>Unlimited</option>
+            </select>
+          </div>
+          <div class="field-block">
+            <label>Polling Rate</label>
+            <select id="pollingRate" class="select-styled">
+              <option>125 Hz</option>
+              <option>250 Hz</option>
+              <option>500 Hz</option>
+              <option>1000 Hz</option>
+            </select>
+          </div>
+          <div class="field-block">
+            <label>Latency Comp (ms)</label>
+            <div class="spinner-input">
+              <input type="number" id="latencyComp" value="0" min="0" max="100" step="5">
+              <div class="spinner-btns"><button type="button" class="spinner-up">▲</button><button type="button" class="spinner-down">▼</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel settings-panel">
+          <h2>Visual</h2>
+          <div class="field-block">
+            <label class="checkbox-label"><input type="checkbox" id="crosshairOverlay"><span class="checkmark"></span> Crosshair overlay</label>
+          </div>
+          <div class="field-block">
+            <label class="checkbox-label"><input type="checkbox" id="targetHighlight"><span class="checkmark"></span> Target highlight</label>
+          </div>
+          <div class="field-block">
+            <label class="checkbox-label"><input type="checkbox" id="debugVisualization"><span class="checkmark"></span> Debug visualization</label>
+          </div>
+          <div class="field-block">
+            <label>Overlay Color</label>
+            <select id="overlayColor" class="select-styled">
+              <option>Red</option>
+              <option>Green</option>
+              <option>Blue</option>
+              <option>Yellow</option>
+              <option>White</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hotkeys Tab -->
+    <section class="tab-content" id="tab-hotkeys">
+      <div class="panel">
+        <h2>Key Bindings</h2>
+        <div class="hotkey-grid">
+          <div class="hotkey-row">
+            <label>Toggle AIM-X</label>
+            <input type="text" id="hotkeyToggle" class="hotkey-input" value="Right Alt" readonly placeholder="Click to bind">
+          </div>
+          <div class="hotkey-row">
+            <label>Hold to aim</label>
+            <input type="text" id="hotkeyHold" class="hotkey-input" value="Mouse 4" readonly placeholder="Click to bind">
+          </div>
+          <div class="hotkey-row">
+            <label>Cycle target</label>
+            <input type="text" id="hotkeyCycle" class="hotkey-input" value="Mouse 5" readonly placeholder="Click to bind">
+          </div>
+          <div class="hotkey-row">
+            <label>Lock target</label>
+            <input type="text" id="hotkeyLock" class="hotkey-input" value="—" readonly placeholder="Click to bind">
+          </div>
+          <div class="hotkey-row">
+            <label>Increase strength</label>
+            <input type="text" id="hotkeyStrengthUp" class="hotkey-input" value="—" readonly placeholder="Click to bind">
+          </div>
+          <div class="hotkey-row">
+            <label>Decrease strength</label>
+            <input type="text" id="hotkeyStrengthDown" class="hotkey-input" value="—" readonly placeholder="Click to bind">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Debug Tab -->
+    <section class="tab-content" id="tab-debug">
+      <div class="panel debug-panel">
+        <div class="debug-row">
+          <div><label>Target</label><div class="debug-field" id="debugTarget">—</div></div>
+          <div><label>Status</label><div class="debug-field" id="debugStatus">—</div></div>
+        </div>
+        <div class="debug-row">
+          <div><label>FPS</label><div class="debug-field" id="debugFps">—</div></div>
+          <div><label>Latency</label><div class="debug-field" id="debugLatency">—</div></div>
+        </div>
+        <div class="debug-area"><label>Debug Out</label><pre id="debugOut"></pre></div>
+        <div class="debug-area"><label>Debug In</label><pre id="debugIn"></pre></div>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

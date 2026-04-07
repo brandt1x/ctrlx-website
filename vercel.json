@@ -1,0 +1,20 @@
+{
+	"rewrites": [
+		{ "source": "/api/supabase-config", "destination": "/api/config" },
+		{ "source": "/api/stripe-config", "destination": "/api/config" }
+	],
+	"headers": [
+		{
+			"source": "/(.*)\\.css",
+			"headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
+		},
+		{
+			"source": "/(.*)\\.js",
+			"headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
+		},
+		{
+			"source": "/images/(.*)",
+			"headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
+		}
+	]
+}

@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<script>(function(){if(typeof localStorage!=='undefined'&&localStorage.getItem('theme')==='light')document.documentElement.classList.add('theme-light');})();</script>
+	<script>document.documentElement.classList.add('site-preload');window.addEventListener('load',()=>document.documentElement.classList.remove('site-preload'),{once:true});setTimeout(()=>document.documentElement.classList.remove('site-preload'),4000);</script>
+	<title>Account — Control-X</title>
+	<meta name="description" content="Access your Control-X account to manage sign-in, purchases, and secure product downloads in one place." />
+	<link rel="canonical" href="https://cntrl-x.com/account.html" />
+	<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" as="style">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+	<link rel="preload" href="style.css" as="style">
+	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="ultimate.css">
+	<link rel="preload" href="images/logo.new.png" as="image">
+	<link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+	<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
+	<script defer src="/_vercel/insights/script.js"></script>
+</head>
+
+<body class="success-page">
+	<canvas id="site-canvas-bg" class="site-canvas-bg" aria-hidden="true"></canvas>
+	<div class="site-vignette" aria-hidden="true"></div>
+
+	<header class="site-header">
+		<div class="container header-inner">
+			<a href="index.html" class="logo-link">
+				<img src="images/logo.new.png" alt="CTRLX Logo" class="logo-image logo-dark" width="656" height="204" fetchpriority="high" decoding="async" />
+				<img src="images/whitelogo.new.png" alt="CTRLX Logo" class="logo-image logo-light" width="982" height="302" loading="lazy" decoding="async" />
+			</a>
+			<button class="mobile-menu-toggle" type="button" aria-label="Toggle menu" aria-expanded="false">
+				<span class="hamburger-line"></span>
+				<span class="hamburger-line"></span>
+				<span class="hamburger-line"></span>
+			</button>
+			<div class="header-right">
+				<nav class="nav-left">
+					<a href="index.html">Home</a>
+					<a href="services.html">Services</a>
+					<a href="zen-scripts.html">Zen Scripts</a>
+					<a href="cheats.html">PC Cheats</a>
+				</nav>
+				<a href="ultimate.html" class="nav-ultimate nav-center-link">ULTIMATE</a>
+				<div class="header-actions">
+					<a href="account.html" class="btn account-interface-btn">Account</a>
+					<a href="contact.html" class="btn">Contact</a>
+					<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light mode">
+						<span class="theme-toggle-switch">
+							<span class="theme-icon theme-icon-dark">&#9789;</span>
+							<span class="theme-icon theme-icon-light">&#9728;</span>
+						</span>
+					</button>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<main class="success-main">
+		<div class="success-card ultimate-product ultimate-tilt">
+			<div class="ultimate-product-glow"></div>
+			<div class="ultimate-product-content">
+				<h2 class="success-title">Your Account</h2>
+				<p class="success-subtitle">Sign in to unlock instant downloads, license access, and purchase history.</p>
+
+				<div id="account-auth" class="account-auth">
+					<form id="auth-form" class="account-auth-form">
+						<div class="account-auth-tabs">
+							<button type="button" class="account-tab active" data-tab="signin">Sign in</button>
+							<button type="button" class="account-tab" data-tab="signup">Sign up</button>
+						</div>
+						<div id="auth-email" class="account-field">
+							<label for="auth-email-input">Email</label>
+							<input type="email" id="auth-email-input" required placeholder="you@example.com" autocomplete="email" />
+						</div>
+						<div id="auth-password" class="account-field">
+							<label for="auth-password-input">Password</label>
+							<div class="account-password-wrap">
+								<input type="password" id="auth-password-input" required placeholder="••••••••" autocomplete="current-password" />
+								<button type="button" class="account-password-toggle" aria-label="Show password" data-target="auth-password-input">
+									<svg class="icon-eye icon-password-visibility" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+									<svg class="icon-eye-slash icon-password-visibility active" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+								</button>
+							</div>
+						</div>
+						<div id="auth-confirm-password" class="account-field" hidden>
+							<label for="auth-confirm-input">Confirm password</label>
+							<div class="account-password-wrap">
+								<input type="password" id="auth-confirm-input" placeholder="••••••••" autocomplete="new-password" />
+								<button type="button" class="account-password-toggle" aria-label="Show confirm password" data-target="auth-confirm-input">
+									<svg class="icon-eye icon-password-visibility" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+									<svg class="icon-eye-slash icon-password-visibility active" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+								</button>
+							</div>
+						</div>
+						<div id="auth-error" class="account-error" hidden></div>
+						<button type="submit" class="btn" id="auth-submit">Sign in</button>
+						<div class="account-divider">or</div>
+						<button type="button" class="btn ghost" id="auth-google">Sign in with Google</button>
+					</form>
+					<div id="account-verify-step" class="account-verify-step" hidden>
+						<div class="account-check-email">
+							<p class="account-check-email-icon" aria-hidden="true">&#9993;</p>
+							<h3 class="account-check-email-title">Check your email</h3>
+							<p class="account-check-email-lead">We sent a confirmation link to <strong id="verify-email-display"></strong>. Click the link in that email to confirm your account, then come back here to sign in.</p>
+							<div id="verify-error" class="account-error" hidden></div>
+							<div class="account-verify-actions">
+								<button type="button" class="btn ghost" id="verify-resend">Resend confirmation email</button>
+							</div>
+							<div class="account-divider">or</div>
+							<button type="button" class="btn ghost" id="verify-google">Sign up with Google instead</button>
+							<button type="button" class="btn ghost account-verify-back" id="verify-back">Use different email</button>
+						</div>
+					</div>
+				</div>
+
+				<div id="account-dashboard" class="account-dashboard" hidden>
+					<p class="account-welcome">Signed in as <span id="account-email"></span></p>
+					<div class="account-dashboard-tabs">
+						<button type="button" class="account-tab-btn active" data-dashboard-view="account">Account</button>
+						<button type="button" class="account-tab-btn" data-dashboard-view="purchases">View Purchases</button>
+					</div>
+					<div id="account-overview" class="account-overview">
+						<p class="muted">You are securely connected. Use this dashboard to manage access, review purchases, and launch downloads quickly.</p>
+						<div class="account-overview-actions">
+							<button type="button" class="btn ghost" id="account-signout">Sign out</button>
+						</div>
+					</div>
+					<div id="account-purchases-view" hidden>
+						<div id="account-purchases" class="success-downloads"></div>
+					</div>
+				</div>
+				<div class="success-slide-box">
+					<p class="success-support-text">Need help fast? <a href="contact.html">Contact support</a> or <a href="https://discord.gg/q9KWFd9xxH" target="_blank" rel="noopener">join our Discord</a> for live updates.</p>
+				</div>
+			</div>
+		</div>
+	</main>
+
+	<footer class="site-footer">
+		<div class="container">
+			<small>© <span id="year"></span> Control-X — All lawful services.</small>
+		</div>
+	</footer>
+
+	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" async></script>
+	<script src="script.js" defer></script>
+	<script src="cinematic.js" defer></script>
+	<script>
+		(async function setupAccount() {
+			let supabase;
+			let oauthRedirectUrl;
+			try {
+				const cfgRes = await fetch('/api/supabase-config');
+				if (!cfgRes.ok) {
+					const cfgErr = await cfgRes.json().catch(() => ({}));
+					throw new Error(cfgErr.error || ('Failed to load config (' + cfgRes.status + ')'));
+				}
+				const cfg = await cfgRes.json();
+				if (!cfg.url || !cfg.anonKey) throw new Error('Supabase not configured');
+				const origin = window.location.origin;
+				const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
+				const baseUrl = cfg.siteUrl || (isLocalhost ? 'https://www.cntrl-x.com' : origin);
+				oauthRedirectUrl = baseUrl.replace(/\/$/, '') + '/account.html';
+				// Reuse shared client from script.js to avoid multiple GoTrueClient instances
+				if (window.__supabaseClient) {
+					supabase = window.__supabaseClient;
+				} else {
+					let createClient;
+					for (let i = 0; i < 100; i++) {
+						const lib = window.supabase || window.supabaseJs;
+						createClient = lib?.createClient || lib?.default?.createClient;
+						if (createClient) break;
+						await new Promise(r => setTimeout(r, 50));
+					}
+					if (!createClient) throw new Error('Supabase script not loaded');
+					supabase = createClient(cfg.url, cfg.anonKey);
+					window.__supabaseClient = supabase;
+				}
+			} catch (e) {
+				const localHint = /^localhost$|^127\.0\.0\.1$/.test(window.location.hostname)
+					? ' Run with "vercel dev" and set SUPABASE_URL and SUPABASE_ANON_KEY in .env.local.'
+					: ' Set SUPABASE_URL and SUPABASE_ANON_KEY in your Vercel environment variables and redeploy.';
+				document.getElementById('auth-error').textContent = (e?.message || 'Supabase not configured.') + localHint;
+				document.getElementById('auth-error').hidden = false;
+				return;
+			}
+			const authEl = document.getElementById('account-auth');
+			const dashboardEl = document.getElementById('account-dashboard');
+			const authForm = document.getElementById('auth-form');
+			const authSubmit = document.getElementById('auth-submit');
+			const authError = document.getElementById('auth-error');
+			const verifyStep = document.getElementById('account-verify-step');
+			const verifyResend = document.getElementById('verify-resend');
+			const verifyError = document.getElementById('verify-error');
+			const verifyEmailDisplay = document.getElementById('verify-email-display');
+			const accountEmail = document.getElementById('account-email');
+			const purchasesEl = document.getElementById('account-purchases');
+			const purchasesView = document.getElementById('account-purchases-view');
+			const overviewView = document.getElementById('account-overview');
+			const signoutBtn = document.getElementById('account-signout');
+			const authPasswordInput = document.getElementById('auth-password-input');
+			const authConfirmInput = document.getElementById('auth-confirm-input');
+			const authConfirmField = document.getElementById('auth-confirm-password');
+			const authGoogleBtn = document.getElementById('auth-google');
+			const tabs = authForm ? authForm.querySelectorAll('.account-tab') : [];
+			const dashboardTabs = document.querySelectorAll('.account-tab-btn');
+			let mode = 'signin';
+			let purchasesLoaded = false;
+
+			function syncPasswordVisibility(visible) {
+				const type = visible ? 'text' : 'password';
+				authPasswordInput.type = type;
+				if (authConfirmField && !authConfirmField.hidden) authConfirmInput.type = type;
+				document.querySelectorAll('.account-password-toggle').forEach(btn => {
+					const eye = btn.querySelector('.icon-eye');
+					const slash = btn.querySelector('.icon-eye-slash');
+					if (eye && slash) {
+						eye.classList.toggle('active', visible);
+						slash.classList.toggle('active', !visible);
+					}
+					btn.setAttribute('aria-label', visible ? 'Hide password' : 'Show password');
+				});
+			}
+
+			document.querySelectorAll('.account-password-toggle').forEach(btn => {
+				btn.addEventListener('click', () => {
+					const input = document.getElementById(btn.dataset.target);
+					if (!input) return;
+					const willBeVisible = input.type === 'password';
+					if (mode === 'signup' && authConfirmField && !authConfirmField.hidden) {
+						syncPasswordVisibility(willBeVisible);
+					} else {
+						input.type = willBeVisible ? 'text' : 'password';
+						const eye = btn.querySelector('.icon-eye');
+						const slash = btn.querySelector('.icon-eye-slash');
+						if (eye && slash) {
+							eye.classList.toggle('active', willBeVisible);
+							slash.classList.toggle('active', !willBeVisible);
+						}
+						btn.setAttribute('aria-label', willBeVisible ? 'Hide password' : 'Show password');
+					}
+				});
+			});
+
+			function updateAuthMode(newMode) {
+				mode = newMode;
+				authSubmit.textContent = mode === 'signin' ? 'Sign in' : 'Sign up';
+				authPasswordInput.setAttribute('autocomplete', mode === 'signin' ? 'current-password' : 'new-password');
+				if (authConfirmField) {
+					authConfirmField.hidden = mode === 'signin';
+					authConfirmInput.required = mode === 'signup';
+					if (mode === 'signin') authConfirmInput.value = '';
+					else syncPasswordVisibility(authPasswordInput.type === 'text');
+				}
+			}
+
+			updateAuthMode('signin');
+			tabs.forEach(t => {
+				t.addEventListener('click', () => {
+					tabs.forEach(x => x.classList.remove('active'));
+					t.classList.add('active');
+					updateAuthMode(t.dataset.tab);
+					authError.hidden = true;
+				});
+			});
+
+			authForm.addEventListener('submit', async (e) => {
+				e.preventDefault();
+				authError.hidden = true;
+				const email = document.getElementById('auth-email-input').value.trim();
+				const password = authPasswordInput.value;
+				if (!email || !password) return;
+				if (mode === 'signup') {
+					const confirmPassword = authConfirmInput ? authConfirmInput.value : '';
+					if (password !== confirmPassword) {
+						authError.textContent = 'Passwords do not match.';
+						authError.hidden = false;
+						return;
+					}
+				}
+				authSubmit.disabled = true;
+				try {
+					if (mode === 'signin') {
+						const { error } = await supabase.auth.signInWithPassword({ email, password });
+						if (error) throw error;
+						location.reload();
+					} else {
+						const { data, error } = await supabase.auth.signUp({ email, password });
+						if (error) throw error;
+						const identities = data?.user?.identities;
+						const hasIdentity = identities && identities.length > 0;
+						if (data?.user && !hasIdentity) {
+							// Repeated signup (existing account) – try sign-in first
+							const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+							if (!signInErr) {
+								location.reload();
+								return;
+							}
+							// Sign-in failed: account exists but wrong auth (e.g. Google) or wrong password
+							authError.textContent = 'An account with this email already exists. Sign in with your password, or use Sign in with Google if you signed up that way.';
+							authError.hidden = false;
+							tabs.forEach(x => x.classList.remove('active'));
+							const signInTab = authForm.querySelector('.account-tab[data-tab="signin"]');
+							if (signInTab) {
+								signInTab.classList.add('active');
+								updateAuthMode('signin');
+							}
+						} else if (data?.user && !data?.session && hasIdentity) {
+							// New user, needs email verification – show "check your email" (no reload)
+							authForm.hidden = true;
+							verifyStep.hidden = false;
+							verifyEmailDisplay.textContent = email;
+							verifyError.hidden = true;
+						} else {
+							location.reload();
+						}
+					}
+				} catch (err) {
+					const msg = err.message || 'Something went wrong';
+					authError.textContent = mode === 'signup'
+						? msg + ' Or try Sign in with Google below.'
+						: msg;
+					authError.hidden = false;
+				} finally {
+					authSubmit.disabled = false;
+				}
+			});
+
+			verifyResend.addEventListener('click', async () => {
+				verifyError.hidden = true;
+				const email = verifyEmailDisplay.textContent;
+				if (!email) return;
+				verifyResend.disabled = true;
+				try {
+					const { error } = await supabase.auth.resend({ type: 'signup', email });
+					if (error) throw error;
+					verifyError.textContent = 'Confirmation email sent. Check your inbox.';
+					verifyError.className = 'account-error account-success';
+					verifyError.hidden = false;
+				} catch (err) {
+					verifyError.textContent = (err.message || 'Could not resend.') + ' Try Sign up with Google instead below.';
+					verifyError.className = 'account-error';
+					verifyError.hidden = false;
+				} finally {
+					verifyResend.disabled = false;
+				}
+			});
+
+			document.getElementById('verify-back').addEventListener('click', () => {
+				verifyStep.hidden = true;
+				authForm.hidden = false;
+				verifyError.hidden = true;
+			});
+
+			document.getElementById('verify-google').addEventListener('click', async () => {
+				verifyError.hidden = true;
+				try {
+					const { error } = await supabase.auth.signInWithOAuth({
+						provider: 'google',
+						options: { redirectTo: oauthRedirectUrl }
+					});
+					if (error) throw error;
+				} catch (err) {
+					verifyError.textContent = err.message || 'Google sign-in failed. Try again.';
+					verifyError.className = 'account-error';
+					verifyError.hidden = false;
+				}
+			});
+
+			authGoogleBtn.addEventListener('click', async () => {
+				authError.hidden = true;
+				try {
+					const { error } = await supabase.auth.signInWithOAuth({
+						provider: 'google',
+						options: { redirectTo: oauthRedirectUrl }
+					});
+					if (error) throw error;
+				} catch (err) {
+					authError.textContent = err.message || 'Google sign-in failed';
+					authError.hidden = false;
+				}
+			});
+
+			signoutBtn.addEventListener('click', async () => {
+				await supabase.auth.signOut();
+				location.reload();
+			});
+
+			function setDashboardView(view) {
+				dashboardTabs.forEach((b) => b.classList.toggle('active', b.dataset.dashboardView === view));
+				const showPurchases = view === 'purchases';
+				purchasesView.hidden = !showPurchases;
+				overviewView.hidden = showPurchases;
+				if (showPurchases && !purchasesLoaded) {
+					loadPurchases();
+					purchasesLoaded = true;
+				}
+			}
+			dashboardEl.addEventListener('click', (e) => {
+				const target = e.target;
+				if (!(target instanceof Element)) return;
+				const btn = target.closest('.account-tab-btn');
+				if (!btn) return;
+				e.preventDefault();
+				setDashboardView(btn.dataset.dashboardView || 'account');
+			});
+
+			function timeRemaining(expiresAt) {
+				const diff = new Date(expiresAt).getTime() - Date.now();
+				if (diff <= 0) return null;
+				const h = Math.floor(diff / 3600000);
+				const m = Math.floor((diff % 3600000) / 60000);
+				if (h > 0) return h + 'h ' + m + 'm remaining';
+				return m + 'm remaining';
+			}
+
+			async function loadPurchases(showProcessing, requiredSessionId, syncSubscriptions) {
+				const renderEmptyPurchases = (leadText) => {
+					purchasesEl.innerHTML =
+						'<p class="muted">' + leadText + '</p>' +
+						'<p class="muted" style="margin-top:8px;"><a href="#" id="refresh-purchases-empty" class="success-refresh-link">Subscription not showing? Refresh</a></p>' +
+						'<div class="success-support-btns">' +
+						'<a href="ultimate.html" class="btn">Browse Ultimate</a>' +
+						'<a href="zen-scripts.html" class="btn ghost">View Zen Scripts</a>' +
+						'<a href="services.html" class="btn ghost">Explore Services</a>' +
+						'</div>';
+					const emptyRefresh = purchasesEl.querySelector('#refresh-purchases-empty');
+					if (emptyRefresh) {
+						emptyRefresh.addEventListener('click', async (e) => {
+							e.preventDefault();
+							emptyRefresh.textContent = 'Refreshing…';
+							await loadPurchases(true, null, true);
+						});
+					}
+				};
+				const { data: { session } } = await supabase.auth.getSession();
+				if (!session?.access_token) return false;
+				if (showProcessing) {
+					purchasesEl.innerHTML = '<p class="muted">Preparing your downloads...</p>';
+				}
+				const url = '/api/my-purchases' + (syncSubscriptions ? '?sync=1' : '');
+				const res = await fetch(url, {
+					headers: { 'Authorization': 'Bearer ' + session.access_token } });
+				const data = await res.json();
+				if (!res.ok) {
+					renderEmptyPurchases('You have no purchases available to show right now.');
+					return false;
+				}
+				const purchases = data.purchases || [];
+				if (purchases.length === 0) {
+					renderEmptyPurchases('You have no purchases yet. Start with one of our top products below.');
+					return false;
+				}
+				const hasRequiredSession = requiredSessionId
+					? purchases.some((p) => p.session_id === requiredSessionId)
+					: true;
+				const html = purchases.map(p => {
+					const expired = p.isExpired;
+					const remaining = !expired && p.expiresAt ? timeRemaining(p.expiresAt) : null;
+					const links = [];
+					const serviceItems = (Array.isArray(p.items) ? p.items : []).filter((item) => {
+						const productId = String(item?.product_id || '').toLowerCase();
+						const name = String(item?.name || '').toLowerCase();
+						return productId === 'jaguars-boost' || name.includes('jaguars account boosting');
+					});
+					const isSub = !!p.isSubscription;
+					function dlBtn(label, type, script) {
+						if (expired) {
+							return '<span class="btn btn-disabled success-dl-btn-expired">Download expired</span>';
+						}
+						return '<a href="#" class="btn success-dl-btn" data-session="' + (p.session_id || '') + '" data-subscription="' + (isSub ? '1' : '') + '" data-type="' + type + '"' + (script ? ' data-script="' + script + '"' : '') + '>' + label + '</a>';
+					}
+					if (p.hasControlX) links.push(dlBtn('Download CONTROL+X Ultimate Script (.gpc)', 'script', 'control-x'));
+					if (p.hasVisionX) links.push(dlBtn('Download Vision-X Tempo', 'vision-x', ''));
+					if (p.hasVisionXPlus) links.push(dlBtn('Download Vision+X Timing', 'vision-x-plus', ''));
+					if (p.hasAimX) links.push(dlBtn('Download Aim-X', 'aim-x', ''));
+					if (p.hasAllBundle) links.push(dlBtn('Download All Scripts', 'all-scripts', ''));
+					else {
+						if (p.has2K) links.push(dlBtn('Download 2K Script (.gpc)', 'script', '2k'));
+						if (p.hasCOD) links.push(dlBtn('Download COD Script (.gpc)', 'script', 'cod'));
+						if (p.hasApex) links.push(dlBtn('Download Apex Script (.gpc)', 'script', 'apex'));
+						if (p.hasArc) links.push(dlBtn('Download ARC Script (.gpc)', 'script', 'arc'));
+						if (p.hasFortnite) links.push(dlBtn('Download Fortnite Script (.gpc)', 'script', 'fortnite'));
+						if (p.hasSiege) links.push(dlBtn('Download Siege Script (.zip)', 'siege', ''));
+						if (p.hasRust) links.push(dlBtn('Download Rust Script (.gpc)', 'script', 'rust'));
+					}
+					const date = p.created_at ? new Date(p.created_at).toLocaleDateString() : '';
+					const statusLabel = p.isSubscription
+						? (expired ? '<span class="purchase-status purchase-status-expired">Subscription ended</span>' : '<span class="purchase-status purchase-status-active">Active subscription</span>')
+						: (expired
+							? '<span class="purchase-status purchase-status-expired">Purchased • Download window expired</span>'
+							: (remaining ? '<span class="purchase-status purchase-status-active">' + remaining + '</span>' : ''));
+					const expiredMeta = expired
+						? '<p class="purchase-expired-note">This purchase is still on your account, but the 24-hour download window has ended.</p><div class="purchase-expired-actions"><a href="contact.html" class="btn ghost">Contact Support</a></div>'
+						: '';
+					const serviceNote = serviceItems.length
+						? '<p class="purchase-service-note">Purchase confirmed for <strong>Jaguars Account Boosting</strong> from Starter II to Vet II. This is a service, so there is no download file. We will handle fulfillment directly and follow up as needed.</p>'
+						: '';
+					const blockTitle = serviceItems.length
+						? 'Jaguars Account Boosting · ' + (date || '')
+						: (p.isSubscription ? 'Vision-X Monthly · ' + (date || '') : 'Purchase ' + (date || ''));
+					const actionHtml = links.length ? '<div class="success-download-list">' + links.join('') + '</div>' : '';
+					return '<div class="account-purchase-block' + (expired ? ' purchase-expired' : '') + '"><h4>' + blockTitle + ' ' + statusLabel + '</h4>' + actionHtml + serviceNote + expiredMeta + '</div>';
+				}).join('');
+				const hasDownloadablePurchases = purchases.some((p) => p.hasControlX || p.hasVisionX || p.hasVisionXPlus || p.hasAimX || p.hasAllBundle || p.has2K || p.hasCOD || p.hasApex || p.hasArc || p.hasFortnite || p.hasSiege || p.hasRust);
+				const instructionHtml = hasDownloadablePurchases
+					? '<p class="success-instruction">Your script downloads are password-protected. Check your email for your unique license key — right-click the ZIP → Extract All, enter the key when prompted, then load the .gpc file(s) into Zen Studio and flash to your CronusZen.</p>'
+					: '';
+				purchasesEl.innerHTML = html + instructionHtml + '<p class="muted" style="margin-top:12px;font-size:0.9rem;"><a href="#" id="refresh-purchases-link" class="success-refresh-link" style="color:#ef4444;text-decoration:underline;">Subscription not showing? Refresh</a></p>';
+
+				const refreshLink = purchasesEl.querySelector('#refresh-purchases-link');
+				if (refreshLink) {
+					refreshLink.addEventListener('click', async (e) => {
+						e.preventDefault();
+						refreshLink.textContent = 'Refreshing…';
+						await loadPurchases(true, null, true);
+						refreshLink.textContent = 'Subscription not showing? Refresh';
+					});
+				}
+				purchasesEl.querySelectorAll('.success-dl-btn').forEach(btn => {
+					btn.addEventListener('click', async (e) => {
+						e.preventDefault();
+						const sessionId = btn.dataset.session;
+						const isSubscription = btn.dataset.subscription === '1';
+						const type = btn.dataset.type;
+						const script = btn.dataset.script;
+						const { data: { session } } = await supabase.auth.getSession();
+						if (!session?.access_token) return;
+						let url;
+						if (isSubscription && type === 'vision-x') {
+							url = '/api/download?type=vision-x';
+						} else {
+							url = '/api/download?session_id=' + encodeURIComponent(sessionId || '') + '&type=';
+							if (type === 'vision-x') url += 'vision-x';
+							else if (type === 'vision-x-plus') url += 'vision-x-plus';
+							else if (type === 'aim-x') url += 'aim-x';
+							else if (type === 'siege') url += 'siege';
+							else if (type === 'all-scripts') url += 'all-scripts';
+							else url += 'script&script=' + (script || '');
+						}
+						let res;
+						try {
+							res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + session.access_token } });
+						} catch (fetchErr) {
+							alert('Download failed. Network error.');
+							return;
+						}
+						if (!res.ok) {
+							const errData = await res.json().catch(() => ({}));
+							alert(errData.error || 'Download failed.');
+							return;
+						}
+						const blob = await res.blob();
+						const a = document.createElement('a');
+						a.href = URL.createObjectURL(blob);
+						a.download = type === 'vision-x' ? 'Vision-X-Tempo.zip' : type === 'vision-x-plus' ? 'Vision-X-Plus-Timing.zip' : type === 'aim-x' ? 'Aim-X.zip' : type === 'siege' ? 'Cntrl-X-R6-Siege.zip' : type === 'all-scripts' ? 'Cntrl-X-All-Scripts.zip' : (script || 'script') + '.zip';
+						a.click();
+						setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+					});
+				});
+				return hasRequiredSession;
+			}
+
+			supabase.auth.onAuthStateChange((event, session) => {
+				if (session) {
+					authEl.hidden = true;
+					dashboardEl.hidden = false;
+					accountEmail.textContent = session.user?.email || '';
+					purchasesLoaded = false;
+					setDashboardView('account');
+				} else {
+					authEl.hidden = false;
+					dashboardEl.hidden = true;
+				}
+			});
+
+			async function init() {
+				const { data: { session } } = await supabase.auth.getSession();
+				const params = new URLSearchParams(location.search);
+				const fromSubscription = params.get('subscription') === '1' && params.get('success') === '1';
+				const fromCheckout = params.get('success') === '1' && params.get('session_id');
+				const subscriptionPaymentIntentId = params.get('payment_intent');
+				const startOnPurchases = location.hash === '#purchases' || fromCheckout || fromSubscription;
+				async function recoverSubscription(paymentIntentId) {
+					if (!paymentIntentId || !session?.access_token) return false;
+					const rr = await fetch('/api/complete-subscription-intent', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': 'Bearer ' + session.access_token,
+						},
+						body: JSON.stringify({ payment_intent_id: paymentIntentId }),
+					});
+					return rr.ok;
+				}
+				if (session) {
+					authEl.hidden = true;
+					dashboardEl.hidden = false;
+					accountEmail.textContent = session.user?.email || '';
+					purchasesLoaded = false;
+					setDashboardView(startOnPurchases ? 'purchases' : 'account');
+					if (fromSubscription) {
+						history.replaceState({}, '', location.pathname);
+						let found = false;
+						for (let i = 0; i < 8; i++) {
+							if (subscriptionPaymentIntentId) {
+								await recoverSubscription(subscriptionPaymentIntentId);
+							}
+							found = await loadPurchases(i > 0, null, true);
+							if (found) break;
+							await new Promise(r => setTimeout(r, 1500));
+						}
+					} else if (fromCheckout) {
+						const sessionId = params.get('session_id');
+						history.replaceState({}, '', location.pathname);
+						let found = false;
+						for (let i = 0; i < 10; i++) {
+							found = await loadPurchases(i > 0, sessionId);
+							if (found) break;
+							await new Promise(r => setTimeout(r, 2000));
+						}
+						if (!found && session?.access_token) {
+							if (sessionId) {
+								const rr = await fetch('/api/recover-purchase', {
+									method: 'POST',
+									headers: {
+										'Content-Type': 'application/json',
+										'Authorization': 'Bearer ' + session.access_token,
+									},
+									body: JSON.stringify({ session_id: sessionId }),
+								});
+								const rd = await rr.json().catch(() => ({}));
+								if (rr.ok && rd.recovered) {
+									found = await loadPurchases(true, sessionId);
+								}
+							}
+							const debugUrl = '/api/purchase-debug' + (sessionId ? '?session_id=' + encodeURIComponent(sessionId) : '');
+							const dr = await fetch(debugUrl, { headers: { 'Authorization': 'Bearer ' + session.access_token } });
+							const d = await dr.json().catch(() => ({}));
+							console.warn('[Purchase debug]', d);
+							if (d.sessionFound === false) {
+								console.warn('Your session_id was not found in purchases. The Stripe webhook may not have run. Check Stripe Dashboard → Webhooks → Recent deliveries.');
+							}
+						}
+					}
+				} else {
+					authEl.hidden = false;
+					dashboardEl.hidden = true;
+				}
+			}
+			init();
+		})();
+	</script>
+</body>
+
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:;">
+  <title>Vision-X Tempo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/theme.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Tab Navigation -->
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="general">General</button>
+      <button class="tab-btn" data-tab="network">Network</button>
+      <button class="tab-btn" data-tab="visionx">Vision-X</button>
+      <button class="tab-btn" data-tab="debug">Debug</button>
+      <button class="simulate-btn" id="simulateBtn">
+        <span class="simulate-label">Start</span>
+        <span class="simulate-indicator"></span>
+      </button>
+    </nav>
+
+    <!-- General Tab -->
+    <section class="tab-content active" id="tab-general">
+      <header class="brand-header">
+        <img src="assets/logo.svg" alt="CTRLX" class="logo">
+        <div class="brand-text">
+          <h1>Vision-X Tempo</h1>
+          <p>Part of Control-X · <span id="expiresDate">Mar 4, 2026</span></p>
+        </div>
+        <div class="account-compact">
+          <label>Account ID</label>
+          <input type="text" id="accountId" value="" placeholder="Account ID" readonly>
+          <span class="version">v<span id="version">0.6.2</span></span>
+        </div>
+      </header>
+    </section>
+
+    <!-- Network Tab -->
+    <section class="tab-content" id="tab-network">
+      <div class="network-grid">
+        <div class="panel network-panel">
+          <h2>Inbound</h2>
+          <div class="stat-row"><span>Total</span><span id="inboundTotal">0</span></div>
+          <div class="stat-row"><span>Consecutive</span><span id="inboundConsecutive">0</span></div>
+          <div class="stat-row"><span>Interval</span><span id="inboundInterval">0</span> ms</div>
+        </div>
+        <div class="panel network-panel">
+          <h2>Outbound</h2>
+          <div class="stat-row"><span>Total</span><span id="outboundTotal">0</span></div>
+          <div class="stat-row"><span>Consecutive</span><span id="outboundConsecutive">0</span></div>
+          <div class="stat-row"><span>Interval</span><span id="outboundInterval">0</span> ms</div>
+        </div>
+        <div class="panel network-panel">
+          <h2>Stats</h2>
+          <div class="stat-row"><span>Ticker Latency</span><span id="tickerLatency">0</span> ms</div>
+          <div class="stat-row"><span>Playing Game</span><span id="playingGame">No</span></div>
+        </div>
+        <div class="panel network-panel">
+          <h2>Players</h2>
+          <div class="stat-row"><span>In Game</span><span id="playersInGame">0</span></div>
+          <div class="stat-row"><span>Position</span><span id="playerPosition">0</span></div>
+          <div class="stat-row"><span>Matchup</span><span id="matchup">None</span></div>
+        </div>
+        <div class="panel network-panel">
+          <h2>Sync</h2>
+          <select id="syncMode" class="select-styled"><option>Automatic</option><option>Manual</option></select>
+          <div class="stat-row"><span>Status</span><span id="syncStatus">---</span></div>
+          <div class="stat-row"><span>Delay</span><span id="syncDelay">0</span> ms</div>
+          <div class="sync-adj-row">
+            <div class="sync-adj-item"><label>Adj</label><div class="spinner-input"><input type="number" id="syncAdj" value="0"><div class="spinner-btns"><button type="button" class="spinner-up">▲</button><button type="button" class="spinner-down">▼</button></div></div></div>
+            <div class="sync-adj-item"><label>Offset</label><div class="spinner-input"><input type="number" id="offset" value="0"><div class="spinner-btns"><button type="button" class="spinner-up">▲</button><button type="button" class="spinner-down">▼</button></div></div></div>
+          </div>
+        </div>
+        <div class="panel network-panel">
+          <h2>Other</h2>
+          <div class="action-row">
+            <button class="action-btn" id="quitGame">Quit</button>
+            <button class="action-btn" id="endGame">End</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Vision-X Tab -->
+    <section class="tab-content" id="tab-visionx">
+      <div class="visionx-bar">
+        <span class="hours-remaining" id="hoursRemaining">23 hours remaining</span>
+        <span class="status-msg">Dpad Up: offense/defense modes</span>
+      </div>
+      <div class="panel visionx-panel">
+        <div class="visionx-row">
+          <h2>Vision-X Shield</h2>
+          <label class="checkbox-label">
+            <input type="checkbox" id="antiSecretEnabled" checked>
+            <span class="checkmark"></span> Enabled
+          </label>
+          <span class="safe-status" id="safeStatus">Safe: None</span>
+          <span class="mode-value" id="antiSecretMode">Legacy: None</span>
+        </div>
+        <div class="visionx-row main">
+          <h2>Vision-X</h2>
+          <label class="checkbox-label">
+            <input type="checkbox" id="secretEnabled" checked>
+            <span class="checkmark"></span> Enabled
+          </label>
+          <div class="visionx-controls">
+            <div class="field-inline">
+              <label>Shot</label>
+              <select id="shotButton" class="select-styled">
+                <option>Stick Only</option>
+                <option>Button Only</option>
+                <option>Both</option>
+              </select>
+            </div>
+            <div class="field-inline">
+              <label>Cue</label>
+              <div class="spinner-input">
+                <input type="number" id="shotCue" value="2.8" step="0.1">
+                <div class="spinner-btns">
+                  <button type="button" class="spinner-up">▲</button>
+                  <button type="button" class="spinner-down">▼</button>
+                </div>
+              </div>
+            </div>
+            <div class="field-inline">
+              <label>Tempo</label>
+              <div class="spinner-input">
+                <input type="number" id="tempo" value="22">
+                <div class="spinner-btns">
+                  <button type="button" class="spinner-up">▲</button>
+                  <button type="button" class="spinner-down">▼</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="checkbox-inline">
+            <label class="checkbox-label"><input type="checkbox" id="allowStickControl" checked><span class="checkmark"></span> Stick</label>
+            <label class="checkbox-label"><input type="checkbox" id="fastNoDip" checked><span class="checkmark"></span> Fast</label>
+            <label class="checkbox-label"><input type="checkbox" id="rightStickDunk"><span class="checkmark"></span> Dunk</label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Debug Tab -->
+    <section class="tab-content" id="tab-debug">
+      <div class="panel debug-panel">
+        <div class="debug-row">
+          <div><label>Opp</label><div class="debug-field" id="debugOpp">—</div></div>
+          <div><label>Controller</label><div class="debug-field" id="controllerState">—</div></div>
+        </div>
+        <div class="debug-area"><label>Debug Out</label><pre id="debugOut"></pre></div>
+        <div class="debug-area"><label>Debug In</label><pre id="debugIn"></pre></div>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/simulator.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

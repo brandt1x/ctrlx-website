@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<script>(function(){if(typeof localStorage!=='undefined'&&localStorage.getItem('theme')==='light')document.documentElement.classList.add('theme-light');})();</script>
+	<script>document.documentElement.classList.add('site-preload');window.addEventListener('load',()=>document.documentElement.classList.remove('site-preload'),{once:true});setTimeout(()=>document.documentElement.classList.remove('site-preload'),4000);</script>
+	<title>Control-X</title>
+	<meta name="description" content="Control-X delivers premium Zen scripts, Vision-X setup, and high-performance automation services built for speed, precision, and consistent results." />
+	<link rel="canonical" href="https://cntrl-x.com/" />
+	<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" as="style">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+	<link rel="preload" href="style.css" as="style">
+	<link rel="stylesheet" href="style.css">
+	<link rel="preload" href="images/logo.new.png" as="image">
+	<link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+	<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
+	<script defer src="/_vercel/insights/script.js"></script>
+</head>
+
+<body>
+	<canvas id="site-canvas-bg" class="site-canvas-bg" aria-hidden="true"></canvas>
+	<div class="site-vignette" aria-hidden="true"></div>
+
+	<header class="site-header">
+		<div class="container header-inner">
+			<a href="index.html" class="logo-link">
+				<img src="images/logo.new.png" alt="CTRLX Logo" class="logo-image logo-dark" width="656" height="204" fetchpriority="high" decoding="async" />
+				<img src="images/whitelogo.new.png" alt="CTRLX Logo" class="logo-image logo-light" width="982" height="302" loading="lazy" decoding="async" />
+			</a>
+			<button class="cart-toggle cart-toggle-mobile" type="button" aria-label="Open cart">
+				<span class="cart-toggle-icon" aria-hidden="true">&#128722;</span>
+				<span class="site-cart-count cart-toggle-count">0</span>
+			</button>
+			<button class="mobile-menu-toggle" type="button" aria-label="Toggle menu" aria-expanded="false">
+				<span class="hamburger-line"></span>
+				<span class="hamburger-line"></span>
+				<span class="hamburger-line"></span>
+			</button>
+			<div class="header-right">
+				<nav class="nav-left">
+					<a href="services.html">Services</a>
+					<a href="zen-scripts.html">Zen Scripts</a>
+					<a href="cheats.html">PC Cheats</a>
+				</nav>
+				<a href="ultimate.html" class="nav-ultimate nav-center-link">ULTIMATE</a>
+				<div class="header-actions">
+					<a href="account.html" class="btn account-interface-btn">Account</a>
+					<a href="contact.html" class="btn">Contact</a>
+					<button id="site-cart-toggle" class="cart-toggle" type="button" aria-label="Open cart">
+						<span class="cart-toggle-icon" aria-hidden="true">&#128722;</span>
+						<span id="site-cart-count" class="site-cart-count cart-toggle-count">0</span>
+					</button>
+					<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light mode">
+						<span class="theme-toggle-switch">
+							<span class="theme-icon theme-icon-dark">&#9789;</span>
+							<span class="theme-icon theme-icon-light">&#9728;</span>
+						</span>
+					</button>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<div id="site-cart-backdrop" class="site-cart-backdrop" aria-hidden="true"></div>
+	<aside id="site-cart" class="site-cart" aria-label="Shopping cart" aria-hidden="true">
+		<div class="site-cart-header">
+			<h2>Your Cart</h2>
+			<button id="site-cart-close" class="site-cart-close" type="button" aria-label="Close cart">×</button>
+		</div>
+		<div class="site-cart-body">
+			<p id="site-cart-summary" class="muted">No items in your cart yet.</p>
+			<ul id="site-cart-items" class="site-cart-items"></ul>
+		</div>
+		<div class="site-cart-footer">
+			<div id="site-cart-total" class="site-cart-total">Total: $0</div>
+			<div class="site-cart-promo">
+				<div class="site-cart-promo-row">
+					<input type="text" id="site-cart-promo-input" class="site-cart-promo-input" placeholder="Promo code" aria-label="Promo code" />
+					<button type="button" id="site-cart-promo-apply" class="btn ghost site-cart-promo-apply">Apply</button>
+				</div>
+				<p id="site-cart-promo-message" class="site-cart-promo-message muted" aria-live="polite"></p>
+			</div>
+			<div class="site-cart-actions">
+				<button id="site-cart-clear" class="btn ghost" type="button">Clear Cart</button>
+				<button id="site-cart-checkout" class="btn" type="button">Checkout</button>
+			</div>
+		</div>
+	</aside>
+
+	<main>
+		<section class="hero hero-sequence">
+			<div class="hero-parallax-layer" aria-hidden="true"></div>
+			<div class="hero-aurora" aria-hidden="true">
+				<span class="hero-aurora-core"></span>
+				<span class="hero-aurora-ring"></span>
+			</div>
+			<div class="container">
+				<span class="hero-badge">Precision AI + Automation</span>
+				<h2>Control-X Vision</h2>
+				<p class="muted">Control-X combines advanced computer vision, precision Zen scripts, and automation-first workflows to deliver faster setup, cleaner performance, and measurable in-game results.</p>
+				<div class="hero-metrics">
+					<span class="hero-metric"><strong>Real-time</strong> CV intelligence</span>
+					<span class="hero-metric"><strong>Flagship</strong> zen scripts</span>
+					<span class="hero-metric"><strong>Priority</strong> rep services</span>
+				</div>
+				<div class="hero-cta">
+					<a href="services.html" class="btn">View Services</a>
+					<a href="contact.html" class="btn ghost">Start Your Setup</a>
+				</div>
+			</div>
+		</section>
+
+		<section class="services container" data-scroll-section>
+			<h3 class="section-accent">Featured</h3>
+			<div class="cards">
+				<article class="card" data-scroll-item>
+					<h4>CTRL-X Services Setup</h4>
+					<p class="muted">Fast 30-minute setup session for any Control-X service — Vision-X, Aim-X, Zen scripts, and more. Dial in your config and optimize performance immediately.</p>
+					<div class="price">From: <strong>$25</strong></div>
+					<button class="btn hero-add-btn card-action-btn" type="button" data-product-id="vision-setup" data-name="CTRL-X All Services Setup" data-price="$25">Add to Cart</button>
+				</article>
+
+				<article class="card" data-scroll-item>
+					<h4>Zen Scripts</h4>
+					<p class="muted">Premium Zen scripts for 2K, COD, ARC, Fortnite, Siege, Apex, Rust, and more.</p>
+					<div class="price">From: <strong>$15–$135</strong></div>
+					<a class="btn card-action-btn" href="zen-scripts.html">View Scripts</a>
+				</article>
+
+				<article class="card" data-scroll-item>
+					<h4>2k Account Boosting</h4>
+					<p class="muted">Accelerated 2K progression with structured execution, speed, and consistency.</p>
+					<div class="price">From: <strong>$125</strong></div>
+					<a class="btn card-action-btn" href="contact.html#contact-info">Get a Quote</a>
+				</article>
+			</div>
+		</section>
+
+		<section class="how container" data-scroll-section>
+			<h3 class="section-accent">How it Works</h3>
+			<div class="how-layout">
+				<div class="how-intro" data-scroll-item>
+					<p class="how-intro-label">The Process</p>
+					<h4>Pick. Send. Done.</h4>
+					<p class="muted">Choose your service, send your goals, and we handle execution from setup to delivery.</p>
+					<div class="how-chips">
+						<span class="how-chip" data-scroll-item>Choose services</span>
+						<span class="how-chip" data-scroll-item>Add to cart</span>
+						<span class="how-chip" data-scroll-item>We deliver</span>
+					</div>
+				</div>
+				<div class="how-steps">
+					<article class="how-step" data-scroll-item>
+						<div class="how-step-badge">1</div>
+						<div>
+							<h4>Select your service</h4>
+							<p class="muted">Go to the <a href="services.html">Services</a> page or use the featured cards on the
+								homepage to choose CTRL-X All Services Setup, Zen Scripts or 2K account boosting.</p>
+						</div>
+					</article>
+					<article class="how-step" data-scroll-item>
+						<div class="how-step-badge">2</div>
+						<div>
+							<h4>Add to cart & send info</h4>
+							<p class="muted">Add your items to cart, then submit your exact request and timing through contact so we can move fast.</p>
+						</div>
+					</article>
+					<article class="how-step" data-scroll-item>
+						<div class="how-step-badge">3</div>
+						<div>
+							<h4>We confirm and deliver</h4>
+							<p class="muted">We confirm scope, schedule, and delivery path, then execute your setup, scripts, or boosting service.</p>
+						</div>
+					</article>
+				</div>
+			</div>
+		</section>
+
+		<section class="faq container" data-scroll-section>
+			<h3 class="section-accent">FAQ</h3>
+			<div class="faq-vertical">
+				<details data-scroll-item data-scroll-direction="down">
+					<summary>How do I schedule a session?</summary>
+					<p>Use the Contact page form or email us and we will confirm the fastest available time slot.</p>
+				</details>
+				<details data-scroll-item data-scroll-direction="up">
+					<summary>What payment methods do you accept?</summary>
+					<p>We accept secure card checkout and manual invoicing options. Contact us for custom payment needs.</p>
+				</details>
+				<details data-scroll-item data-scroll-direction="down">
+					<summary>Can I combine multiple services?</summary>
+					<p>Yes. You can bundle multiple services and scripts in one order for a single streamlined checkout.</p>
+				</details>
+			</div>
+		</section>
+	</main>
+
+	<footer class="site-footer">
+		<div class="container">
+			<small>© <span id="year"></span> Control-X — All lawful services.</small>
+		</div>
+	</footer>
+
+	<script src="script.js" defer></script>
+	<script src="cinematic.js" defer></script>
+</body>
+
+</html>

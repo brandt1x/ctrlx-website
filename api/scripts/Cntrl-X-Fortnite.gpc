@@ -1,0 +1,383 @@
+﻿																									/*
+_________   ____________________________.____              ____  ___
+\_   ___ \  \      \__    ___/\______   \    |             \   \/  /
+/    \  \/  /   |   \|    |    |       _/    |      ______  \     / 
+\     \____/    |    \    |    |    |   \    |___  /_____/  /     \ 
+ \______  /\____|__  /____|    |____|_  /_______ \         /___/\  \
+        \/         \/                 \/        \/               \_/																																	/*
+
+Welcome to Cntrl-x Fortnite! This is the Premium model Fortnite Cronus Zen script.
+
+To protect the quality of our scripts and community, all guides and settings are private.
+To unlock full access, open a ticket in our Discord and verify your order. Once verified, you'll unlock private guides, fast support and personalized help.
+
+Support:
+Cntrl-x.com																																													*/
+
+/* =========================
+   Cntrl-x OLED (CX_) module
+   ========================= */
+define CX_JETS_COUNT = 8;
+define CX_LASERS_COUNT = 6;
+define CX_LOADING_TIMER = 3500;
+
+const string CX_splash_line1[] = { "Cntrl-x Fortnite" };
+const string CX_splash_line2[] = { "By" };
+const string CX_splash_line3[] = { "CNTRL-X.COM" };
+const string CX_saver_line1[]  = { "CNTRL-X.COM" };
+const string CX_saver_line2[]  = { "L2+Options" };
+
+int CX_jet_x[CX_JETS_COUNT];
+int CX_jet_y[CX_JETS_COUNT];
+int CX_jet_speed[CX_JETS_COUNT];
+int CX_jet_i;
+
+int CX_laser_x[CX_LASERS_COUNT];
+int CX_laser_y[CX_LASERS_COUNT];
+int CX_laser_speed[CX_LASERS_COUNT];
+int CX_laser_i;
+
+int CX_sx = 2, CX_sy = 16;
+int CX_svx = 2, CX_svy = 2;
+int CX_msg_w, CX_line1_w, CX_line2_w;
+
+int CX_saver_timer = 0;
+int CX_initialized = 0;
+int CX_isLoadingScreen = 1;
+int CX_LoadingTimeToRun = 0;
+int CX_splash_progress = 0;
+int CX_splash_cx;
+
+int CX_stringLength;
+function CX_get_string_length(offset) {
+    CX_stringLength = 0;
+    while (duint8(offset)) {
+        CX_stringLength++;
+        offset++;
+    }
+    return CX_stringLength + 1;
+}
+
+function CX_center_x(f_chars, f_font) {
+    return (OLED_WIDTH / 2) - ((f_chars * f_font) / 2);
+}
+
+function CX_update_jets() {
+    for (CX_jet_i = 0; CX_jet_i < CX_JETS_COUNT; CX_jet_i++) {
+        CX_jet_y[CX_jet_i] -= CX_jet_speed[CX_jet_i];
+        if (CX_jet_y[CX_jet_i] < -10) {
+            CX_jet_x[CX_jet_i] = random(5, 122);
+            CX_jet_y[CX_jet_i] = random(64, 90);
+            CX_jet_speed[CX_jet_i] = random(1, 3);
+        }
+    }
+}
+
+function CX_draw_jets() {
+    for (CX_jet_i = 0; CX_jet_i < CX_JETS_COUNT; CX_jet_i++) {
+        if (CX_jet_y[CX_jet_i] >= 0 && CX_jet_y[CX_jet_i] < 63) {
+            if (CX_jet_x[CX_jet_i] >= 0 && CX_jet_x[CX_jet_i] < 127) {
+                pixel_oled(CX_jet_x[CX_jet_i], CX_jet_y[CX_jet_i], 1);
+            }
+            if (CX_jet_y[CX_jet_i] + 1 >= 0 && CX_jet_y[CX_jet_i] + 1 < 63) {
+                pixel_oled(CX_jet_x[CX_jet_i], CX_jet_y[CX_jet_i] + 1, 1);
+            }
+            if (CX_jet_y[CX_jet_i] + 2 >= 0 && CX_jet_y[CX_jet_i] + 2 < 63) {
+                pixel_oled(CX_jet_x[CX_jet_i], CX_jet_y[CX_jet_i] + 2, 1);
+            }
+            if (CX_jet_x[CX_jet_i] - 1 >= 0 && CX_jet_y[CX_jet_i] + 2 < 63) {
+                pixel_oled(CX_jet_x[CX_jet_i] - 1, CX_jet_y[CX_jet_i] + 2, 1);
+            }
+            if (CX_jet_x[CX_jet_i] + 1 < 127 && CX_jet_y[CX_jet_i] + 2 < 63) {
+                pixel_oled(CX_jet_x[CX_jet_i] + 1, CX_jet_y[CX_jet_i] + 2, 1);
+            }
+        }
+    }
+}
+
+function CX_update_lasers() {
+    for (CX_laser_i = 0; CX_laser_i < CX_LASERS_COUNT; CX_laser_i++) {
+        CX_laser_y[CX_laser_i] -= CX_laser_speed[CX_laser_i];
+        if (CX_laser_y[CX_laser_i] < -5) {
+            CX_laser_x[CX_laser_i] = random(5, 122);
+            CX_laser_y[CX_laser_i] = random(64, 100);
+            CX_laser_speed[CX_laser_i] = random(2, 4);
+        }
+    }
+}
+
+function CX_draw_lasers() {
+    for (CX_laser_i = 0; CX_laser_i < CX_LASERS_COUNT; CX_laser_i++) {
+        if (CX_laser_y[CX_laser_i] >= 0 && CX_laser_y[CX_laser_i] < 63) {
+            if (CX_laser_x[CX_laser_i] >= 0 && CX_laser_x[CX_laser_i] < 127) {
+                pixel_oled(CX_laser_x[CX_laser_i], CX_laser_y[CX_laser_i], 1);
+            }
+            if (CX_laser_y[CX_laser_i] + 1 >= 0 && CX_laser_y[CX_laser_i] + 1 < 63) {
+                pixel_oled(CX_laser_x[CX_laser_i], CX_laser_y[CX_laser_i] + 1, 1);
+            }
+            if (CX_laser_y[CX_laser_i] + 2 >= 0 && CX_laser_y[CX_laser_i] + 2 < 63) {
+                pixel_oled(CX_laser_x[CX_laser_i], CX_laser_y[CX_laser_i] + 2, 1);
+            }
+        }
+    }
+}
+
+function CX_draw_splash(load_pct) {
+    cls_oled(OLED_BLACK);
+    CX_draw_jets();
+    CX_draw_lasers();
+    line_oled(2, 2, 2, 10, 1, OLED_WHITE);
+    line_oled(2, 2, 10, 2, 1, OLED_WHITE);
+    line_oled(OLED_WIDTH - 3, 2, OLED_WIDTH - 3, 10, 1, OLED_WHITE);
+    line_oled(OLED_WIDTH - 11, 2, OLED_WIDTH - 3, 2, 1, OLED_WHITE);
+    line_oled(2, OLED_HEIGHT - 3, 2, OLED_HEIGHT - 11, 1, OLED_WHITE);
+    line_oled(2, OLED_HEIGHT - 3, 10, OLED_HEIGHT - 3, 1, OLED_WHITE);
+    line_oled(OLED_WIDTH - 3, OLED_HEIGHT - 3, OLED_WIDTH - 3, OLED_HEIGHT - 11, 1, OLED_WHITE);
+    line_oled(OLED_WIDTH - 11, OLED_HEIGHT - 3, OLED_WIDTH - 3, OLED_HEIGHT - 3, 1, OLED_WHITE);
+    line_oled(34, 16, 94, 16, 1, OLED_WHITE);
+    line_oled(34, 38, 94, 38, 1, OLED_WHITE);
+    line_oled(58, 27, 70, 27, 1, OLED_WHITE);
+    line_oled(64, 21, 64, 33, 1, OLED_WHITE);
+    CX_splash_cx = CX_center_x(CX_get_string_length(CX_splash_line1[0]), OLED_FONT_SMALL_WIDTH);
+    print(CX_splash_cx, 5, OLED_FONT_SMALL, OLED_WHITE, CX_splash_line1[0]);
+    CX_splash_cx = CX_center_x(CX_get_string_length(CX_splash_line2[0]), OLED_FONT_SMALL_WIDTH);
+    print(CX_splash_cx, 18, OLED_FONT_SMALL, OLED_WHITE, CX_splash_line2[0]);
+    CX_splash_cx = CX_center_x(CX_get_string_length(CX_splash_line3[0]), OLED_FONT_SMALL_WIDTH);
+    print(CX_splash_cx, 40, OLED_FONT_SMALL, OLED_WHITE, CX_splash_line3[0]);
+    line_oled(14, 55, OLED_WIDTH - 15, 55, 1, OLED_WHITE);
+    line_oled(14, 58, OLED_WIDTH - 15, 58, 1, OLED_WHITE);
+    if (load_pct > 0) {
+        rect_oled(16, 56, (96 * load_pct) / 100, 1, 1, OLED_WHITE);
+    }
+}
+
+function CX_saver_step() {
+    cls_oled(OLED_BLACK);
+    CX_draw_jets();
+    CX_draw_lasers();
+    CX_line1_w = (CX_get_string_length(CX_saver_line1[0]) - 1) * OLED_FONT_SMALL_WIDTH;
+    CX_line2_w = (CX_get_string_length(CX_saver_line2[0]) - 1) * OLED_FONT_SMALL_WIDTH;
+    if (CX_line1_w > CX_line2_w) { CX_msg_w = CX_line1_w; } else { CX_msg_w = CX_line2_w; }
+    print(CX_sx, CX_sy, OLED_FONT_SMALL, OLED_WHITE, CX_saver_line1[0]);
+    print(CX_sx + ((CX_msg_w - CX_line2_w) / 2), CX_sy + 14, OLED_FONT_SMALL, OLED_WHITE, CX_saver_line2[0]);
+    CX_saver_timer += get_rtime();
+    if (CX_saver_timer >= 80) {
+        CX_sx += CX_svx;
+        CX_sy += CX_svy;
+        if (CX_sx <= 1 || CX_sx >= (OLED_WIDTH - CX_msg_w - 1)) { CX_svx = -CX_svx; }
+        if (CX_sy <= 1 || CX_sy >= (OLED_HEIGHT - 38 - 1)) { CX_svy = -CX_svy; }
+        CX_saver_timer = 0;
+    }
+}
+
+function CX_Init() {
+    for (CX_jet_i = 0; CX_jet_i < CX_JETS_COUNT; CX_jet_i++) {
+        CX_jet_x[CX_jet_i] = random(5, 122);
+        CX_jet_y[CX_jet_i] = random(64, 128);
+        CX_jet_speed[CX_jet_i] = random(1, 3);
+    }
+    for (CX_laser_i = 0; CX_laser_i < CX_LASERS_COUNT; CX_laser_i++) {
+        CX_laser_x[CX_laser_i] = random(5, 122);
+        CX_laser_y[CX_laser_i] = random(64, 128);
+        CX_laser_speed[CX_laser_i] = random(2, 4);
+    }
+    CX_sx = 2; CX_sy = 16;
+    CX_svx = 2; CX_svy = 2;
+    CX_saver_timer = 0;
+    CX_isLoadingScreen = 1;
+    CX_LoadingTimeToRun = 0;
+    CX_splash_progress = 0;
+    CX_initialized = 1;
+    CX_draw_splash(0);
+}
+
+function CX_Tick(allow_idle) {
+    if (!CX_initialized) CX_Init();
+
+    if (CX_isLoadingScreen) {
+        CX_LoadingTimeToRun += get_rtime();
+        CX_update_jets();
+        CX_update_lasers();
+        CX_splash_progress = (CX_LoadingTimeToRun * 100) / CX_LOADING_TIMER;
+        if (CX_splash_progress > 100) CX_splash_progress = 100;
+        CX_draw_splash(CX_splash_progress);
+        if (CX_LoadingTimeToRun >= CX_LOADING_TIMER) {
+            cls_oled(OLED_BLACK);
+            CX_isLoadingScreen = 0;
+            CX_saver_timer = 80;
+        }
+    } else if (allow_idle) {
+        CX_update_jets();
+        CX_update_lasers();
+        CX_saver_step();
+    }
+}
+
+
+int WJoadmaMIJ=FALSE;
+combo still {
+    // OLED animation replaced by CX_ module
+    wait(10);
+}
+
+
+
+combo still2 {
+    // OLED animation replaced by CX_ module
+    wait(10);
+}
+
+
+
+
+
+const string WM_RECOIL="RECOIL";
+const string WM_STRAFE_MODE="STRAFE MODE";
+const string WM_AIMSTR="AIM STRENGTH";
+const string WM_ZERO="ZERO DELAY";
+const string WM_VIBE="VIBRATIONS";
+const string WM_DZ="DEADZONE";
+const string WM_DROP="DROPSHOT";
+const string WM_DROPWAIT="DROP WAIT";
+const string WM_BLOOM="BLOOM";
+const string WM_EYES="EYES";
+const string WM_PICKUP_MACRO="PICKUP MACRO";
+const string WM_AUDIO_FIX="AUDIO FIX";
+const string WM_AIMTYPE="AIM TYPE";
+const string WM_ON="ON";
+const string WM_OFF="OFF";
+const string WM_PULSE="PULSE";
+const string WM_SAVED="SAVED";
+const string WM_D0="0";
+const string WM_D1="1";
+const string WM_D2="2";
+const string WM_D3="3";
+const string WM_D4="4";
+const string WM_D5="5";
+const string WM_D6="6";
+const string WM_D7="7";
+const string WM_D8="8";
+const string WM_D9="9";
+const string WM_V4="V4";
+const string WM_V5="V5";
+const string WM_X="X";
+const string WM_CIRC="CIRC";
+const string WM_L1R1="L1 R1";
+const string WM_SQ="SQUARE";
+const string WM_FLASH="FLASH";
+const string WM_STILL="STILL";
+const string WM_PL_LM="LOW-";
+const string WM_PL_L="LOW";
+const string WM_PL_M="MED";
+const string WM_PL_H="HIGH";
+const string WM_PL_HP="HIGH+";
+int WM_menu_on=FALSE;
+int WM_menu_page=0;
+int WM_save_flash=FALSE;
+int WM_settings_loaded=FALSE;
+int WM_vibe_block_on=FALSE;
+int WM_zero_delay_on=FALSE;
+int WM_ab_dz=8;
+int WM_dt=0;
+int WM_do=0;
+int WM_dh=0;
+int WM_p3h=0;
+int WM_p3r=0;
+int WM_p3x=50;
+int K_IDLE=10000;
+int K_SAVE=1250;
+int strafe_mode=0;
+int dropshot_on=0;
+int dropshot_wait=25;
+int bloom_on=0;
+int pickup_mode=0;
+int eyes_mode=0;
+int audio_fix_on=0;
+int aim_type=0;
+int AR_Y_EPS=5;
+int AR_X_EPS=1;
+int DeadzoneLimit=8;
+int OrlaRecoilPower=0;
+int OrlaRecoilPower2=0;
+int v3On=TRUE;
+int v4Pulse=100;
+int AntirecoilVertical=0;
+int AntirecoilHorizontal=0;
+int PULSE_BASE=12;
+int PULSE_CUR=12;
+int PULSE_LEVEL=2;
+int INIT_FLAG=0;
+int AIM_TMP=0;
+int sx[24];
+int sy[24];
+int sv[24];
+int si=0;
+int stardir=1;
+int starsize=4;
+int lnw=0;
+int lnt=0;
+int dtms=0;
+int slcnt=0;
+int sloff=0;
+int REPEAT_INITIAL_MS=250;
+int REPEAT_RATE_SLOW=90;
+int REPEAT_ACCEL_AT=500;
+int REPEAT_RATE_FAST=40;
+int rptupheld=0;
+int rptdnheld=0;
+int rptupbucket=0;
+int rptdnbucket=0;
+int rptuptotal=0;
+int rptdntotal=0;
+int rprateup=0;
+int rpratedn=0
+combo MnuOpen{cls_oled(OLED_BLACK);set_rumble(RUMBLE_A,60);wait(60);reset_rumble();}
+combo MnuTick{set_rumble(RUMBLE_A,35);wait(35);reset_rumble();}
+combo MnuTog{set_rumble(RUMBLE_A,50);wait(50);reset_rumble();}
+combo VibOff{set_rumble(RUMBLE_B,70);wait(90);reset_rumble();}
+combo StrXL{set_val(PS4_LX,-90 + get_ival(PS4_LX));set_val(XB1_LX,-90 + get_ival(XB1_LX));wait(30);set_val(PS4_LX,90 - get_ival(PS4_LX));set_val(XB1_LX,90 - get_ival(XB1_LX));wait(30);}
+combo StrCL{set_val(PS4_LX,100);set_val(PS4_LY,0);set_val(XB1_LX,100);set_val(XB1_LY,0);wait(5);set_val(PS4_LX,0);set_val(PS4_LY,100);set_val(XB1_LX,0);set_val(XB1_LY,100);wait(5);set_val(PS4_LX,-100);set_val(PS4_LY,0);set_val(XB1_LX,-100);set_val(XB1_LY,0);wait(5);set_val(PS4_LX,0);set_val(PS4_LY,-100);set_val(XB1_LX,0);set_val(XB1_LY,-100);wait(5);}
+combo Bloom15{set_val(PS4_LX,-15 + get_ival(PS4_LX));set_val(XB1_LX,-15 + get_ival(XB1_LX));wait(1);set_val(PS4_LX,15 + get_ival(PS4_LX));set_val(XB1_LX,15 + get_ival(XB1_LX));wait(1);}
+combo Pkup{set_val(PS4_SQUARE,100);set_val(XB1_X,100);wait(20);set_val(PS4_SQUARE,0);set_val(XB1_X,0);wait(20);}
+combo DropR3{set_val(PS5_R3,100);set_val(PS4_R3,100);set_val(XB1_RS,100);wait(40);set_val(PS5_R3,0);set_val(PS4_R3,0);set_val(XB1_RS,0);wait(dropshot_wait);set_val(PS5_R3,100);set_val(PS4_R3,100);set_val(XB1_RS,100);wait(40);set_val(PS5_R3,0);set_val(PS4_R3,0);set_val(XB1_RS,0);wait(dropshot_wait);}
+combo SaveFx{WM_save_flash=TRUE;cls_oled(OLED_BLACK);print(20,10,OLED_FONT_MEDIUM,OLED_WHITE,WM_SAVED[0]);set_rumble(RUMBLE_A,75);wait(200);reset_rumble();wait(K_SAVE);WM_save_flash=FALSE;cls_oled(OLED_BLACK);}
+combo V3Pulse{PULSE_CUR=inv(PULSE_CUR);vAim(PS4_RX,PULSE_CUR);vAim(PS4_RY,PULSE_CUR);vAim(XB1_RX,PULSE_CUR);vAim(XB1_RY,PULSE_CUR);}
+combo V4LegPulse{v4Pulse=inv(v4Pulse);v4set(PS4_LX,v4Pulse);v4set(XB1_LX,v4Pulse);}
+combo V4LegPull{set_val(PS4_LY,0);set_val(XB1_LY,0);}
+combo AR1{AntirecoilVertical=get_ival(PS4_RY) + OrlaRecoilPower;if(AntirecoilVertical>100)AntirecoilVertical=100;if(AntirecoilVertical<-100)AntirecoilVertical=-100;if(abs(get_val(PS4_RY))<abs(OrlaRecoilPower) + AR_Y_EPS){set_val(PS4_RY,AntirecoilVertical);set_val(XB1_RY,AntirecoilVertical);}AntirecoilHorizontal=get_ival(PS4_RX) + OrlaRecoilPower2;if(AntirecoilHorizontal>100)AntirecoilHorizontal=100;if(AntirecoilHorizontal<-100)AntirecoilHorizontal=-100;if(abs(get_val(PS4_RX))<abs(OrlaRecoilPower2) + AR_X_EPS){set_val(PS4_RX,AntirecoilHorizontal);set_val(XB1_RX,AntirecoilHorizontal);}}
+function nabs(int a){a=abs(a);return a;}
+function v3set(int ax,int v){if(nabs(get_val(ax))<=WM_ab_dz)set_val(ax,v);}
+function v4set(int ax,int v){if(nabs(get_val(ax))<=WM_ab_dz)set_val(ax,v);}
+function vAim(int ax,int v){if(aim_type==0){v3set(ax,v);}else{AIM_TMP=get_ival(ax) + v;if(AIM_TMP>100)AIM_TMP=100;if(AIM_TMP<-100)AIM_TMP=-100;set_val(ax,AIM_TMP);}}
+function c50(int v){if(v<0)v=0;if(v>50)v=50;return v;}
+function c100(int v){if(v<1)v=1;if(v>100)v=100;return v;}
+function ZD(){if(get_ival(PS4_UP))set_val(PS4_UP,100);if(get_ival(PS4_DOWN))set_val(PS4_DOWN,100);if(get_ival(PS4_LEFT))set_val(PS4_LEFT,100);if(get_ival(PS4_RIGHT))set_val(PS4_RIGHT,100);if(get_ival(PS4_SQUARE))set_val(PS4_SQUARE,100);if(get_ival(PS4_TRIANGLE))set_val(PS4_TRIANGLE,100);if(get_ival(PS4_CIRCLE))set_val(PS4_CIRCLE,100);if(get_ival(PS4_CROSS))set_val(PS4_CROSS,100);if(get_ival(PS4_L1))set_val(PS4_L1,100);if(get_ival(PS4_R1))set_val(PS4_R1,100);if(get_ival(PS4_L2))set_val(PS4_L2,100);if(get_ival(PS4_R2))set_val(PS4_R2,100);if(get_ival(PS4_L3))set_val(PS4_L3,100);if(get_ival(PS4_R3))set_val(PS4_R3,100);if(get_ival(XB1_UP))set_val(XB1_UP,100);if(get_ival(XB1_DOWN))set_val(XB1_DOWN,100);if(get_ival(XB1_LEFT))set_val(XB1_LEFT,100);if(get_ival(XB1_RIGHT))set_val(XB1_RIGHT,100);if(get_ival(XB1_X))set_val(XB1_X,100);if(get_ival(XB1_Y))set_val(XB1_Y,100);if(get_ival(XB1_B))set_val(XB1_B,100);if(get_ival(XB1_A))set_val(XB1_A,100);if(get_ival(XB1_LB))set_val(XB1_LB,100);if(get_ival(XB1_RB))set_val(XB1_RB,100);if(get_ival(XB1_LT))set_val(XB1_LT,100);if(get_ival(XB1_RT))set_val(XB1_RT,100);if(get_ival(XB1_LS))set_val(XB1_LS,100);if(get_ival(XB1_RS))set_val(XB1_RS,100);}
+function slen(int off){slcnt=0;sloff=off;while(duint8(sloff)){slcnt=slcnt + 1;sloff=sloff + 1;}return slcnt;}
+function cx(int off,int font){return (OLED_WIDTH / 2) - ((slen(off) * font) / 2);}
+function ps(int off,int y,int font,int w){print(cx(off,w),y,font,OLED_WHITE,off);}
+function drawline(){if(lnw<lnt){lnw=lnw + (dtms / 16) + 1;if(lnw>lnt)lnw=lnt;}rect_oled((OLED_WIDTH - lnw) / 2,14,lnw,1,1,OLED_WHITE);}
+function dgt(int x,int y,int d){if(d==0)print(x,y,OLED_FONT_MEDIUM,OLED_WHITE,WM_D0[0]);else if(d==1)print(x,y,OLED_FONT_MEDIUM,OLED_WHITE,WM_D1[0]);else if(d==2)print(x,y,OLED_FONT_MEDIUM,OLED_WHITE,WM_D2[0]);else if(d==3)print(x,y,OLED_FONT_MEDIUM,OLED_WHITE,WM_D3[0]);else if(d==4)print(x,y,OLED_FONT_MEDIUM,OLED_WHITE,WM_D4[0]);else if(d==5)print(x,y,OLED_FONT_MEDIUM,OLED_WHITE,WM_D5[0]);else if(d==6)print(x,y,OLED_FONT_MEDIUM,OLED_WHITE,WM_D6[0]);else if(d==7)print(x,y,OLED_FONT_MEDIUM,OLED_WHITE,WM_D7[0]);else if(d==8)print(x,y,OLED_FONT_MEDIUM,OLED_WHITE,WM_D8[0]);else print(x,y,OLED_FONT_MEDIUM,OLED_WHITE,WM_D9[0]);}
+function num2c(int y,int v){WM_dt=v / 10;WM_do=v % 10;if(WM_dt>0)WM_p3x=(OLED_WIDTH - 24) / 2;else WM_p3x=(OLED_WIDTH - 12) / 2;if(WM_dt>0){dgt(WM_p3x,y,WM_dt);WM_p3x=WM_p3x + 12;}dgt(WM_p3x,y,WM_do);}
+function num3c(int y,int v){WM_p3h=v / 100;WM_p3r=v % 100;WM_dt=WM_p3r / 10;WM_do=WM_p3r % 10;if(WM_p3h>0)WM_p3x=(OLED_WIDTH - 36) / 2;else if(WM_dt>0)WM_p3x=(OLED_WIDTH - 24) / 2;else WM_p3x=(OLED_WIDTH - 12) / 2;if(WM_p3h>0){dgt(WM_p3x,y,WM_p3h);WM_p3x=WM_p3x + 12;}if(WM_dt>0 || WM_p3h>0){dgt(WM_p3x,y,WM_dt);WM_p3x=WM_p3x + 12;}dgt(WM_p3x,y,WM_do);}
+function apply_pulse_level(){if(PULSE_LEVEL==0){PULSE_BASE=6;}else if(PULSE_LEVEL==1){PULSE_BASE=8;}else if(PULSE_LEVEL==2){PULSE_BASE=12;}else if(PULSE_LEVEL==3){PULSE_BASE=15;}else{PULSE_BASE=18;}PULSE_CUR=PULSE_BASE;}
+function starsinit(){si=0;while(si<24){sx[si]=random(0,OLED_WIDTH - 1);sy[si]=random(0,OLED_HEIGHT - 1);sv[si]=4 + random(0,3);si=si + 1;}}
+function starsstep(){si=0;while(si<24){sx[si]=sx[si] + (sv[si] * stardir);if(sx[si]<0){sx[si]=OLED_WIDTH - 1;sy[si]=random(0,OLED_HEIGHT - 1);}if(sx[si]>=OLED_WIDTH){sx[si]=0;sy[si]=random(0,OLED_HEIGHT - 1);}rect_oled(sx[si],sy[si],starsize,starsize,1,OLED_WHITE);si=si + 1;}}
+function repupd(){if(get_val(PS4_L2)&&get_val(PS4_UP)){if(!rptupheld){rptupheld=1;rptupbucket=0;rptuptotal=0;}rptupbucket=rptupbucket + dtms;rptuptotal=rptuptotal + dtms;}else{rptupheld=0;rptupbucket=0;rptuptotal=0;}if(get_val(PS4_L2)&&get_val(PS4_DOWN)){if(!rptdnheld){rptdnheld=1;rptdnbucket=0;rptdntotal=0;}rptdnbucket=rptdnbucket + dtms;rptdntotal=rptdntotal + dtms;}else{rptdnheld=0;rptdnbucket=0;rptdntotal=0;}}
+function repupdue(){if(!rptupheld)return 0;if(rptuptotal<REPEAT_INITIAL_MS)return 0;if(rptuptotal>=REPEAT_ACCEL_AT)rprateup=REPEAT_RATE_FAST;else rprateup=REPEAT_RATE_SLOW;if(rptupbucket>=rprateup){rptupbucket=rptupbucket - rprateup;return 1;}return 0;}
+function repdndue(){if(!rptdnheld)return 0;if(rptdntotal<REPEAT_INITIAL_MS)return 0;if(rptdntotal>=REPEAT_ACCEL_AT)rpratedn=REPEAT_RATE_FAST;else rpratedn=REPEAT_RATE_SLOW;if(rptdnbucket>=rpratedn){rptdnbucket=rpratedn - rpratedn;return 1;}return 0;}
+function header(){if(WM_menu_page==0){ps(WM_RECOIL[0],2,OLED_FONT_SMALL,OLED_FONT_SMALL_WIDTH);lnt=slen(WM_RECOIL[0]) * OLED_FONT_SMALL_WIDTH;}else if(WM_menu_page==1){ps(WM_STRAFE_MODE[0],2,OLED_FONT_SMALL,OLED_FONT_SMALL_WIDTH);lnt=slen(WM_STRAFE_MODE[0]) * OLED_FONT_SMALL_WIDTH;}else if(WM_menu_page==2){ps(WM_AIMSTR[0],2,OLED_FONT_SMALL,OLED_FONT_SMALL_WIDTH);lnt=slen(WM_AIMSTR[0]) * OLED_FONT_SMALL_WIDTH;}else if(WM_menu_page==3){ps(WM_ZERO[0],2,OLED_FONT_SMALL,OLED_FONT_SMALL_WIDTH);lnt=slen(WM_ZERO[0]) * OLED_FONT_SMALL_WIDTH;}else if(WM_menu_page==4){ps(WM_VIBE[0],2,OLED_FONT_SMALL,OLED_FONT_SMALL_WIDTH);lnt=slen(WM_VIBE[0]) * OLED_FONT_SMALL_WIDTH;}else if(WM_menu_page==5){ps(WM_DZ[0],2,OLED_FONT_SMALL,OLED_FONT_SMALL_WIDTH);lnt=slen(WM_DZ[0]) * OLED_FONT_SMALL_WIDTH;}else if(WM_menu_page==6){ps(WM_DROP[0],2,OLED_FONT_SMALL,OLED_FONT_SMALL_WIDTH);lnt=slen(WM_DROP[0]) * OLED_FONT_SMALL_WIDTH;}else if(WM_menu_page==7){ps(WM_DROPWAIT[0],2,OLED_FONT_SMALL,OLED_FONT_SMALL_WIDTH);lnt=slen(WM_DROPWAIT[0]) * OLED_FONT_SMALL_WIDTH;}else if(WM_menu_page==8){ps(WM_BLOOM[0],2,OLED_FONT_SMALL,OLED_FONT_SMALL_WIDTH);lnt=slen(WM_BLOOM[0]) * OLED_FONT_SMALL_WIDTH;}else if(WM_menu_page==9){ps(WM_EYES[0],2,OLED_FONT_SMALL,OLED_FONT_SMALL_WIDTH);lnt=slen(WM_EYES[0]) * OLED_FONT_SMALL_WIDTH;}else if(WM_menu_page==10){ps(WM_PICKUP_MACRO[0],2,OLED_FONT_SMALL,OLED_FONT_SMALL_WIDTH);lnt=slen(WM_PICKUP_MACRO[0]) * OLED_FONT_SMALL_WIDTH;}else if(WM_menu_page==11){ps(WM_AUDIO_FIX[0],2,OLED_FONT_SMALL,OLED_FONT_SMALL_WIDTH);lnt=slen(WM_AUDIO_FIX[0]) * OLED_FONT_SMALL_WIDTH;}else{ps(WM_AIMTYPE[0],2,OLED_FONT_SMALL,OLED_FONT_SMALL_WIDTH);lnt=slen(WM_AIMTYPE[0]) * OLED_FONT_SMALL_WIDTH;}}
+function body(){if(WM_menu_page==0){num2c(22,OrlaRecoilPower);}else if(WM_menu_page==1){if(strafe_mode==0)ps(WM_OFF[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);else if(strafe_mode==1)ps(WM_X[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);else if(strafe_mode==2)ps(WM_CIRC[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);else ps(WM_V4[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);}else if(WM_menu_page==2){if(PULSE_LEVEL==0)ps(WM_PL_LM[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);else if(PULSE_LEVEL==1)ps(WM_PL_L[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);else if(PULSE_LEVEL==2)ps(WM_PL_M[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);else if(PULSE_LEVEL==3)ps(WM_PL_H[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);else ps(WM_PL_HP[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);}else if(WM_menu_page==3){if(WM_zero_delay_on)ps(WM_ON[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);else ps(WM_OFF[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);}else if(WM_menu_page==4){if(WM_vibe_block_on)ps(WM_OFF[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);else ps(WM_ON[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);}else if(WM_menu_page==5){num3c(22,WM_ab_dz);}else if(WM_menu_page==6){if(dropshot_on)ps(WM_ON[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);else ps(WM_OFF[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);}else if(WM_menu_page==7){num3c(22,dropshot_wait);}else if(WM_menu_page==8){if(bloom_on)ps(WM_ON[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);else ps(WM_OFF[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);}else if(WM_menu_page==9){if(eyes_mode==0)ps(WM_FLASH[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);else if(eyes_mode==1)ps(WM_STILL[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);else ps(WM_OFF[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);}else if(WM_menu_page==10){if(pickup_mode==0)ps(WM_OFF[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);else if(pickup_mode==1)ps(WM_L1R1[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);else ps(WM_SQ[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);}else if(WM_menu_page==11){if(audio_fix_on)ps(WM_ON[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);else ps(WM_OFF[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);}else{if(aim_type==0)ps(WM_V4[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);else ps(WM_V5[0],22,OLED_FONT_MEDIUM,OLED_FONT_MEDIUM_WIDTH);}}
+function footer(){ps(WM_PULSE[0],44,OLED_FONT_SMALL,OLED_FONT_SMALL_WIDTH);}
+function draw_menu(){cls_oled(OLED_BLACK);starsstep();header();drawline();body();footer();}
+function WM_Load(){INIT_FLAG=get_pvar(SPVAR_16,0,999,0);if(INIT_FLAG!=777){WM_ab_dz=8;strafe_mode=0;WM_zero_delay_on=0;WM_vibe_block_on=0;dropshot_on=0;dropshot_wait=25;bloom_on=0;pickup_mode=0;eyes_mode=0;audio_fix_on=0;aim_type=0;OrlaRecoilPower=0;OrlaRecoilPower2=0;PULSE_LEVEL=2;apply_pulse_level();set_pvar(SPVAR_1,WM_ab_dz);set_pvar(SPVAR_3,strafe_mode);set_pvar(SPVAR_4,WM_zero_delay_on);set_pvar(SPVAR_5,WM_vibe_block_on);set_pvar(SPVAR_6,dropshot_on);set_pvar(SPVAR_7,dropshot_wait);set_pvar(SPVAR_8,bloom_on);set_pvar(SPVAR_9,pickup_mode);set_pvar(SPVAR_10,eyes_mode);set_pvar(SPVAR_11,OrlaRecoilPower);set_pvar(SPVAR_12,OrlaRecoilPower2);set_pvar(SPVAR_13,PULSE_LEVEL);set_pvar(SPVAR_14,audio_fix_on);set_pvar(SPVAR_15,aim_type);set_pvar(SPVAR_16,777);}else{WM_ab_dz=get_pvar(SPVAR_1,1,100,8);strafe_mode=get_pvar(SPVAR_3,0,3,0);WM_zero_delay_on=get_pvar(SPVAR_4,0,1,0);WM_vibe_block_on=get_pvar(SPVAR_5,0,1,0);dropshot_on=get_pvar(SPVAR_6,0,1,0);dropshot_wait=get_pvar(SPVAR_7,1,50,25);bloom_on=get_pvar(SPVAR_8,0,1,0);pickup_mode=get_pvar(SPVAR_9,0,2,0);eyes_mode=get_pvar(SPVAR_10,0,2,0);OrlaRecoilPower=get_pvar(SPVAR_11,0,50,0);OrlaRecoilPower2=get_pvar(SPVAR_12,0,50,0);PULSE_LEVEL=get_pvar(SPVAR_13,0,4,2);audio_fix_on=get_pvar(SPVAR_14,0,1,0);aim_type=get_pvar(SPVAR_15,0,1,0);apply_pulse_level();}}
+function WM_Save(){set_pvar(SPVAR_1,WM_ab_dz);set_pvar(SPVAR_3,strafe_mode);set_pvar(SPVAR_4,WM_zero_delay_on);set_pvar(SPVAR_5,WM_vibe_block_on);set_pvar(SPVAR_6,dropshot_on);set_pvar(SPVAR_7,dropshot_wait);set_pvar(SPVAR_8,bloom_on);set_pvar(SPVAR_9,pickup_mode);set_pvar(SPVAR_10,eyes_mode);set_pvar(SPVAR_11,OrlaRecoilPower);set_pvar(SPVAR_12,OrlaRecoilPower2);set_pvar(SPVAR_13,PULSE_LEVEL);set_pvar(SPVAR_14,audio_fix_on);set_pvar(SPVAR_15,aim_type);}
+init{
+    audio_fix_on=get_pvar(SPVAR_14,0,1,0);
+    WJoadmaMIJ=0;
+    if(audio_fix_on){
+        WJoadmaMIJ=1;
+    }
+    starsinit();
+    CX_Init();
+}
+main{dtms=get_rtime();if(!WM_settings_loaded){WM_Load();WM_settings_loaded=TRUE;}if(get_val(PS4_L2)&&event_press(PS4_OPTIONS)){set_val(PS4_L2,0);set_val(PS4_OPTIONS,0);WM_dh=get_rtime();WM_save_flash=FALSE;if(!WM_menu_on){WM_menu_on=TRUE;lnw=0;combo_run(MnuOpen);}else{WM_Save();WM_menu_on=FALSE;lnw=0;combo_run(SaveFx);}}if(CX_isLoadingScreen){CX_Tick(FALSE);}else if(!WM_menu_on){CX_Tick(TRUE);}if(WM_menu_on){repupd();if(event_press(PS4_RIGHT)){WM_menu_page=(WM_menu_page + 1) % 13;lnw=0;combo_run(MnuTick);}if(event_press(PS4_LEFT)){WM_menu_page=(WM_menu_page + 12) % 13;lnw=0;combo_run(MnuTick);}if(WM_menu_page==0){if(event_press(PS4_UP)||repupdue()){OrlaRecoilPower=c50(OrlaRecoilPower + 1);set_pvar(SPVAR_11,OrlaRecoilPower);combo_run(MnuTick);}if(event_press(PS4_DOWN)||repdndue()){OrlaRecoilPower=c50(OrlaRecoilPower - 1);set_pvar(SPVAR_11,OrlaRecoilPower);combo_run(MnuTick);}}else if(WM_menu_page==1){if(event_press(PS4_CROSS)){strafe_mode=(strafe_mode + 1) % 4;set_pvar(SPVAR_3,strafe_mode);combo_run(MnuTog);}}else if(WM_menu_page==2){if(event_press(PS4_CROSS)){PULSE_LEVEL=(PULSE_LEVEL + 1) % 5;apply_pulse_level();set_pvar(SPVAR_13,PULSE_LEVEL);combo_run(MnuTog);}}else if(WM_menu_page==3){if(event_press(PS4_CROSS)){if(WM_zero_delay_on)WM_zero_delay_on=0;else WM_zero_delay_on=1;set_pvar(SPVAR_4,WM_zero_delay_on);combo_run(MnuTog);}}else if(WM_menu_page==4){if(event_press(PS4_CROSS)){if(WM_vibe_block_on)WM_vibe_block_on=0;else WM_vibe_block_on=1;set_pvar(SPVAR_5,WM_vibe_block_on);if(WM_vibe_block_on)combo_run(VibOff);else combo_run(MnuTog);}}else if(WM_menu_page==5){if(event_press(PS4_UP)||repupdue()){WM_ab_dz=c100(WM_ab_dz + 1);set_pvar(SPVAR_1,WM_ab_dz);combo_run(MnuTick);}if(event_press(PS4_DOWN)||repdndue()){WM_ab_dz=c100(WM_ab_dz - 1);set_pvar(SPVAR_1,WM_ab_dz);combo_run(MnuTick);}}else if(WM_menu_page==6){if(event_press(PS4_CROSS)){if(dropshot_on)dropshot_on=0;else dropshot_on=1;set_pvar(SPVAR_6,dropshot_on);combo_run(MnuTog);}}else if(WM_menu_page==7){if(event_press(PS4_UP)||repupdue()){if(dropshot_wait<50)dropshot_wait=dropshot_wait + 1;set_pvar(SPVAR_7,dropshot_wait);combo_run(MnuTick);}if(event_press(PS4_DOWN)||repdndue()){if(dropshot_wait>1)dropshot_wait=dropshot_wait - 1;set_pvar(SPVAR_7,dropshot_wait);combo_run(MnuTick);}}else if(WM_menu_page==8){if(event_press(PS4_CROSS)){if(bloom_on)bloom_on=0;else bloom_on=1;set_pvar(SPVAR_8,bloom_on);combo_run(MnuTog);}}else if(WM_menu_page==9){if(event_press(PS4_CROSS)){eyes_mode=(eyes_mode + 1) % 3;set_pvar(SPVAR_10,eyes_mode);combo_run(MnuTog);}}else if(WM_menu_page==10){if(event_press(PS4_CROSS)){pickup_mode=(pickup_mode + 1) % 3;set_pvar(SPVAR_9,pickup_mode);combo_run(MnuTog);}}else if(WM_menu_page==11){if(event_press(PS4_CROSS)){if(audio_fix_on)audio_fix_on=0;else audio_fix_on=1;set_pvar(SPVAR_14,audio_fix_on);WJoadmaMIJ=0;combo_run(MnuTog);}}else{if(event_press(PS4_CROSS)){if(aim_type)aim_type=0;else aim_type=1;set_pvar(SPVAR_15,aim_type);combo_run(MnuTog);}}draw_menu();set_val(PS4_RX,0);set_val(PS4_RY,0);set_val(PS4_LX,0);set_val(PS4_LY,0);set_val(PS4_UP,0);set_val(PS4_DOWN,0);set_val(PS4_LEFT,0);set_val(PS4_RIGHT,0);set_val(PS4_L1,0);set_val(PS4_R1,0);set_val(PS4_L2,0);set_val(PS4_R2,0);set_val(PS4_L3,0);set_val(PS4_R3,0);set_val(PS4_CROSS,0);set_val(PS4_CIRCLE,0);set_val(PS4_SQUARE,0);set_val(PS4_TRIANGLE,0);set_val(XB1_RX,0);set_val(XB1_RY,0);set_val(XB1_LX,0);set_val(XB1_LY,0);set_val(XB1_UP,0);set_val(XB1_DOWN,0);set_val(XB1_LEFT,0);set_val(XB1_RIGHT,0);set_val(XB1_LB,0);set_val(XB1_RB,0);set_val(XB1_LT,0);set_val(XB1_RT,0);set_val(XB1_LS,0);set_val(XB1_RS,0);set_val(XB1_A,0);set_val(XB1_B,0);set_val(XB1_X,0);set_val(XB1_Y,0);}else{if(WM_vibe_block_on)block_rumble();if(WM_zero_delay_on)ZD();if((OrlaRecoilPower>0||OrlaRecoilPower2>0)&&(get_val(PS4_R2)||get_val(XB1_RT)))combo_run(AR1);else combo_stop(AR1);if(strafe_mode==1&&abs(get_ival(PS4_LX))<=DeadzoneLimit&&abs(get_ival(PS4_LY))<=DeadzoneLimit)combo_run(StrXL);else combo_stop(StrXL);if(strafe_mode==2&&abs(get_ival(PS4_LX))<=DeadzoneLimit&&abs(get_ival(PS4_LY))<=DeadzoneLimit)combo_run(StrCL);else combo_stop(StrCL);if(strafe_mode==3&&abs(get_ival(PS4_LX))<=WM_ab_dz&&abs(get_ival(PS4_LY))<=WM_ab_dz){combo_run(V4LegPulse);if(get_val(PS4_L2)&&!get_val(PS4_R2))combo_run(V4LegPull);}else{combo_stop(V4LegPulse);combo_stop(V4LegPull);}if(!WM_save_flash&&v3On&&(((aim_type==0)&&(abs(get_ival(PS4_RX))<=WM_ab_dz&&abs(get_ival(PS4_RY))<=WM_ab_dz))||(aim_type==1))&&!get_val(PS4_R2)&&!get_val(XB1_RT)){combo_run(V3Pulse);}else{combo_stop(V3Pulse);}if(bloom_on&&(get_val(PS4_R2)||get_val(XB1_RT)))combo_run(Bloom15);else combo_stop(Bloom15);if(dropshot_on&&(get_val(PS4_R2)||get_val(XB1_RT))){if(!combo_running(DropR3))combo_run(DropR3);}else{combo_stop(DropR3);}if(pickup_mode==1&&((get_val(PS4_L1)&&get_val(PS4_R1))||(get_val(XB1_LB)&&get_val(XB1_RB))))combo_run(Pkup);else if(pickup_mode==2&&get_val(PS4_SQUARE))combo_run(Pkup);else combo_stop(Pkup);if(event_press(PS4_UP)||event_press(PS4_DOWN)||event_press(PS4_LEFT)||event_press(PS4_RIGHT)||event_press(PS4_CROSS)||event_press(PS4_OPTIONS)||event_press(PS4_L2)||event_press(PS4_R2))WM_dh=get_rtime();if(!WM_save_flash&&(get_rtime()-WM_dh)>=K_IDLE){WM_Save();combo_run(SaveFx);WM_dh=get_rtime();}if(audio_fix_on){if(!WJoadmaMIJ){cls_oled(OLED_BLACK);combo_run(still2);WJoadmaMIJ=1;}combo_stop(still);}else{if(!combo_running(still))combo_run(still);}}}
