@@ -1763,7 +1763,9 @@ document.addEventListener('DOMContentLoaded', function () {
 			detailsField.value = 'Game: \nBudget: \nDesired Rep/Rank: \nCurrent Rep/Rank: ';
 		} else if (detailsField && serviceParam === 'cheats' && gameParam) {
 			const gameName = decodeURIComponent(gameParam).replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-			detailsField.value = `Game: ${gameName}\nCheat Inquiry: \nPlatform/OS: `;
+			const planParam = urlParams.get('plan');
+			const planLine = planParam ? `Plan: ${planParam === 'lifetime' ? 'Lifetime' : 'Monthly'}\n` : '';
+			detailsField.value = `Game: ${gameName}\n${planLine}Cheat Inquiry: \nPlatform/OS: `;
 		}
 
 		// Initialize EmailJS (replace with your Public Key)
