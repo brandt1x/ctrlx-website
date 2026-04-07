@@ -165,7 +165,9 @@
 				const origin = window.location.origin;
 				const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
 				const baseUrl = cfg.siteUrl || (isLocalhost ? 'https://www.cntrl-x.com' : origin);
-				oauthRedirectUrl = baseUrl.replace(/\/$/, '') + '/account.html';
+				const _nextQs = new URLSearchParams(location.search).get('next');
+			const _oauthNext = (_nextQs && /^\/[^/]/.test(_nextQs)) ? '?next=' + encodeURIComponent(_nextQs) : '';
+			oauthRedirectUrl = baseUrl.replace(/\/$/, '') + '/account.html' + _oauthNext;
 				// Reuse shared client from script.js to avoid multiple GoTrueClient instances
 				if (window.__supabaseClient) {
 					supabase = window.__supabaseClient;
@@ -211,6 +213,12 @@
 			const dashboardTabs = document.querySelectorAll('.account-tab-btn');
 			let mode = 'signin';
 			let purchasesLoaded = false;
+
+			const _nextParam = new URLSearchParams(location.search).get('next');
+			const _safeNext = (_nextParam && /^\/[^/]/.test(_nextParam)) ? _nextParam : null;
+			function navigateAfterAuth() {
+				if (_safeNext) { location.replace(_safeNext); } else { location.reload(); }
+			}
 
 			function syncPasswordVisibility(visible) {
 				const type = visible ? 'text' : 'password';
@@ -288,7 +296,7 @@
 					if (mode === 'signin') {
 						const { error } = await supabase.auth.signInWithPassword({ email, password });
 						if (error) throw error;
-						location.reload();
+						navigateAfterAuth();
 					} else {
 						const { data, error } = await supabase.auth.signUp({ email, password });
 						if (error) throw error;
@@ -298,7 +306,7 @@
 							// Repeated signup (existing account) – try sign-in first
 							const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
 							if (!signInErr) {
-								location.reload();
+								navigateAfterAuth();
 								return;
 							}
 							// Sign-in failed: account exists but wrong auth (e.g. Google) or wrong password
@@ -317,7 +325,7 @@
 							verifyEmailDisplay.textContent = email;
 							verifyError.hidden = true;
 						} else {
-							location.reload();
+							navigateAfterAuth();
 						}
 					}
 				} catch (err) {
@@ -468,6 +476,10 @@
 						const name = String(item?.name || '').toLowerCase();
 						return productId === 'jaguars-boost' || name.includes('jaguars account boosting');
 					});
+					const cheatItems = (Array.isArray(p.items) ? p.items : []).filter((item) => {
+						return String(item?.product_id || '').toLowerCase().startsWith('cheat-');
+					});
+					const isCheatPurchase = !!p.hasPcCheat || cheatItems.length > 0;
 					const isSub = !!p.isSubscription;
 					function dlBtn(label, type, script) {
 						if (expired) {
@@ -475,19 +487,21 @@
 						}
 						return '<a href="#" class="btn success-dl-btn" data-session="' + (p.session_id || '') + '" data-subscription="' + (isSub ? '1' : '') + '" data-type="' + type + '"' + (script ? ' data-script="' + script + '"' : '') + '>' + label + '</a>';
 					}
-					if (p.hasControlX) links.push(dlBtn('Download CONTROL+X Ultimate Script (.gpc)', 'script', 'control-x'));
-					if (p.hasVisionX) links.push(dlBtn('Download Vision-X Tempo', 'vision-x', ''));
-					if (p.hasVisionXPlus) links.push(dlBtn('Download Vision+X Timing', 'vision-x-plus', ''));
-					if (p.hasAimX) links.push(dlBtn('Download Aim-X', 'aim-x', ''));
-					if (p.hasAllBundle) links.push(dlBtn('Download All Scripts', 'all-scripts', ''));
-					else {
-						if (p.has2K) links.push(dlBtn('Download 2K Script (.gpc)', 'script', '2k'));
-						if (p.hasCOD) links.push(dlBtn('Download COD Script (.gpc)', 'script', 'cod'));
-						if (p.hasApex) links.push(dlBtn('Download Apex Script (.gpc)', 'script', 'apex'));
-						if (p.hasArc) links.push(dlBtn('Download ARC Script (.gpc)', 'script', 'arc'));
-						if (p.hasFortnite) links.push(dlBtn('Download Fortnite Script (.gpc)', 'script', 'fortnite'));
-						if (p.hasSiege) links.push(dlBtn('Download Siege Script (.zip)', 'siege', ''));
-						if (p.hasRust) links.push(dlBtn('Download Rust Script (.gpc)', 'script', 'rust'));
+					if (!isCheatPurchase) {
+						if (p.hasControlX) links.push(dlBtn('Download CONTROL+X Ultimate Script (.gpc)', 'script', 'control-x'));
+						if (p.hasVisionX) links.push(dlBtn('Download Vision-X Tempo', 'vision-x', ''));
+						if (p.hasVisionXPlus) links.push(dlBtn('Download Vision+X Timing', 'vision-x-plus', ''));
+						if (p.hasAimX) links.push(dlBtn('Download Aim-X', 'aim-x', ''));
+						if (p.hasAllBundle) links.push(dlBtn('Download All Scripts', 'all-scripts', ''));
+						else {
+							if (p.has2K) links.push(dlBtn('Download 2K Script (.gpc)', 'script', '2k'));
+							if (p.hasCOD) links.push(dlBtn('Download COD Script (.gpc)', 'script', 'cod'));
+							if (p.hasApex) links.push(dlBtn('Download Apex Script (.gpc)', 'script', 'apex'));
+							if (p.hasArc) links.push(dlBtn('Download ARC Script (.gpc)', 'script', 'arc'));
+							if (p.hasFortnite) links.push(dlBtn('Download Fortnite Script (.gpc)', 'script', 'fortnite'));
+							if (p.hasSiege) links.push(dlBtn('Download Siege Script (.zip)', 'siege', ''));
+							if (p.hasRust) links.push(dlBtn('Download Rust Script (.gpc)', 'script', 'rust'));
+						}
 					}
 					const date = p.created_at ? new Date(p.created_at).toLocaleDateString() : '';
 					const statusLabel = p.isSubscription
@@ -495,19 +509,30 @@
 						: (expired
 							? '<span class="purchase-status purchase-status-expired">Purchased • Download window expired</span>'
 							: (remaining ? '<span class="purchase-status purchase-status-active">' + remaining + '</span>' : ''));
-					const expiredMeta = expired
+					const expiredMeta = expired && !isCheatPurchase
 						? '<p class="purchase-expired-note">This purchase is still on your account, but the 24-hour download window has ended.</p><div class="purchase-expired-actions"><a href="contact.html" class="btn ghost">Contact Support</a></div>'
+						: '';
+					const cheatName = cheatItems.length ? cheatItems[0].name : (p.items && p.items[0] ? p.items[0].name : 'PC Cheat');
+					const cheatNote = isCheatPurchase
+						? '<p class="purchase-service-note">Purchase confirmed for <strong>' + cheatName + '</strong>. Access will be delivered via Discord. <a href="https://discord.gg/ctrl-x" target="_blank" rel="noopener">Join our Discord</a> or <a href="contact.html">contact support</a> for setup.</p>'
 						: '';
 					const serviceNote = serviceItems.length
 						? '<p class="purchase-service-note">Purchase confirmed for <strong>Jaguars Account Boosting</strong> from Starter II to Vet II. This is a service, so there is no download file. We will handle fulfillment directly and follow up as needed.</p>'
 						: '';
-					const blockTitle = serviceItems.length
-						? 'Jaguars Account Boosting · ' + (date || '')
-						: (p.isSubscription ? 'Vision-X Monthly · ' + (date || '') : 'Purchase ' + (date || ''));
+					let blockTitle;
+					if (serviceItems.length) {
+						blockTitle = 'Jaguars Account Boosting · ' + (date || '');
+					} else if (isCheatPurchase) {
+						blockTitle = cheatName + ' · ' + (date || '');
+					} else if (p.isSubscription) {
+						blockTitle = 'Vision-X Monthly · ' + (date || '');
+					} else {
+						blockTitle = 'Purchase ' + (date || '');
+					}
 					const actionHtml = links.length ? '<div class="success-download-list">' + links.join('') + '</div>' : '';
-					return '<div class="account-purchase-block' + (expired ? ' purchase-expired' : '') + '"><h4>' + blockTitle + ' ' + statusLabel + '</h4>' + actionHtml + serviceNote + expiredMeta + '</div>';
+					return '<div class="account-purchase-block' + (expired ? ' purchase-expired' : '') + '"><h4>' + blockTitle + ' ' + statusLabel + '</h4>' + actionHtml + cheatNote + serviceNote + expiredMeta + '</div>';
 				}).join('');
-				const hasDownloadablePurchases = purchases.some((p) => p.hasControlX || p.hasVisionX || p.hasVisionXPlus || p.hasAimX || p.hasAllBundle || p.has2K || p.hasCOD || p.hasApex || p.hasArc || p.hasFortnite || p.hasSiege || p.hasRust);
+				const hasDownloadablePurchases = purchases.some((p) => !p.hasPcCheat && (p.hasControlX || p.hasVisionX || p.hasVisionXPlus || p.hasAimX || p.hasAllBundle || p.has2K || p.hasCOD || p.hasApex || p.hasArc || p.hasFortnite || p.hasSiege || p.hasRust));
 				const instructionHtml = hasDownloadablePurchases
 					? '<p class="success-instruction">Your script downloads are password-protected. Check your email for your unique license key — right-click the ZIP → Extract All, enter the key when prompted, then load the .gpc file(s) into Zen Studio and flash to your CronusZen.</p>'
 					: '';
@@ -581,6 +606,10 @@
 
 			async function init() {
 				const { data: { session } } = await supabase.auth.getSession();
+				if (session && _safeNext) {
+					location.replace(_safeNext);
+					return;
+				}
 				const params = new URLSearchParams(location.search);
 				const fromSubscription = params.get('subscription') === '1' && params.get('success') === '1';
 				const fromCheckout = params.get('success') === '1' && params.get('session_id');

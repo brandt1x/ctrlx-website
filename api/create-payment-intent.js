@@ -77,6 +77,11 @@ module.exports = async (req, res) => {
 		return res.status(400).json({ error: 'Invalid or empty cart. Use valid product IDs only.' });
 	}
 
+	const hasCheatProduct = productIds.some((id) => String(id).startsWith('cheat-'));
+	if (hasCheatProduct && !user) {
+		return res.status(401).json({ error: 'Sign in required to purchase PC cheats.' });
+	}
+
 	const signedInEmail = user && user.email ? String(user.email).trim().toLowerCase() : '';
 	const guestEmail = String(customerEmail || '').trim().toLowerCase();
 	const effectiveEmail = signedInEmail || guestEmail;

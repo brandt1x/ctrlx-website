@@ -1526,6 +1526,21 @@ document.addEventListener('DOMContentLoaded', function () {
 		});
 	})();
 
+	// PC Cheats buy buttons (cheats.html) — clear cart, add single cheat, go to checkout
+	; (function setupCheatsBuy() {
+		document.body.addEventListener('click', (e) => {
+			const btn = e.target?.closest?.('.cheat-buy-btn');
+			if (!btn || !window.__addToSiteCart) return;
+			e.preventDefault();
+			const productId = btn.getAttribute('data-product-id') || '';
+			const name = btn.getAttribute('data-name') || 'PC Cheat';
+			const price = btn.getAttribute('data-price') || '0';
+			try { localStorage.setItem('siteCart', '[]'); } catch (_) {}
+			window.__addToSiteCart(productId, name, price);
+			location.href = '/checkout.html';
+		});
+	})();
+
 	// Hero "CTRL-X Vision Setup" add-to-cart (index.html)
 	; (function setupHeroAdd() {
 		if (!window.__addToSiteCart) return;

@@ -1,5 +1,6 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { getUserFromRequest } = require('../lib/auth-helpers');
+const { getProduct } = require('../lib/products');
 const { checkRateLimit } = require('../lib/rate-limit');
 
 async function getOrCreateCustomerByEmail(email, name, metadata) {
@@ -14,33 +15,39 @@ async function getOrCreateCustomerByEmail(email, name, metadata) {
 	});
 }
 
-async function getOrCreateVisionXMonthlyPrice() {
-	const envPriceId = process.env.STRIPE_VISION_X_MONTHLY_PRICE_ID;
-	if (envPriceId) return envPriceId;
+async function getOrCreateRecurringPriceId(productId) {
+	if (productId === 'vision-x-monthly') {
+		const envPriceId = process.env.STRIPE_VISION_X_MONTHLY_PRICE_ID;
+		if (envPriceId) return envPriceId;
+	}
+
+	const product = getProduct(productId);
+	if (!product || !product.recurring) return null;
+	const unitAmount = Math.round(product.price * 100);
 
 	const products = await stripe.products.list({ limit: 100, active: true });
-	const existing = products.data.find((p) => p.metadata?.product_id === 'vision-x-monthly');
+	const existing = products.data.find((p) => p.metadata?.product_id === productId);
 	if (existing) {
 		const prices = await stripe.prices.list({
 			product: existing.id,
 			active: true,
 			limit: 10,
 		});
-		const monthly = prices.data.find(
-			(pr) => pr.recurring?.interval === 'month' && pr.unit_amount === 10000
+		const match = prices.data.find(
+			(pr) => pr.recurring?.interval === product.recurring && pr.unit_amount === unitAmount
 		);
-		if (monthly) return monthly.id;
+		if (match) return match.id;
 	}
 
-	const product = await stripe.products.create({
-		name: 'VISION-X Computer Vision — Monthly',
-		metadata: { product_id: 'vision-x-monthly' },
+	const stripeProduct = existing || await stripe.products.create({
+		name: product.name,
+		metadata: { product_id: productId },
 	});
 	const price = await stripe.prices.create({
-		product: product.id,
-		unit_amount: 10000,
+		product: stripeProduct.id,
+		unit_amount: unitAmount,
 		currency: 'usd',
-		recurring: { interval: 'month' },
+		recurring: { interval: product.recurring },
 	});
 	return price.id;
 }
@@ -60,16 +67,24 @@ module.exports = async (req, res) => {
 		return res.status(401).json({ error: 'Sign in required to subscribe' });
 	}
 
+	const requestedId = (req.body && req.body.productId) || 'vision-x-monthly';
+	const catalogEntry = getProduct(requestedId);
+	if (!catalogEntry || !catalogEntry.recurring) {
+		return res.status(400).json({ error: 'Invalid subscription product.' });
+	}
+
 	let priceId;
 	try {
-		priceId = await getOrCreateVisionXMonthlyPrice();
+		priceId = await getOrCreateRecurringPriceId(requestedId);
 	} catch (err) {
-		console.error('Failed to get/create Vision-X monthly price:', err);
+		console.error('Failed to get/create recurring price for', requestedId, err);
 		return res.status(500).json({ error: 'Subscription not available. Please contact support.' });
 	}
 	if (!priceId) {
 		return res.status(500).json({ error: 'Subscription not available. Please contact support.' });
 	}
+
+	const unitAmount = Math.round(catalogEntry.price * 100);
 
 	try {
 		const customer = await getOrCreateCustomerByEmail(
@@ -87,7 +102,7 @@ module.exports = async (req, res) => {
 				payment_method_types: ['card', 'link', 'cashapp', 'us_bank_account'],
 			},
 			expand: ['latest_invoice.payment_intent'],
-			metadata: { user_id: user.id, product_id: 'vision-x-monthly' },
+			metadata: { user_id: user.id, product_id: requestedId },
 		});
 
 		const paymentIntent = subscription.latest_invoice?.payment_intent;
@@ -98,7 +113,7 @@ module.exports = async (req, res) => {
 
 		return res.json({
 			clientSecret: paymentIntent.client_secret,
-			amount: 10000,
+			amount: unitAmount,
 			currency: 'usd',
 			subscriptionId: subscription.id,
 		});

@@ -171,15 +171,24 @@ document.addEventListener('DOMContentLoaded', () => {
 		overlay.setAttribute('aria-hidden', String(!show));
 	}
 
+	function isRecurringProduct(productId) {
+		const id = (productId || '').toLowerCase();
+		return id === 'vision-x-monthly' || (id.startsWith('cheat-') && id.endsWith('-monthly'));
+	}
+
 	function isSubscriptionCart() {
 		if (!cartItems.length) return false;
-		return cartItems.every((i) => (i.productId || '').toLowerCase() === 'vision-x-monthly');
+		return cartItems.every((i) => isRecurringProduct(i.productId));
 	}
 
 	function hasMixedCart() {
-		const hasSub = cartItems.some((i) => (i.productId || '').toLowerCase() === 'vision-x-monthly');
-		const hasOneTime = cartItems.some((i) => (i.productId || '').toLowerCase() !== 'vision-x-monthly');
+		const hasSub = cartItems.some((i) => isRecurringProduct(i.productId));
+		const hasOneTime = cartItems.some((i) => !isRecurringProduct(i.productId));
 		return hasSub && hasOneTime;
+	}
+
+	function cartRequiresAccount() {
+		return isSubscriptionCart() || cartItems.some((i) => (i.productId || '').toLowerCase().startsWith('cheat-'));
 	}
 
 	function renderSummary() {
@@ -295,7 +304,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	function renderGuestEmailVisibility() {
 		const subscriptionCart = isSubscriptionCart();
 		const signedIn = !!authToken;
-		if (guestToggleWrap) guestToggleWrap.hidden = subscriptionCart || !signedIn;
+		const accountOnly = cartRequiresAccount();
+		if (guestToggleWrap) guestToggleWrap.hidden = subscriptionCart || accountOnly || !signedIn;
 		if (guestModeToggle && signedIn && !subscriptionCart) {
 			guestModeToggle.textContent = forceGuestMode ? 'Use account checkout' : 'Checkout as guest instead';
 		}
@@ -391,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		const intentUrl = subscriptionCart ? '/api/create-subscription-intent' : '/api/create-payment-intent';
 		const intentBody = subscriptionCart
-			? {}
+			? { productId: productIds[0] }
 			: {
 				productIds,
 				promoCode: currentPromo,
@@ -508,6 +518,12 @@ document.addEventListener('DOMContentLoaded', () => {
 			return;
 		}
 		authToken = await getAuthToken();
+
+		if (cartRequiresAccount() && !authToken) {
+			window.location.replace('/account.html?next=' + encodeURIComponent('/checkout.html'));
+			return;
+		}
+
 		renderGuestEmailVisibility();
 		if (payButton) payButton.disabled = true;
 		try {

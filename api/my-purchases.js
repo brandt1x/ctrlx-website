@@ -1,6 +1,7 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { getUserFromRequest } = require('../lib/auth-helpers');
 const { getPurchaseFlags } = require('../lib/items-utils');
+const { getProduct } = require('../lib/products');
 const { createClient } = require('@supabase/supabase-js');
 
 async function persistSubscriptionRecord(supabase, row) {
@@ -163,13 +164,16 @@ module.exports = async (req, res) => {
 		// Add active subscriptions as synthetic "purchases" for download UI
 		const SUBSCRIPTION_FLAGS = { 'vision-x-monthly': { hasVisionX: true } };
 		for (const sub of mergedSubRows || []) {
+			const catalogEntry = getProduct(sub.product_id);
 			const flags = SUBSCRIPTION_FLAGS[sub.product_id] || {};
+			const isCheat = String(sub.product_id || '').startsWith('cheat-');
+			if (isCheat) flags.hasPcCheat = true;
 			const periodEnd = sub.current_period_end ? new Date(sub.current_period_end) : null;
 			const isExpired = periodEnd ? Date.now() > periodEnd.getTime() : false;
 			purchases.unshift({
 				session_id: null,
 				subscription_id: sub.stripe_subscription_id,
-				items: [{ product_id: sub.product_id, name: 'VISION-X Computer Vision — Monthly', price: 100 }],
+				items: [{ product_id: sub.product_id, name: catalogEntry ? catalogEntry.name : sub.product_id, price: catalogEntry ? catalogEntry.price : 0 }],
 				created_at: sub.created_at,
 				expiresAt: periodEnd ? periodEnd.toISOString() : null,
 				isExpired,
